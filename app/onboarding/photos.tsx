@@ -10,22 +10,38 @@ export default function OnboardingPhotos() {
   const router = useRouter();
 
   const pickImage = async (index: number) => {
-    // Request permission first
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: [ImagePicker.MediaType.IMAGE],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const newPhotos = [...photos];
-      newPhotos[index] = result.assets[0].uri;
-      setPhotos(newPhotos);
+    try {
+      console.log('Starting image picker for index:', index);
+      // Request permission first
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log('Permission status:', status);
+      
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+        return;
+      }
+      
+      console.log('Launching image library...');
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      
+      console.log('Image picker result:', result);
+      
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const newPhotos = [...photos];
+        newPhotos[index] = result.assets[0].uri;
+        setPhotos(newPhotos);
+        console.log('Photo added successfully:', result.assets[0].uri);
+      } else {
+        console.log('Image picker was canceled or no assets returned');
+      }
+    } catch (error) {
+      console.error('Error in pickImage:', error);
+      alert('Error picking image: ' + error.message);
     }
   };
 

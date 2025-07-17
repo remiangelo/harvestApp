@@ -6,10 +6,12 @@ export default function LoginScreen() {
   const router = useRouter();
 
   const handleLogin = () => {
+    console.log('Login button pressed, navigating to onboarding...');
     router.push('/onboarding');
   };
 
   const handleSignup = () => {
+    console.log('Signup button pressed, navigating to onboarding...');
     router.push('/onboarding');
   };
 

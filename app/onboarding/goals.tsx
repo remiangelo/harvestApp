@@ -27,6 +27,7 @@ export default function OnboardingGoals() {
             key={goal}
             style={[styles.option, selected === goal && styles.selectedOption]}
             onPress={() => setSelected(goal)}
+            activeOpacity={0.8}
           >
             <Text style={[styles.optionText, selected === goal && styles.selectedOptionText]}>{goal}</Text>
           </TouchableOpacity>
@@ -83,32 +84,49 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   option: {
-    width: '90%',
-    alignSelf: 'center',
+    width: '100%',
+    minWidth: 280,
     height: 56,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#8B1E2D',
-    borderRadius: 24,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     backgroundColor: '#fff',
-    marginHorizontal: 0,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   selectedOption: {
     backgroundColor: '#8B1E2D',
     borderWidth: 2,
     borderColor: '#8B1E2D',
+    shadowColor: '#8B1E2D',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
   },
   optionText: {
     color: '#8B1E2D',
     fontSize: 18,
     fontWeight: '600',
     fontFamily: 'System',
+    letterSpacing: 0.5,
   },
   selectedOptionText: {
     fontWeight: 'bold',
     color: '#fff',
+    letterSpacing: 0.5,
   },
   button: {
     width: '100%',

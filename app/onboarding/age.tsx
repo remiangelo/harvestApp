@@ -10,6 +10,7 @@ export default function OnboardingAge() {
 
   const handleContinue = () => {
     // TODO: Save birthDate to global state or backend
+    console.log('Navigating to preferences...');
     router.push('/onboarding/preferences');
   };
 
@@ -24,7 +25,7 @@ export default function OnboardingAge() {
         <View style={styles.progressBarContainer}>
           <View style={styles.progressBar} />
         </View>
-        <Text style={styles.title}>Let’s Start with Your Age</Text>
+        <Text style={styles.title}>Let's Start with Your Age</Text>
         <Text style={styles.subtitle}>Input your birth date so people know how old you are</Text>
         <TouchableOpacity style={styles.input} onPress={() => setShow(true)}>
           <Text style={{ color: date ? '#222' : '#888', fontSize: 18, textAlign: 'center' }}>

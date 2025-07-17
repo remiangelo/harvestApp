@@ -1,0 +1,157 @@
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+
+const MAX_PHOTOS = 6;
+
+export default function OnboardingPhotos() {
+  const [photos, setPhotos] = useState<(string | null)[]>(Array(MAX_PHOTOS).fill(null));
+  const router = useRouter();
+
+  const pickImage = async (index: number) => {
+    // Request permission first
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: [ImagePicker.MediaType.IMAGE],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const newPhotos = [...photos];
+      newPhotos[index] = result.assets[0].uri;
+      setPhotos(newPhotos);
+    }
+  };
+
+  const handleContinue = () => {
+    // TODO: Save photos to global state or backend
+    router.push('/onboarding/hobbies');
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={styles.container}>
+        <View style={styles.progressBarContainer}>
+          <View style={[styles.progressBar, { width: '80%' }]} />
+        </View>
+        <Text style={styles.title}>Show your Best Self</Text>
+        <Text style={styles.subtitle}>Upload up to six of your best photos to make a fantastic first impression. Let your personality shine.</Text>
+        <View style={styles.grid}>
+          {photos.map((photo, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={[styles.photoSlot, photo && styles.filledSlot]}
+              onPress={() => pickImage(idx)}
+              activeOpacity={0.7}
+            >
+              {photo ? (
+                <Image source={{ uri: photo }} style={styles.photo} />
+              ) : (
+                <Text style={styles.plus}>+</Text>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+                  <TouchableOpacity style={styles.button} onPress={handleContinue} disabled={photos.every(p => !p)}>
+            <Text style={styles.buttonText}>Continue</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 80,
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+  },
+  progressBarContainer: {
+    width: '100%',
+    height: 8,
+    backgroundColor: '#eee',
+    borderRadius: 4,
+    marginBottom: 32,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#8B1E2D',
+    borderRadius: 4,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#222',
+    textAlign: 'center',
+    fontFamily: 'System',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 32,
+    textAlign: 'center',
+    fontFamily: 'System',
+  },
+  grid: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 32,
+  },
+  photoSlot: {
+    width: '30%',
+    aspectRatio: 2/3,
+    backgroundColor: '#fafafa',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    marginHorizontal: '1.5%',
+    overflow: 'hidden',
+  },
+  filledSlot: {
+    borderColor: '#8B1E2D',
+  },
+  photo: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  plus: {
+    fontSize: 36,
+    color: '#8B1E2D',
+    fontWeight: 'bold',
+  },
+  button: {
+    width: '100%',
+    height: 48,
+    backgroundColor: '#8B1E2D',
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    opacity: 1,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: 'System',
+  },
+}); 

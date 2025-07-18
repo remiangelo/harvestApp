@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import ProfileCard from '../../components/ProfileCard';
+import SwipeableProfileCard from '../../components/SwipeableProfileCard';
 import { demoProfiles, DemoProfile } from '../../data/demoProfiles';
 
 export default function SwipingScreen() {
@@ -78,7 +78,7 @@ export default function SwipingScreen() {
       </View>
 
       <View style={styles.content}>
-        <ProfileCard
+        <SwipeableProfileCard
           profile={currentProfile}
           onLike={handleLike}
           onDislike={handleDislike}

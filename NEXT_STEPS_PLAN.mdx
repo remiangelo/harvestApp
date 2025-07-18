@@ -1,13 +1,11 @@
 # Harvest Dating App - Next Steps Plan
 
 ## Executive Summary
-Your Harvest dating app has a solid foundation with completed onboarding flow, working image upload, and professional UI. The next phase focuses on backend implementation, core dating features, and preparing for launch to 5-10k users.
+Your Harvest dating app has a solid foundation with completed onboarding flow, working image upload, and professional UI. The next phase focuses on modernizing the tech stack, implementing core dating features, and preparing for launch to 5-10k users.
 
-## Backend Decision: Supabase vs Custom Solution
+## Recommended Tech Stack Upgrades
 
-### Recommended: **Supabase** ✅
-Based on your preference and project needs, Supabase is the optimal choice:
-
+### Backend: **Supabase** ✅
 **Why Supabase is Perfect for Harvest:**
 - **Rapid Development**: 3-4x faster than custom backend
 - **Cost-Effective**: ~$25/month for 5k users, ~$100/month for 10k users
@@ -18,317 +16,692 @@ Based on your preference and project needs, Supabase is the optimal choice:
 - **Postgres**: Powerful relational database with JSON support
 - **Edge Functions**: Serverless functions for matching algorithms
 
+### State Management: **Zustand** (Replace Context API)
+**Current**: React Context API
+**Upgrade to**: Zustand
+**Benefits**:
+- **Simpler API**: Less boilerplate than Context
+- **Better Performance**: No unnecessary re-renders
+- **TypeScript Native**: Excellent type safety
+- **Persist Store**: Built-in state persistence
+- **DevTools**: Better debugging experience
+
+### Gesture Handling: **React Native Gesture Handler v2**
+**Current**: Basic TouchableOpacity
+**Upgrade to**: React Native Gesture Handler v2
+**Benefits**:
+- **Native Performance**: 60fps animations
+- **Advanced Gestures**: Pan, pinch, rotation for card swiping
+- **Better UX**: More responsive touch interactions
+- **Concurrent Mode**: Works with React 18+
+
+### Animation: **React Native Reanimated v3**
+**Current**: Basic animations
+**Upgrade to**: React Native Reanimated v3
+**Benefits**:
+- **Shared Values**: Better performance with UI thread
+- **Layout Animations**: Smooth transitions
+- **Spring Animations**: Natural motion for cards
+- **Gesture Integration**: Perfect for swipe animations
+
+### Navigation: **Expo Router v3** (Latest)
+**Current**: Expo Router ~5.1.3
+**Upgrade to**: Expo Router v3 with latest patterns
+**Benefits**:
+- **File-based Routing**: Better organization
+- **Typed Routes**: Full TypeScript support
+- **Nested Layouts**: Better UI composition
+- **Dynamic Routes**: For profile pages
+
+### Development Tools: **Modern Workflow**
+**Add**:
+- **Flipper**: Advanced debugging
+- **React Native Performance**: Performance monitoring
+- **Expo Dev Tools**: Better development experience
+- **ESLint + Prettier**: Code quality
+- **Husky**: Git hooks for quality checks
+
 **Cost Comparison:**
 - **Supabase**: $25-100/month (5-10k users)
 - **Custom AWS**: $300-1000/month (5-10k users)
 - **Savings**: 75-90% cost reduction
 
-## Phase 1: Backend Setup & Core Features (Weeks 1-4)
+## Phase 1: Tech Stack Modernization & Backend Setup (Weeks 1-4)
 
-### Week 1: Supabase Foundation
+### Week 1: Modern State Management & Tools
 **Priority: High**
 
-#### 1.1 Supabase Project Setup
+#### 1.1 State Management Upgrade
 ```bash
-# Install Supabase CLI and dependencies
-npm install @supabase/supabase-js
-npm install @supabase/auth-helpers-react-native
+# Install modern state management
+npm install zustand
+npm install @react-native-async-storage/async-storage
+npm remove react # Remove if using Context API extensively
 ```
 
-#### 1.2 Database Schema Design
+#### 1.2 Development Tools Setup
+```bash
+# Install development tools
+npm install --save-dev @typescript-eslint/eslint-plugin @typescript-eslint/parser
+npm install --save-dev prettier eslint-config-prettier eslint-plugin-prettier
+npm install --save-dev husky lint-staged
+npm install --save-dev @react-native-flipper/flipper-plugin
+```
+
+#### 1.3 Gesture & Animation Libraries
+```bash
+# Install modern gesture and animation libraries
+npm install react-native-gesture-handler@^2.14.0
+npm install react-native-reanimated@^3.6.0
+npm install react-native-svg # For advanced UI components
+```
+
+#### 1.4 Enhanced Navigation
+```bash
+# Update to latest Expo Router patterns
+npx expo install expo-router@latest
+npx expo install expo-linking@latest
+```
+
+### Week 2: Supabase Foundation
+**Priority: High**
+
+#### 2.1 Supabase Project Setup
+```bash
+# Install Supabase CLI and dependencies
+npm install @supabase/supabase-js@^2.38.0
+npm install @supabase/auth-helpers-react-native
+npm install react-native-url-polyfill
+```
+
+#### 2.2 Database Schema Design
 Create tables in Supabase Dashboard:
 
 ```sql
--- Users table
+-- Enhanced Users table with better indexing
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
   phone TEXT,
-  first_name TEXT,
+  first_name TEXT NOT NULL,
   bio TEXT,
-  age INTEGER,
+  age INTEGER CHECK (age >= 18 AND age <= 100),
   gender TEXT,
   sexual_identity TEXT,
   location POINT,
   city TEXT,
-  max_distance INTEGER DEFAULT 50,
+  max_distance INTEGER DEFAULT 50 CHECK (max_distance > 0),
+  is_verified BOOLEAN DEFAULT false,
+  last_active TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- User preferences
+-- Add indexes for performance
+CREATE INDEX idx_users_location ON users USING GIST (location);
+CREATE INDEX idx_users_age ON users (age);
+CREATE INDEX idx_users_last_active ON users (last_active);
+
+-- User preferences with better structure
 CREATE TABLE user_preferences (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  min_age INTEGER,
-  max_age INTEGER,
-  interested_in TEXT[],
-  relationship_goals TEXT[],
+  min_age INTEGER CHECK (min_age >= 18),
+  max_age INTEGER CHECK (max_age <= 100),
+  interested_in TEXT[] NOT NULL,
+  relationship_goals TEXT[] NOT NULL,
+  max_distance INTEGER DEFAULT 50,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Photos table
+-- Photos with better metadata
 CREATE TABLE photos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   url TEXT NOT NULL,
+  thumbnail_url TEXT,
   is_primary BOOLEAN DEFAULT false,
-  order_index INTEGER,
+  order_index INTEGER NOT NULL,
+  width INTEGER,
+  height INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Hobbies/Interests
+-- Hobbies/Interests with categories
 CREATE TABLE user_hobbies (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   hobby TEXT NOT NULL,
+  category TEXT, -- Sports, Arts, Music, etc.
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Add unique constraints
+ALTER TABLE photos ADD CONSTRAINT unique_user_order UNIQUE (user_id, order_index);
+ALTER TABLE user_hobbies ADD CONSTRAINT unique_user_hobby UNIQUE (user_id, hobby);
 ```
 
-#### 1.3 Authentication Integration
-- Set up Supabase Auth in your app
+#### 2.3 Authentication Integration
+- Set up Supabase Auth with modern patterns
 - Replace placeholder login with real authentication
 - Add email/phone verification
 - Implement social login (Google, Apple)
 
 **Files to Update:**
-- `app/login.tsx` - Real authentication
+- `app/login.tsx` - Real authentication with Zustand
 - `app/_layout.tsx` - Auth state management
 - Create `lib/supabase.ts` - Supabase client configuration
+- Create `stores/authStore.ts` - Zustand auth store
 
-### Week 2: User Profile & Data Management
+### Week 3: Enhanced Profile & Swipe Experience
 **Priority: High**
 
-#### 2.1 Profile Management
-- Connect onboarding flow to Supabase
+#### 3.1 Profile Management Upgrade
+```bash
+# Install advanced UI components
+npm install react-native-super-grid
+npm install react-native-image-crop-picker
+npm install react-native-image-resizer
+```
+
+- Connect onboarding flow to Supabase with Zustand
 - Save user data from all onboarding screens
 - Implement profile editing functionality
-- Add photo upload to Supabase Storage
+- Add photo upload to Supabase Storage with optimization
+- Add photo cropping and resizing
 
-#### 2.2 Location Services
+#### 3.2 Advanced Swipe Cards
+```bash
+# Install swipe card library
+npm install react-native-deck-swiper
+# Or implement custom with gesture handler
+```
+
+- Replace basic ProfileCard with advanced swipe gestures
+- Add spring animations for natural card movement
+- Implement card stack with pre-loading
+- Add swipe feedback (haptics, visual cues)
+
+#### 3.3 Location Services Enhancement
+```bash
+# Install location services
+npm install expo-location
+npm install @react-native-community/geolocation
+```
+
 - Implement location-based features
 - Add city/region detection
 - Set up geolocation permissions
 - Create location update functions
+- Add location-based matching radius
 
 **Files to Update:**
 - All onboarding screens to save to Supabase
-- `app/_tabs/two.tsx` - Connect to real user data
+- `app/_tabs/index.tsx` - Advanced swipe interface
+- `components/ProfileCard.tsx` - Enhanced with gestures
 - Create `lib/userService.ts` - User data operations
+- Create `stores/userStore.ts` - User state management
 
-### Week 3: Core Matching System
+### Week 4: Matching System & Real-time Features
 **Priority: High**
 
-#### 3.1 Matching Algorithm (Supabase Edge Function)
-Create matching logic considering:
-- Age preferences
-- Distance
-- Sexual identity compatibility
-- Relationship goals alignment
-- Mutual interests
-
-#### 3.2 Swipe Functionality
+#### 4.1 Advanced Matching Algorithm
 ```sql
--- Swipes table
+-- Enhanced Swipes table with metadata
 CREATE TABLE swipes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   swiper_id UUID REFERENCES users(id) ON DELETE CASCADE,
   swiped_id UUID REFERENCES users(id) ON DELETE CASCADE,
   is_like BOOLEAN NOT NULL,
+  swipe_type TEXT DEFAULT 'normal', -- normal, super_like, nope
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(swiper_id, swiped_id)
 );
 
--- Matches table
+-- Matches table with better tracking
 CREATE TABLE matches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user1_id UUID REFERENCES users(id) ON DELETE CASCADE,
   user2_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  is_active BOOLEAN DEFAULT true,
+  matched_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user1_id, user2_id)
+);
+
+-- Match quality scoring
+CREATE TABLE match_scores (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  match_id UUID REFERENCES matches(id) ON DELETE CASCADE,
+  compatibility_score INTEGER CHECK (compatibility_score >= 0 AND compatibility_score <= 100),
+  common_interests INTEGER DEFAULT 0,
+  distance_km INTEGER,
+  age_compatibility INTEGER,
+  calculated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 
-#### 3.3 Discovery Screen Implementation
-- Update `app/_tabs/index.tsx` with real user cards
-- Implement swipe gestures
-- Add match notifications
-- Create user card component
-
-### Week 4: Real-time Chat Foundation
-**Priority: Medium**
-
-#### 4.1 Chat Schema
+#### 4.2 Real-time Chat Foundation
 ```sql
--- Conversations table
+-- Enhanced conversations table
 CREATE TABLE conversations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   match_id UUID REFERENCES matches(id) ON DELETE CASCADE,
+  last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Messages table
+-- Advanced messages table
 CREATE TABLE messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
   sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
+  message_type TEXT DEFAULT 'text', -- text, image, emoji
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Message reactions
+CREATE TABLE message_reactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  message_id UUID REFERENCES messages(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  reaction TEXT NOT NULL, -- heart, laugh, etc.
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(message_id, user_id)
+);
+```
+
+#### 4.3 Chat Interface with Modern Features
+```bash
+# Install chat components
+npm install react-native-gifted-chat
+npm install react-native-image-picker
+```
+
+- Create chat screen with modern UI
+- Implement message sending with optimistic updates
+- Add real-time message updates using Supabase Realtime
+- Add typing indicators
+- Implement message reactions
+- Add to tab navigation
+
+## Phase 2: Advanced Features & User Experience (Weeks 5-8)
+
+### Week 5: Premium Features & Matching Intelligence
+**Priority: Medium**
+
+#### 5.1 Advanced Matching Algorithm (Supabase Edge Function)
+```typescript
+// Edge function for intelligent matching
+export async function matchingAlgorithm(userId: string) {
+  // Compatibility scoring based on:
+  // - Age preferences (weight: 20%)
+  // - Distance (weight: 25%)
+  // - Sexual identity compatibility (weight: 30%)
+  // - Relationship goals alignment (weight: 15%)
+  // - Mutual interests (weight: 10%)
+}
+```
+
+#### 5.2 Premium Features
+```bash
+# Install premium feature dependencies
+npm install react-native-purchases # For in-app purchases
+npm install @react-native-community/blur # For premium UI effects
+```
+
+- Implement "Super Like" functionality
+- Add advanced filters (education, height, etc.)
+- Create match quality scoring
+- Add "Boost" profile feature
+- Implement mutual friends detection
+
+#### 5.3 Performance Optimization
+```bash
+# Install performance monitoring
+npm install @react-native-firebase/perf
+npm install react-native-performance
+```
+
+- Optimize image loading with lazy loading
+- Implement efficient card pre-loading
+- Add memory management for large photo sets
+- Optimize database queries with proper indexing
+
+### Week 6: Enhanced Chat & Social Features
+**Priority: High**
+
+#### 6.1 Advanced Chat Features
+```bash
+# Install additional chat features
+npm install react-native-video # For video messages
+npm install react-native-sound # For audio messages
+npm install react-native-linear-gradient # For modern UI
+```
+
+- Add photo/video sharing in chat
+- Implement voice messages
+- Add message reactions with animations
+- Create chat list/inbox with real-time updates
+- Add message search functionality
+
+#### 6.2 Social Features
+```sql
+-- User reports/blocking
+CREATE TABLE user_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reporter_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  reported_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  reason TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- User blocking
+CREATE TABLE user_blocks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  blocker_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  blocked_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(blocker_id, blocked_id)
+);
+```
+
+### Week 7: Push Notifications & Engagement
+**Priority: High**
+
+#### 7.1 Advanced Push Notifications
+```bash
+# Install notification system
+npm install expo-notifications
+npm install @react-native-firebase/messaging
+```
+
+- Set up Expo notifications with Firebase
+- Integrate with Supabase Edge Functions
+- Add match notifications with custom sounds
+- Implement message notifications
+- Add daily engagement notifications
+- Create notification preferences
+
+#### 7.2 User Engagement Features
+```sql
+-- User activity tracking
+CREATE TABLE user_activities (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  activity_type TEXT NOT NULL, -- login, swipe, message, etc.
+  metadata JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 
-#### 4.2 Basic Chat Interface
-- Create chat screen
-- Implement message sending
-- Add real-time message updates using Supabase Realtime
-- Add to tab navigation
+### Week 8: Profile Enhancements & Analytics
+**Priority: Medium**
 
-## Phase 2: Enhanced Features (Weeks 5-8)
+#### 8.1 Profile Enhancement Features
+```bash
+# Install profile enhancement tools
+npm install react-native-image-editor
+npm install react-native-sensors # For profile insights
+```
 
-### Week 5: Advanced Matching & Filters
-- Implement advanced filters
-- Add "Super Like" functionality
-- Create match quality scoring
-- Add mutual friends detection
-
-### Week 6: Enhanced Chat Features
-- Add photo sharing in chat
-- Implement message reactions
-- Add typing indicators
-- Create chat list/inbox
-
-### Week 7: Push Notifications
-- Set up Expo notifications
-- Integrate with Supabase Edge Functions
-- Add match notifications
-- Implement message notifications
-
-### Week 8: Profile Enhancements
-- Add profile verification
+- Add profile verification (photo verification)
 - Implement profile boost features
-- Add more photo options
-- Create profile insights
+- Add more photo options (GIFs, videos)
+- Create profile insights and analytics
+- Add profile completion suggestions
 
-## Phase 3: Polish & Launch Prep (Weeks 9-12)
+#### 8.2 Analytics & Monitoring
+```bash
+# Install analytics
+npm install @react-native-firebase/analytics
+npm install react-native-performance-monitor
+```
 
-### Week 9: Testing & Bug Fixes
-- Comprehensive testing
-- Performance optimization
-- Security audit
-- Bug fixes
+- Add user behavior tracking
+- Implement A/B testing for features
+- Create performance monitoring
+- Add crash reporting
+- Implement user feedback system
 
-### Week 10: App Store Preparation
-- Create app store assets
-- Write app descriptions
-- Set up app store accounts
-- Prepare marketing materials
+## Phase 3: Testing, Launch Prep & Scaling (Weeks 9-12)
 
-### Week 11: Beta Testing
-- Internal testing
-- Friend/family beta
+### Week 9: Comprehensive Testing & QA
+**Priority: Critical**
+
+#### 9.1 Testing Infrastructure
+```bash
+# Install testing tools
+npm install --save-dev detox # E2E testing
+npm install --save-dev @testing-library/react-native
+npm install --save-dev jest-react-native
+npm install --save-dev @react-native-community/eslint-config
+```
+
+#### 9.2 Test Coverage
+- Unit tests for all stores (Zustand)
+- Integration tests for Supabase operations
+- E2E tests for critical user flows
+- Performance testing with large datasets
+- Security audit of authentication flows
+
+#### 9.3 Bug Fixes & Optimization
+- Memory leak detection and fixes
+- Performance optimization for lower-end devices
+- Network failure handling
+- Edge case testing (poor connectivity, etc.)
+
+### Week 10: App Store Preparation & CI/CD
+**Priority: High**
+
+#### 10.1 Build Optimization
+```bash
+# Install build optimization tools
+npm install --save-dev @expo/webpack-config
+npm install --save-dev babel-plugin-transform-remove-console
+```
+
+#### 10.2 App Store Assets
+- Create app store screenshots (all device sizes)
+- Write compelling app descriptions
+- Set up app store accounts (Apple, Google)
+- Prepare marketing materials and press kit
+- Create privacy policy and terms of service
+
+#### 10.3 CI/CD Pipeline
+```bash
+# Install CI/CD tools
+npm install --save-dev @expo/cli
+npm install --save-dev eas-cli
+```
+
+- Set up EAS Build for automated builds
+- Configure automated testing pipeline
+- Set up staging and production environments
+- Create release management workflow
+
+### Week 11: Beta Testing & User Feedback
+**Priority: High**
+
+#### 11.1 Beta Testing Setup
+```bash
+# Install beta testing tools
+npm install --save-dev @react-native-community/cli-platform-ios
+npm install --save-dev @react-native-community/cli-platform-android
+```
+
+- Internal team testing
+- Friends & family beta program
 - TestFlight/Play Console setup
-- Feedback incorporation
+- Feedback collection system
+- Bug tracking and prioritization
 
-### Week 12: Launch
+#### 11.2 User Feedback Integration
+- Implement in-app feedback system
+- Create user onboarding improvements
+- Performance optimization based on feedback
+- UI/UX refinements
+
+### Week 12: Launch & Monitoring
+**Priority: Critical**
+
+#### 12.1 Launch Preparation
+```bash
+# Install monitoring tools
+npm install @react-native-firebase/crashlytics
+npm install @react-native-firebase/analytics
+npm install @sentry/react-native
+```
+
+#### 12.2 Launch Activities
 - App store submission
 - Marketing campaign launch
-- User acquisition strategy
-- Monitoring and analytics
+- User acquisition strategy execution
+- Monitoring and analytics setup
+- Customer support system
 
-## Technical Implementation Priority
+## Modern Tech Stack Implementation Priority
 
 ### Immediate (This Week)
-1. **Set up Supabase project** - 2 hours
-2. **Install Supabase dependencies** - 1 hour
-3. **Create database schema** - 4 hours
-4. **Set up authentication** - 6 hours
+1. **Install Zustand and modern tools** - 3 hours
+2. **Set up Supabase project** - 2 hours
+3. **Install gesture handler and reanimated** - 2 hours
+4. **Create modern database schema** - 4 hours
 
 ### Week 1 Goals
+- Modern state management with Zustand
+- Enhanced development workflow
+- Advanced gesture handling setup
+- Improved animation capabilities
+
+### Week 2 Goals
 - Working Supabase authentication
 - User registration saving to database
 - Basic profile viewing from database
-- Photo upload to Supabase Storage
+- Photo upload with optimization
 
-### Week 2 Goals
+### Week 3 Goals
+- Advanced swipe cards with gestures
 - Complete onboarding data flow
-- Working profile editing
 - Location services integration
-- User discovery preparation
+- Enhanced profile management
 
-## Cost Breakdown (Supabase)
+### Week 4 Goals
+- Real-time chat functionality
+- Match quality scoring
+- Push notifications setup
+- Core matching algorithm
 
-### 5,000 Users
-- **Supabase Pro**: $25/month
-- **Storage**: ~$10/month (photos)
-- **Edge Functions**: ~$5/month
-- **Total**: ~$40/month
+## Enhanced Cost Breakdown
 
-### 10,000 Users
-- **Supabase Pro**: $25/month
-- **Additional Database**: ~$50/month
-- **Storage**: ~$20/month
-- **Edge Functions**: ~$10/month
-- **Total**: ~$105/month
+### 5,000 Users (Monthly)
+- **Supabase Pro**: $25
+- **Storage (optimized)**: ~$8
+- **Edge Functions**: ~$5
+- **Push Notifications**: ~$3
+- **Analytics**: ~$2
+- **Total**: ~$43/month
 
-## Development Tools & Resources
+### 10,000 Users (Monthly)
+- **Supabase Pro**: $25
+- **Additional Database**: ~$45
+- **Storage**: ~$15
+- **Edge Functions**: ~$8
+- **Push Notifications**: ~$5
+- **Analytics**: ~$4
+- **Total**: ~$102/month
+
+## Modern Development Tools
 
 ### Required Installations
 ```bash
-# Supabase CLI
-npm install -g supabase
-# React Native dependencies
-npm install @supabase/supabase-js @supabase/auth-helpers-react-native
-npm install react-native-url-polyfill
-# Additional utilities
-npm install expo-location expo-notifications
+# Core modern stack
+npm install zustand @react-native-async-storage/async-storage
+npm install react-native-gesture-handler@^2.14.0
+npm install react-native-reanimated@^3.6.0
+npm install @supabase/supabase-js@^2.38.0
+
+# Development tools
+npm install --save-dev @typescript-eslint/eslint-plugin
+npm install --save-dev prettier eslint-config-prettier
+npm install --save-dev husky lint-staged
+
+# Advanced features
+npm install react-native-gifted-chat
+npm install react-native-image-crop-picker
+npm install expo-notifications
 ```
 
 ### Recommended VS Code Extensions
-- Supabase
-- PostgreSQL
-- React Native Tools
-- Expo Tools
+- **Zustand DevTools**
+- **React Native Tools**
+- **Expo Tools**
+- **Supabase**
+- **PostgreSQL**
+- **GitLens**
+- **ES7+ React/Redux/React-Native snippets**
 
-## Risk Mitigation
+## Risk Mitigation & Scaling
 
 ### Technical Risks
-- **Supabase limits**: Monitor usage, have scaling plan
-- **Real-time performance**: Implement efficient queries
-- **Image storage costs**: Optimize image sizes
+- **Performance**: Implement lazy loading and optimization
+- **Real-time load**: Use efficient queries and caching
+- **Image storage**: Automatic compression and CDN
+- **Database scaling**: Proper indexing and query optimization
 
 ### Business Risks
-- **User acquisition**: Prepare marketing strategy
-- **Retention**: Focus on core matching quality
-- **Monetization**: Plan premium features
+- **User acquisition**: Multi-channel marketing strategy
+- **Retention**: Focus on core matching quality and engagement
+- **Monetization**: Freemium model with premium features
+- **Competition**: Unique value proposition with mindful dating
 
-## Success Metrics
+## Success Metrics & KPIs
 
 ### Week 4 Targets
-- User registration working
-- Basic matching functional
-- Profile management complete
+- Modern state management implemented
+- Advanced swipe gestures working
+- Real-time chat functional
 - 50+ test users onboarded
 
 ### Week 8 Targets
-- Full feature set complete
-- Chat functionality working
+- Full feature set with premium options
+- Advanced matching algorithm
 - Push notifications active
-- Beta testing initiated
+- Beta testing with 100+ users
 
 ### Week 12 Targets
 - App store approval
-- 100+ active users
+- 500+ active users
 - Core metrics tracking
 - User feedback integration
+- Revenue stream established
 
 ## Next Immediate Action Items
 
-1. **Today**: Set up Supabase project and get API keys
-2. **Tomorrow**: Install dependencies and create database schema
-3. **This Week**: Implement authentication and user registration
-4. **Next Week**: Connect onboarding flow to database
+### Today
+1. **Install Zustand and modern dependencies** - Replace Context API
+2. **Set up development tools** - ESLint, Prettier, Husky
+3. **Create Supabase project** - Get API keys
 
-This plan prioritizes rapid development with Supabase while maintaining quality and scalability for your 5-10k user target. The cost savings compared to custom backend allows more budget for marketing and user acquisition.
+### Tomorrow
+1. **Implement gesture handler** - Enhanced swipe experience
+2. **Set up database schema** - With proper indexing
+3. **Create auth store** - Modern authentication flow
 
-Would you like me to start with the Supabase setup immediately? 
+### This Week
+1. **Modern state management** - Zustand implementation
+2. **Advanced gestures** - Smooth swipe animations
+3. **Enhanced UI** - Modern design patterns
+4. **Real authentication** - Supabase integration
+
+### Next Week
+1. **Real-time features** - Chat and notifications
+2. **Advanced matching** - Algorithm implementation
+3. **Performance optimization** - Memory and speed
+4. **Testing setup** - Comprehensive QA
+
+This plan prioritizes modern development practices while maintaining rapid development with Supabase. The upgraded tech stack provides better performance, developer experience, and scalability for your 5-10k user target.
+
+**Ready to start with the modern tech stack implementation?** 

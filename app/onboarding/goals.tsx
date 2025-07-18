@@ -1,15 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useUser } from '../../context/UserContext';
 
 const GOALS = ['Dating', 'Relationship', 'Marriage'];
 
 export default function OnboardingGoals() {
   const [selected, setSelected] = useState<string | null>(null);
   const router = useRouter();
+  const { currentUser, updateOnboardingData } = useUser();
+
+  // Pre-fill with demo data if available
+  useEffect(() => {
+    if (currentUser?.goals) {
+      setSelected(currentUser.goals);
+    }
+  }, [currentUser]);
 
   const handleContinue = () => {
-    // TODO: Save selected goal to global state or backend
+    // Save selected goal to user context
+    updateOnboardingData({ goals: selected });
     router.push('/onboarding/gender');
   };
 

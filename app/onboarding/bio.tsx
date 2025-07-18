@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useUser } from '../../context/UserContext';
 
 export default function OnboardingBio() {
   const [bio, setBio] = useState('');
   const router = useRouter();
+  const { currentUser, updateOnboardingData } = useUser();
+
+  // Pre-fill with demo data if available
+  useEffect(() => {
+    if (currentUser?.bio) {
+      setBio(currentUser.bio);
+    }
+  }, [currentUser]);
 
   const handleContinue = () => {
-    // TODO: Save bio to global state or backend
+    // Save bio to user context
+    updateOnboardingData({ bio });
     router.push('/onboarding/nickname');
   };
 

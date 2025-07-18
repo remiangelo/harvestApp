@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { useUser } from '../../context/UserContext';
 
 export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
+  const { currentUser, updateOnboardingData } = useUser();
+  
   const [profile, setProfile] = useState({
     name: 'John Doe',
     age: 25,
@@ -13,6 +16,21 @@ export default function ProfileScreen() {
     hobbies: ['Photography', 'Hiking', 'Coffee'],
     location: 'San Francisco, CA'
   });
+
+  // Update profile with current user data
+  useEffect(() => {
+    if (currentUser) {
+      const age = currentUser.age ? new Date().getFullYear() - currentUser.age.getFullYear() : 25;
+      setProfile({
+        name: currentUser.nickname || currentUser.name,
+        age,
+        bio: currentUser.bio || 'I love hiking, photography, and good coffee. Looking for meaningful connections.',
+        photos: currentUser.photos ? [...currentUser.photos, ...Array(6 - currentUser.photos.length).fill(null)] : [null, null, null, null, null, null],
+        hobbies: currentUser.hobbies || ['Photography', 'Hiking', 'Coffee'],
+        location: currentUser.location || 'San Francisco, CA'
+      });
+    }
+  }, [currentUser]);
 
   const pickImage = async (index: number) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -32,11 +50,21 @@ export default function ProfileScreen() {
       const newPhotos = [...profile.photos];
       newPhotos[index] = result.assets[0].uri;
       setProfile({ ...profile, photos: newPhotos });
+      
+      // Update user context
+      const validPhotos = newPhotos.filter(photo => photo !== null) as string[];
+      updateOnboardingData({ photos: validPhotos });
     }
   };
 
   const handleSave = () => {
-    // TODO: Save profile to backend
+    // Save profile to user context
+    updateOnboardingData({
+      nickname: profile.name,
+      bio: profile.bio,
+      hobbies: profile.hobbies,
+      location: profile.location
+    });
     setIsEditing(false);
   };
 
@@ -148,6 +176,27 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.settingItem}>
             <Text style={styles.settingText}>Account Settings</Text>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.settingItem, styles.resetButton]} 
+            onPress={() => {
+              // Reset to original demo data
+              if (currentUser) {
+                const age = currentUser.age ? new Date().getFullYear() - currentUser.age.getFullYear() : 25;
+                setProfile({
+                  name: currentUser.nickname || currentUser.name,
+                  age,
+                  bio: currentUser.bio || 'I love hiking, photography, and good coffee. Looking for meaningful connections.',
+                  photos: currentUser.photos ? [...currentUser.photos, ...Array(6 - currentUser.photos.length).fill(null)] : [null, null, null, null, null, null],
+                  hobbies: currentUser.hobbies || ['Photography', 'Hiking', 'Coffee'],
+                  location: currentUser.location || 'San Francisco, CA'
+                });
+                setIsEditing(false);
+              }
+            }}
+          >
+            <Text style={[styles.settingText, styles.resetText]}>Reset Demo Data</Text>
+            <Ionicons name="refresh" size={20} color="#8B1E2D" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -283,5 +332,13 @@ const styles = StyleSheet.create({
   settingText: {
     fontSize: 16,
     color: '#222',
+  },
+  resetButton: {
+    borderBottomColor: '#8B1E2D',
+    borderBottomWidth: 2,
+  },
+  resetText: {
+    color: '#8B1E2D',
+    fontWeight: '600',
   },
 });

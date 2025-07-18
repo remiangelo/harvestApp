@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "harvestApp",
-    "slug": "harvestApp",
+    "slug": "harvest",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -36,6 +36,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4bf484c4-576a-4d5a-8373-1c854bb46ea7"
+      }
+    },
+    "owner": "remiangelo"
   }
 }

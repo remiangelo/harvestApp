@@ -27,6 +27,7 @@ This document outlines the comprehensive backend architecture for Harvest, a Rea
 ### Primary Backend Framework: **Node.js with Express.js**
 
 **Why Node.js?**
+
 - Perfect for real-time applications (chat, notifications)
 - Excellent ecosystem for React Native integration
 - Fast development cycle
@@ -35,6 +36,7 @@ This document outlines the comprehensive backend architecture for Harvest, a Rea
 - Large talent pool
 
 **Alternative Considerations:**
+
 - **Python (Django/FastAPI)**: Better for ML/AI features but slower for real-time
 - **Go**: Excellent performance but smaller ecosystem
 - **Java (Spring Boot)**: Enterprise-grade but heavier for startup needs
@@ -42,6 +44,7 @@ This document outlines the comprehensive backend architecture for Harvest, a Rea
 ### Database Strategy: **Hybrid Approach**
 
 #### Primary Database: **PostgreSQL**
+
 - **User profiles, relationships, matches**
 - ACID compliance for critical data
 - Excellent JSON support for flexible schemas
@@ -49,6 +52,7 @@ This document outlines the comprehensive backend architecture for Harvest, a Rea
 - Mature ecosystem
 
 #### Secondary Database: **Redis**
+
 - **Session management**
 - **Real-time chat caching**
 - **Matching algorithm cache**
@@ -56,6 +60,7 @@ This document outlines the comprehensive backend architecture for Harvest, a Rea
 - **Pub/Sub for real-time features**
 
 #### Optional: **MongoDB** (for specific use cases)
+
 - **Analytics data**
 - **User activity logs**
 - **Flexible schema for evolving features**
@@ -63,6 +68,7 @@ This document outlines the comprehensive backend architecture for Harvest, a Rea
 ### Cloud Platform: **AWS** (Recommended)
 
 **Why AWS?**
+
 - Comprehensive services ecosystem
 - Excellent React Native SDK support
 - Cost-effective for startups with free tier
@@ -70,6 +76,7 @@ This document outlines the comprehensive backend architecture for Harvest, a Rea
 - Mature real-time services (AppSync, IoT Core)
 
 **Alternative:** **Google Cloud Platform**
+
 - Better ML/AI services
 - Competitive pricing
 - Excellent Firebase integration
@@ -114,7 +121,7 @@ This document outlines the comprehensive backend architecture for Harvest, a Rea
 
 ### Microservices Architecture
 
-#### Core Services:
+#### Core Services
 
 1. **Authentication Service**
    - User registration/login
@@ -157,6 +164,7 @@ This document outlines the comprehensive backend architecture for Harvest, a Rea
 ### PostgreSQL Schema
 
 #### Users Table
+
 ```sql
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -181,6 +189,7 @@ CREATE TABLE users (
 ```
 
 #### User Photos Table
+
 ```sql
 CREATE TABLE user_photos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -193,6 +202,7 @@ CREATE TABLE user_photos (
 ```
 
 #### User Preferences Table
+
 ```sql
 CREATE TABLE user_preferences (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -208,6 +218,7 @@ CREATE TABLE user_preferences (
 ```
 
 #### Matches Table
+
 ```sql
 CREATE TABLE matches (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -220,6 +231,7 @@ CREATE TABLE matches (
 ```
 
 #### Swipes Table
+
 ```sql
 CREATE TABLE swipes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -232,6 +244,7 @@ CREATE TABLE swipes (
 ```
 
 #### Messages Table
+
 ```sql
 CREATE TABLE messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -248,17 +261,20 @@ CREATE TABLE messages (
 ### Redis Schema
 
 #### Session Management
+
 ```
 user:session:{userId} -> {sessionData}
 ```
 
 #### Real-time Chat
+
 ```
 chat:room:{matchId} -> {activeUsers, lastActivity}
 chat:typing:{matchId} -> {typingUsers}
 ```
 
 #### Matching Cache
+
 ```
 user:potential_matches:{userId} -> [userIds]
 user:daily_likes:{userId} -> count
@@ -269,6 +285,7 @@ user:daily_likes:{userId} -> count
 ### RESTful API Endpoints
 
 #### Authentication
+
 ```
 POST /api/auth/register
 POST /api/auth/login
@@ -279,6 +296,7 @@ POST /api/auth/reset-password
 ```
 
 #### User Management
+
 ```
 GET    /api/users/profile
 PUT    /api/users/profile
@@ -290,6 +308,7 @@ GET    /api/users/preferences
 ```
 
 #### Matching
+
 ```
 GET  /api/matches/potential
 POST /api/matches/swipe
@@ -298,6 +317,7 @@ POST /api/matches/unmatch
 ```
 
 #### Chat
+
 ```
 GET  /api/chat/conversations
 GET  /api/chat/conversations/:matchId/messages
@@ -308,6 +328,7 @@ PUT  /api/chat/conversations/:matchId/read
 ### WebSocket Events
 
 #### Real-time Chat
+
 ```javascript
 // Client -> Server
 'join_chat': { matchId }
@@ -325,11 +346,13 @@ PUT  /api/chat/conversations/:matchId/read
 ## Authentication & Security
 
 ### JWT Token Strategy
+
 - **Access Token**: Short-lived (15 minutes)
 - **Refresh Token**: Long-lived (7 days)
 - **Device Token**: For push notifications
 
 ### Security Measures
+
 1. **Password Security**
    - bcrypt hashing (12 rounds)
    - Password strength requirements
@@ -348,6 +371,7 @@ PUT  /api/chat/conversations/:matchId/read
    - Photo verification
 
 ### Privacy Features
+
 - Location approximation (not exact coordinates)
 - Photo blur for unmatched users
 - Block/report functionality
@@ -356,6 +380,7 @@ PUT  /api/chat/conversations/:matchId/read
 ## Real-time Features
 
 ### WebSocket Implementation
+
 ```javascript
 // Socket.io server setup
 const io = require('socket.io')(server, {
@@ -375,6 +400,7 @@ io.use(async (socket, next) => {
 ```
 
 ### Real-time Features
+
 1. **Instant Messaging**
 2. **Typing Indicators**
 3. **Online Status**
@@ -384,6 +410,7 @@ io.use(async (socket, next) => {
 ## File Storage & Media
 
 ### AWS S3 Strategy
+
 ```
 bucket-structure/
 ├── users/
@@ -400,6 +427,7 @@ bucket-structure/
 ```
 
 ### Image Processing Pipeline
+
 1. **Upload** → S3 (original)
 2. **Process** → Lambda function
 3. **Generate** → Multiple sizes (thumbnail, compressed)
@@ -407,6 +435,7 @@ bucket-structure/
 5. **CDN** → CloudFront distribution
 
 ### Content Moderation
+
 - AWS Rekognition for inappropriate content
 - Manual review queue for flagged content
 - Automated NSFW detection
@@ -416,6 +445,7 @@ bucket-structure/
 ### Core Algorithm Components
 
 #### 1. Distance-Based Filtering
+
 ```javascript
 function getUsersInRadius(userLocation, radius) {
   return db.query(`
@@ -427,6 +457,7 @@ function getUsersInRadius(userLocation, radius) {
 ```
 
 #### 2. Preference Matching
+
 ```javascript
 function matchesPreferences(user1, user2) {
   const ageMatch = user2.age >= user1.preferences.min_age && 
@@ -437,6 +468,7 @@ function matchesPreferences(user1, user2) {
 ```
 
 #### 3. Compatibility Score
+
 ```javascript
 function calculateCompatibilityScore(user1, user2) {
   let score = 0;
@@ -459,6 +491,7 @@ function calculateCompatibilityScore(user1, user2) {
 ```
 
 #### 4. Machine Learning Enhancement (Future)
+
 - User behavior analysis
 - Swipe pattern recognition
 - Success rate optimization
@@ -467,6 +500,7 @@ function calculateCompatibilityScore(user1, user2) {
 ## Push Notifications
 
 ### Firebase Cloud Messaging (FCM)
+
 ```javascript
 const admin = require('firebase-admin');
 
@@ -488,6 +522,7 @@ async function sendMatchNotification(userId, matchedUser) {
 ```
 
 ### Notification Types
+
 1. **New Match** - Immediate
 2. **New Message** - Immediate
 3. **Daily Recommendations** - Scheduled
@@ -497,6 +532,7 @@ async function sendMatchNotification(userId, matchedUser) {
 ## Analytics & Monitoring
 
 ### Key Metrics to Track
+
 1. **User Engagement**
    - Daily/Monthly Active Users
    - Session duration
@@ -516,6 +552,7 @@ async function sendMatchNotification(userId, matchedUser) {
    - Real-time message latency
 
 ### Tools
+
 - **Application Monitoring**: New Relic / DataDog
 - **Error Tracking**: Sentry
 - **Analytics**: Mixpanel / Amplitude
@@ -524,6 +561,7 @@ async function sendMatchNotification(userId, matchedUser) {
 ## Deployment Strategy
 
 ### Development Environment
+
 ```yaml
 version: '3.8'
 services:
@@ -556,6 +594,7 @@ services:
 ### Production Deployment (AWS)
 
 #### Infrastructure as Code (Terraform)
+
 ```hcl
 # ECS Cluster for API services
 resource "aws_ecs_cluster" "harvest_cluster" {
@@ -582,6 +621,7 @@ resource "aws_elasticache_cluster" "harvest_cache" {
 ```
 
 #### CI/CD Pipeline (GitHub Actions)
+
 ```yaml
 name: Deploy to Production
 
@@ -618,12 +658,14 @@ jobs:
 ### For 5-10K Users (Current Target)
 
 #### Infrastructure Sizing
+
 - **API Servers**: 2-3 ECS tasks (t3.medium)
 - **Database**: RDS t3.medium (2 vCPU, 4GB RAM)
 - **Cache**: ElastiCache t3.micro
 - **Storage**: S3 with CloudFront CDN
 
 #### Expected Load
+
 - **Concurrent Users**: ~500-1000
 - **API Requests**: ~10,000/hour
 - **Messages**: ~50,000/day
@@ -632,13 +674,16 @@ jobs:
 ### Scaling Strategy (10K+ Users)
 
 #### Horizontal Scaling
+
 1. **Load Balancing**: Multiple API instances
 2. **Database Sharding**: User-based partitioning
 3. **CDN**: Global content distribution
 4. **Caching**: Multi-layer caching strategy
 
 #### Performance Optimizations
+
 1. **Database Indexing**
+
    ```sql
    CREATE INDEX idx_users_location ON users USING GIST(location);
    CREATE INDEX idx_swipes_swiper_created ON swipes(swiper_id, created_at);
@@ -658,6 +703,7 @@ jobs:
 ## Development Timeline
 
 ### Phase 1: Foundation (Weeks 1-4)
+
 - [ ] Project setup and infrastructure
 - [ ] Database schema implementation
 - [ ] Authentication system
@@ -665,6 +711,7 @@ jobs:
 - [ ] Photo upload functionality
 
 ### Phase 2: Core Features (Weeks 5-8)
+
 - [ ] Matching algorithm implementation
 - [ ] Swipe functionality
 - [ ] Basic chat system
@@ -672,6 +719,7 @@ jobs:
 - [ ] Location services
 
 ### Phase 3: Enhanced Features (Weeks 9-12)
+
 - [ ] Real-time messaging
 - [ ] Advanced matching preferences
 - [ ] Profile verification
@@ -679,6 +727,7 @@ jobs:
 - [ ] Content moderation
 
 ### Phase 4: Polish & Launch (Weeks 13-16)
+
 - [ ] Performance optimization
 - [ ] Security audit
 - [ ] Load testing
@@ -690,6 +739,7 @@ jobs:
 ### Monthly Costs (5K Users)
 
 #### AWS Infrastructure
+
 - **ECS (API)**: $50-100/month
 - **RDS (PostgreSQL)**: $80-120/month
 - **ElastiCache (Redis)**: $20-40/month
@@ -698,6 +748,7 @@ jobs:
 - **API Gateway**: $10-20/month
 
 #### Third-party Services
+
 - **Firebase (Push Notifications)**: $0-25/month
 - **Monitoring (New Relic)**: $50-100/month
 - **Email Service (SendGrid)**: $10-30/month
@@ -705,6 +756,7 @@ jobs:
 **Total Estimated Cost**: $235-480/month
 
 ### Scaling Costs (10K Users)
+
 - **Infrastructure**: $400-800/month
 - **Third-party Services**: $100-200/month
 - **Total**: $500-1000/month
@@ -712,9 +764,10 @@ jobs:
 ## Risk Assessment
 
 ### Technical Risks
+
 1. **Scalability Bottlenecks**
    - Mitigation: Load testing, performance monitoring
-   
+
 2. **Real-time Performance**
    - Mitigation: WebSocket optimization, message queuing
 
@@ -722,6 +775,7 @@ jobs:
    - Mitigation: Legal review, GDPR implementation
 
 ### Business Risks
+
 1. **User Acquisition Cost**
    - Mitigation: Organic growth features, referral system
 
@@ -734,11 +788,13 @@ jobs:
 ## Recommended Implementation Approach
 
 ### 1. Start with MVP Backend
+
 - Focus on core features: auth, profiles, basic matching
 - Use managed services (RDS, ElastiCache) for reliability
 - Implement basic real-time chat
 
 ### 2. Technology Stack Priority
+
 1. **Node.js + Express** for API
 2. **PostgreSQL** for primary database
 3. **Redis** for caching and sessions
@@ -746,15 +802,17 @@ jobs:
 5. **Socket.io** for real-time features
 
 ### 3. Development Strategy
+
 - Build microservices gradually
 - Start with monolith, extract services as needed
 - Implement comprehensive testing
 - Focus on security from day one
 
 ### 4. Launch Strategy
+
 - Beta test with 100-500 users
 - Gather feedback and iterate
 - Gradual rollout to full user base
 - Monitor performance and scale accordingly
 
-This architecture provides a solid foundation for 5-10K users with clear scaling paths for future growth. The technology choices balance development speed, operational simplicity, and cost-effectiveness while maintaining the flexibility to evolve with your user base. 
+This architecture provides a solid foundation for 5-10K users with clear scaling paths for future growth. The technology choices balance development speed, operational simplicity, and cost-effectiveness while maintaining the flexibility to evolve with your user base.

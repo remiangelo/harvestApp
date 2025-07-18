@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { useUser } from '../../context/UserContext';
 
 const MAX_PHOTOS = 6;
 
 export default function OnboardingPhotos() {
   const [photos, setPhotos] = useState<(string | null)[]>(Array(MAX_PHOTOS).fill(null));
   const router = useRouter();
+  const { currentUser, updateOnboardingData } = useUser();
+
+  // Pre-fill with demo data if available
+  useEffect(() => {
+    if (currentUser?.photos) {
+      const demoPhotos = [...currentUser.photos];
+      // Fill remaining slots with null
+      while (demoPhotos.length < MAX_PHOTOS) {
+        demoPhotos.push(null);
+      }
+      setPhotos(demoPhotos.slice(0, MAX_PHOTOS));
+    }
+  }, [currentUser]);
 
   const pickImage = async (index: number) => {
     try {
@@ -46,7 +60,9 @@ export default function OnboardingPhotos() {
   };
 
   const handleContinue = () => {
-    // TODO: Save photos to global state or backend
+    // Save photos to user context (filter out null values)
+    const validPhotos = photos.filter(photo => photo !== null) as string[];
+    updateOnboardingData({ photos: validPhotos });
     router.push('/onboarding/hobbies');
   };
 

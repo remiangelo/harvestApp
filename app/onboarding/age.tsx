@@ -1,15 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useUser } from '../../context/UserContext';
 
 export default function OnboardingAge() {
   const [date, setDate] = useState(new Date(2000, 0, 1));
   const [show, setShow] = useState(false);
   const router = useRouter();
+  const { currentUser, updateOnboardingData } = useUser();
+
+  // Pre-fill with demo data if available
+  useEffect(() => {
+    if (currentUser?.age) {
+      setDate(currentUser.age);
+    }
+  }, [currentUser]);
 
   const handleContinue = () => {
-    // TODO: Save birthDate to global state or backend
+    // Save birthDate to user context
+    updateOnboardingData({ age: date });
     console.log('Navigating to preferences...');
     router.push('/onboarding/preferences');
   };

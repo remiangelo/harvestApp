@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useUser } from '../../context/UserContext';
 
 export default function OnboardingNickname() {
   const [nickname, setNickname] = useState('');
   const router = useRouter();
+  const { currentUser, updateOnboardingData } = useUser();
+
+  // Pre-fill with demo data if available
+  useEffect(() => {
+    if (currentUser?.nickname) {
+      setNickname(currentUser.nickname);
+    }
+  }, [currentUser]);
 
   const handleContinue = () => {
-    // TODO: Save nickname to global state or backend
+    // Save nickname to user context
+    updateOnboardingData({ nickname });
     router.push('/onboarding/photos');
   };
 

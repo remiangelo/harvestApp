@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useUser } from '../../context/UserContext';
 
 const GENDERS = [
-  'Asexual', 'Bisexual', 'Gay', 'Intersex', 'Lesbian', 'Trans',
+  'Asexual', 'Bisexual', 'Gay', 'Intersex', 'Lesbian', 'Trans', 'Straight',
 ];
 
 export default function OnboardingGender() {
   const [selected, setSelected] = useState<string | null>(null);
   const router = useRouter();
+  const { currentUser, updateOnboardingData } = useUser();
+
+  // Pre-fill with demo data if available
+  useEffect(() => {
+    if (currentUser?.gender) {
+      setSelected(currentUser.gender);
+    }
+  }, [currentUser]);
 
   const handleContinue = () => {
-    // TODO: Save selected gender to global state or backend
+    // Save selected gender to user context
+    updateOnboardingData({ gender: selected });
     router.push('/onboarding/location');
   };
 

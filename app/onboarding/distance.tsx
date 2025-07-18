@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
+import { useUser } from '../../context/UserContext';
 
 export default function OnboardingDistance() {
   const [distance, setDistance] = useState(4);
   const router = useRouter();
+  const { currentUser, updateOnboardingData } = useUser();
+
+  // Pre-fill with demo data if available
+  useEffect(() => {
+    if (currentUser?.distance) {
+      setDistance(currentUser.distance);
+    }
+  }, [currentUser]);
 
   const handleContinue = () => {
-    // TODO: Save distance to global state or backend
+    // Save distance to user context
+    updateOnboardingData({ distance });
     router.push('/onboarding/goals');
   };
 

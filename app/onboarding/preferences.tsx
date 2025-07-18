@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useUser } from '../../context/UserContext';
 
 const options = [
   'Asexual',
@@ -9,14 +10,24 @@ const options = [
   'Intersex',
   'Lesbian',
   'Trans',
+  'Straight',
 ];
 
 export default function OnboardingPreferences() {
   const [selected, setSelected] = useState<string | null>(null);
   const router = useRouter();
+  const { currentUser, updateOnboardingData } = useUser();
+
+  // Pre-fill with demo data if available
+  useEffect(() => {
+    if (currentUser?.preferences) {
+      setSelected(currentUser.preferences);
+    }
+  }, [currentUser]);
 
   const handleContinue = () => {
-    // TODO: Save selected preference to global state or backend
+    // Save selected preference to user context
+    updateOnboardingData({ preferences: selected });
     router.push('/onboarding/bio');
   };
 

@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useUser } from '../../context/UserContext';
 
 export default function OnboardingLocation() {
   const router = useRouter();
+  const { currentUser, updateOnboardingData } = useUser();
+
+  // Pre-fill with demo data if available
+  useEffect(() => {
+    if (currentUser?.location) {
+      // Auto-complete location for demo users
+      handleAllowLocation();
+    }
+  }, [currentUser]);
 
   const handleAllowLocation = () => {
-    // TODO: Request location permission and save to global state or backend
+    // Save location and mark onboarding as completed
+    const location = currentUser?.location || 'San Francisco, CA';
+    updateOnboardingData({ 
+      location,
+      onboardingCompleted: true 
+    });
+    
+    // Redirect to main app
     router.replace('/_tabs');
   };
 

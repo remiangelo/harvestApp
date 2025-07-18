@@ -48,16 +48,23 @@ export default function SwipeableProfileCard({
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
+  const hasTriggeredHaptic = useSharedValue(false);
+
+  const triggerHaptic = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
 
   const resetPosition = () => {
     'worklet';
     translateX.value = withSpring(0);
     translateY.value = withSpring(0);
     scale.value = withSpring(1);
+    hasTriggeredHaptic.value = false;
   };
 
   const handleSwipeComplete = (direction: 'left' | 'right' | 'up') => {
     'worklet';
+    runOnJS(triggerHaptic)();
     opacity.value = withTiming(0, { duration: 200 }, () => {
       if (direction === 'left') {
         runOnJS(onDislike)();
@@ -84,6 +91,17 @@ export default function SwipeableProfileCard({
         [1, 0.95],
         Extrapolation.CLAMP
       );
+      
+      // Trigger haptic when crossing threshold
+      const shouldTriggerHaptic = Math.abs(event.translationX) > SWIPE_THRESHOLD || 
+                                  (event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD);
+      
+      if (shouldTriggerHaptic && !hasTriggeredHaptic.value) {
+        hasTriggeredHaptic.value = true;
+        runOnJS(triggerHaptic)();
+      } else if (!shouldTriggerHaptic && hasTriggeredHaptic.value) {
+        hasTriggeredHaptic.value = false;
+      }
     })
     .onEnd((event) => {
       const shouldSwipeLeft = event.translationX < -SWIPE_THRESHOLD || event.velocityX < -SWIPE_VELOCITY;

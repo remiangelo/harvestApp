@@ -1,7 +1,7 @@
 # Harvest Dating App - Next Steps Plan
 
 ## 🚀 Implementation Progress Update
-**Last Updated**: July 18, 2025
+**Last Updated**: July 19, 2025
 
 ### ✅ Completed Upgrades
 1. **Zustand State Management** - Replaced Context API with modern state management
@@ -20,8 +20,25 @@
    - 60fps UI thread performance
    - Card rotation and scale effects
 
-### 🎯 Next Priority: Supabase Backend
-The app now has modern state management and smooth gestures. Next step is implementing the real backend with Supabase for authentication, data persistence, and real-time features.
+4. **UI Design Analysis** - Comprehensive design system documentation
+   - Analyzed 40+ screens from design files
+   - Identified maroon/burgundy color scheme (#A0354E)
+   - Documented unique features (Gardener AI, Growth Opportunities)
+   - Created implementation roadmap for UI components
+
+### 🎯 Current Priority Stack (Updated Post-UI Analysis)
+Based on the UI analysis, we've identified that the app has sophisticated design requirements including:
+- **Unique Features**: Gardener AI coach, Growth Opportunities lessons, compatibility scoring
+- **Design System**: Maroon color palette, apple-themed branding, consistent component library
+- **Safety Features**: "Ready to move?" toggle, emotional safety policies
+
+The priorities remain the same but with enhanced context:
+1. **Create Supabase project** - Backend foundation (CRITICAL)
+2. **Set up development tools** - ESLint, Prettier, Husky
+3. **Implement modern authentication** - Replace demo auth
+4. **Connect onboarding to real database** - Persist user data
+5. **Implement real-time chat** - Core dating app feature
+6. **Build UI component library** - Based on design system analysis (NEW)
 
 ---
 
@@ -95,6 +112,69 @@ Your Harvest dating app has a solid foundation with completed onboarding flow, w
 - **Custom AWS**: $300-1000/month (5-10k users)
 - **Savings**: 75-90% cost reduction
 
+## UI Design System Implementation
+
+### Design Tokens & Theme Configuration
+Based on the UI analysis, create a comprehensive theme system:
+
+```typescript
+// constants/theme.ts
+export const theme = {
+  colors: {
+    primary: '#A0354E', // Maroon/burgundy
+    secondary: '#F5E6D3', // Cream/beige
+    background: '#FFFFFF',
+    text: {
+      primary: '#2C2C2C',
+      secondary: '#666666',
+    },
+    gradients: {
+      profileCard: ['#E8B4F3', '#F3B4E8'], // Purple-pink gradient
+    },
+  },
+  typography: {
+    headers: {
+      h1: { fontSize: 28, fontWeight: '700' },
+      h2: { fontSize: 22, fontWeight: '600' },
+      h3: { fontSize: 18, fontWeight: '600' },
+    },
+    body: {
+      regular: { fontSize: 16, fontWeight: '400' },
+      small: { fontSize: 14, fontWeight: '400' },
+    },
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+  },
+  borderRadius: {
+    small: 8,
+    medium: 12,
+    large: 20,
+    full: 9999,
+  },
+};
+```
+
+### Priority UI Components to Build
+
+#### Week 1-2: Core Components
+1. **Button Component** - Primary, secondary, social variants
+2. **Input Component** - With validation states
+3. **Card Component** - For various content types
+4. **ProfileCard** - Enhanced with compatibility metrics
+5. **Tag/Pill Component** - For interests and labels
+
+#### Week 3-4: Advanced Components
+1. **GardenerChat** - AI coach conversation UI
+2. **CompatibilityIndicator** - Three-metric circular progress
+3. **LessonCard** - For Growth Opportunities
+4. **SafetyToggle** - "Ready to move?" component
+5. **SwipeIndicator** - LIKE/NOPE/SUPER LIKE overlays
+
 ## Phase 1: Tech Stack Modernization & Backend Setup (Weeks 1-4)
 
 ### Week 1: Modern State Management & Tools ✅ PARTIALLY COMPLETE
@@ -142,8 +222,23 @@ npx expo install expo-router@latest
 npx expo install expo-linking@latest
 ```
 
-### Week 2: Supabase Foundation
+### Week 2: Supabase Foundation & UI Component Library
 **Priority: High**
+
+#### 2.0 UI Component Library Setup (NEW)
+```bash
+# Install UI development dependencies
+npm install react-native-linear-gradient
+npm install react-native-svg
+npm install @shopify/react-native-skia # For advanced graphics
+```
+
+Create base components following design system:
+- `components/ui/Button.tsx` - With maroon primary variant
+- `components/ui/Input.tsx` - With proper styling
+- `components/ui/Card.tsx` - With consistent shadows
+- `components/ui/Tag.tsx` - For interest pills
+- `constants/theme.ts` - Design tokens
 
 #### 2.1 Supabase Project Setup
 ```bash
@@ -249,17 +344,18 @@ npm install react-native-image-resizer
 - Add photo upload to Supabase Storage with optimization
 - Add photo cropping and resizing
 
-#### 3.2 Advanced Swipe Cards
+#### 3.2 Advanced Swipe Cards with Design System
 ```bash
 # Install swipe card library
 npm install react-native-deck-swiper
 # Or implement custom with gesture handler
 ```
 
-- Replace basic ProfileCard with advanced swipe gestures
-- Add spring animations for natural card movement
-- Implement card stack with pre-loading
-- Add swipe feedback (haptics, visual cues)
+- Enhance SwipeableProfileCard with design system colors
+- Add compatibility metrics visualization (3 circular indicators)
+- Implement gradient overlays from design
+- Add interest tags with proper styling
+- Include LIKE/NOPE/SUPER LIKE visual indicators
 
 #### 3.3 Location Services Enhancement
 ```bash
@@ -367,8 +463,22 @@ npm install react-native-image-picker
 
 ## Phase 2: Advanced Features & User Experience (Weeks 5-8)
 
-### Week 5: Premium Features & Matching Intelligence
+### Week 5: Premium Features & Unique UI Elements
 **Priority: Medium**
+
+#### 5.0 Gardener AI Interface (NEW)
+Based on UI analysis, implement the unique Gardener AI coach:
+```typescript
+// components/GardenerAI/GardenerChat.tsx
+// components/GardenerAI/GrowthOpportunities.tsx
+// components/GardenerAI/LessonCard.tsx
+```
+
+- Create conversational UI for Gardener
+- Implement Growth Opportunities grid
+- Add lesson progress tracking
+- Create intervention screens
+- Add coin/points system UI
 
 #### 5.1 Advanced Matching Algorithm (Supabase Edge Function)
 ```typescript
@@ -719,28 +829,61 @@ npm install expo-notifications
 
 ## Next Immediate Action Items
 
-### ✅ Completed Today
+### ✅ Completed Recently
 1. **Install Zustand and modern dependencies** ✅ - Replaced Context API
 2. **Implement gesture handler** ✅ - Enhanced swipe experience with haptics
 3. **Create SwipeableProfileCard** ✅ - Modern swipe animations
+4. **UI Design Analysis** ✅ - Comprehensive design system documentation
 
-### 🔄 In Progress / Next Up
-1. **Set up development tools** - ESLint, Prettier, Husky
-2. **Create Supabase project** - Get API keys and set up database
-3. **Create auth store** - Modern authentication flow with Supabase
+### 🔄 Priority Stack (Post-UI Analysis)
+1. **Create Supabase project** - Backend foundation (CRITICAL)
+2. **Build theme configuration** - Design tokens from UI analysis
+3. **Create UI component library** - Button, Input, Card, Tag components
+4. **Set up development tools** - ESLint, Prettier, Husky
+5. **Implement modern authentication** - Replace demo auth with Supabase
+6. **Connect onboarding to database** - Persist user data
+7. **Enhanced ProfileCard** - Add compatibility metrics UI
+8. **Implement Gardener AI UI** - Unique differentiator
 
-### This Week
-1. **Modern state management** ✅ - Zustand implementation complete
-2. **Advanced gestures** ✅ - Smooth swipe animations with haptics
-3. **Enhanced UI** 🔄 - Modern design patterns in progress
-4. **Real authentication** - Supabase integration pending
+### This Week Focus
+1. **Supabase Setup** 🔴 - Critical path for all features
+2. **Design System Implementation** - Theme and base components
+3. **UI Component Library** - Following maroon color scheme
+4. **Authentication Flow** - Real auth with proper UI
 
 ### Next Week
-1. **Real-time features** - Chat and notifications
-2. **Advanced matching** - Algorithm implementation
-3. **Performance optimization** - Memory and speed
-4. **Testing setup** - Comprehensive QA
+1. **Gardener AI Implementation** - Unique feature development
+2. **Real-time Chat** - With safety features
+3. **Enhanced Matching UI** - Compatibility visualization
+4. **Growth Opportunities** - Lesson system
 
-This plan prioritizes modern development practices while maintaining rapid development with Supabase. The upgraded tech stack provides better performance, developer experience, and scalability for your 5-10k user target.
+## Key Design Insights from UI Analysis
 
-**Ready to start with the modern tech stack implementation?** 
+### Unique Features to Implement
+1. **Gardener AI Coach** - No other dating app has this
+2. **Growth Opportunities** - Gamified self-improvement
+3. **Compatibility Scoring** - Three-metric visualization
+4. **Safety Features** - "Ready to move?" toggle
+5. **Maroon Theme** - Distinctive brand identity
+
+### UI Components Priority
+1. **Core Components** (Week 1)
+   - Button, Input, Card with maroon theme
+   - Tag/Pill for interests
+   - Navigation with custom tab bar
+
+2. **Advanced Components** (Week 2-3)
+   - SwipeCard with compatibility metrics
+   - GardenerChat interface
+   - LessonCard for Growth Opportunities
+   - SafetyToggle component
+
+3. **Unique Features** (Week 4+)
+   - Full Gardener AI system
+   - Intervention screens
+   - Coin/reward system
+   - Progress tracking
+
+This updated plan integrates the UI design analysis with the technical implementation roadmap, ensuring the unique visual identity and features of Harvest are properly implemented alongside the modern tech stack.
+
+**Ready to start with Supabase setup and UI component library?** 

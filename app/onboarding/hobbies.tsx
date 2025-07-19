@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, SafeAreaView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
+import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 const ALL_HOBBIES = [
   'Art', 'Board Games', 'Cooking', 'Dancing', 'Fitness', 'Gaming', 'Hiking', 'Motorcycling', 'Movies', 'Music', 'Pets', 'Photography', 'Reading', 'Sports', 'Singing', 'Technology', 'Tourism', 'Writing', 'Coffee', 'Travel', 'Coding', 'Guitar', 'Craft Beer', 'Yoga', 'Meditation', 'Nature Walks', 'Design', 'Vintage Fashion', 'Indie Films', 'Art Galleries', 'Wine Tasting', 'Running', 'Volunteering', 'Football', 'Basketball', 'Investing', 'Game Nights', 'Gym', 'Rock Climbing', 'Sustainability', 'Astronomy', 'Camping', 'Gardening',
@@ -10,8 +10,7 @@ const ALL_HOBBIES = [
 export default function OnboardingHobbies() {
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState('');
-  const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUserStore();
+  const { currentUser } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {
@@ -32,18 +31,21 @@ export default function OnboardingHobbies() {
     }
   };
 
-  const handleContinue = () => {
-    // Save selected hobbies to user context
-    updateOnboardingData({ hobbies: selected });
-    router.push('/onboarding/distance');
+  const handleValidate = () => {
+    if (selected.length > 0) {
+      return { hobbies: selected };
+    }
+    return null;
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={styles.container}>
-      <View style={styles.progressBarContainer}>
-        <View style={[styles.progressBar, { width: '90%' }]} />
-      </View>
+    <OnboardingScreen
+      progress={90}
+      currentStep="hobbies"
+      nextStep="distance"
+      onValidate={handleValidate}
+      buttonDisabled={selected.length === 0}
+    >
       <Text style={styles.title}>Share your Hobbies</Text>
       <Text style={styles.subtitle}>Share your interests, passions, and hobbies. We’ll connect you with people who share your enthusiasm.</Text>
       <TextInput
@@ -66,36 +68,11 @@ export default function OnboardingHobbies() {
           </TouchableOpacity>
         ))}
       </ScrollView>
-              <TouchableOpacity style={styles.button} onPress={handleContinue} disabled={selected.length === 0}>
-          <Text style={styles.buttonText}>Continue</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    </OnboardingScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  progressBarContainer: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    marginBottom: 32,
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 4,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -158,21 +135,5 @@ const styles = StyleSheet.create({
   selectedHobbyText: {
     color: '#fff',
     fontWeight: 'bold',
-  },
-  button: {
-    width: '100%',
-    height: 48,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    opacity: 1,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'System',
   },
 }); 

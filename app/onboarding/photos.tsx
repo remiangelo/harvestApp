@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
 import useUserStore from '../../stores/useUserStore';
+import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 const MAX_PHOTOS = 6;
 
 export default function OnboardingPhotos() {
   const [photos, setPhotos] = useState<(string | null)[]>(Array(MAX_PHOTOS).fill(null));
-  const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUserStore();
+  const { currentUser } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {
@@ -59,20 +58,23 @@ export default function OnboardingPhotos() {
     }
   };
 
-  const handleContinue = () => {
-    // Save photos to user context (filter out null values)
+  const handleValidate = () => {
     const validPhotos = photos.filter(photo => photo !== null) as string[];
-    updateOnboardingData({ photos: validPhotos });
-    router.push('/onboarding/hobbies');
+    if (validPhotos.length > 0) {
+      return { photos: validPhotos };
+    }
+    return null;
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={styles.container}>
-        <View style={styles.progressBarContainer}>
-          <View style={[styles.progressBar, { width: '80%' }]} />
-        </View>
+    <OnboardingScreen
+      progress={80}
+      currentStep="photos"
+      nextStep="hobbies"
+      onValidate={handleValidate}
+      buttonDisabled={photos.every(p => !p)}
+    >
+      <KeyboardAvoidingView style={{ flex: 1, width: '100%' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Text style={styles.title}>Show your Best Self</Text>
         <Text style={styles.subtitle}>Upload up to six of your best photos to make a fantastic first impression. Let your personality shine.</Text>
         <View style={styles.grid}>
@@ -91,37 +93,12 @@ export default function OnboardingPhotos() {
             </TouchableOpacity>
           ))}
         </View>
-                  <TouchableOpacity style={styles.button} onPress={handleContinue} disabled={photos.every(p => !p)}>
-            <Text style={styles.buttonText}>Continue</Text>
-          </TouchableOpacity>
-        </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </OnboardingScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  progressBarContainer: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    marginBottom: 32,
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 4,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -169,21 +146,5 @@ const styles = StyleSheet.create({
     fontSize: 36,
     color: '#8B1E2D',
     fontWeight: 'bold',
-  },
-  button: {
-    width: '100%',
-    height: 48,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    opacity: 1,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'System',
   },
 }); 

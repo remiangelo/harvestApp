@@ -3,10 +3,13 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase, signIn, signUp, signOut, getCurrentUser } from '../lib/supabase';
+import { createProfile, getProfile, UserProfile } from '../lib/profiles';
+import useUserStore from './useUserStore';
 
 interface AuthState {
   user: User | null;
   session: Session | null;
+  profile: UserProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   
@@ -17,6 +20,7 @@ interface AuthState {
   logout: () => Promise<void>;
   setSession: (session: Session | null) => void;
   setUser: (user: User | null) => void;
+  loadProfile: (userId: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -24,6 +28,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       session: null,
+      profile: null,
       isLoading: true,
       isAuthenticated: false,
 
@@ -36,16 +41,27 @@ export const useAuthStore = create<AuthState>()(
           
           if (user && !error) {
             const { data: { session } } = await supabase.auth.getSession();
+            
+            // Load user profile
+            const { data: profile } = await getProfile(user.id);
+            
             set({ 
               user, 
               session,
+              profile,
               isAuthenticated: true,
               isLoading: false 
             });
+            
+            // Sync with user store
+            if (profile) {
+              useUserStore.getState().setCurrentUser(profile as any);
+            }
           } else {
             set({ 
               user: null, 
               session: null,
+              profile: null,
               isAuthenticated: false,
               isLoading: false 
             });
@@ -67,12 +83,21 @@ export const useAuthStore = create<AuthState>()(
           }
 
           if (data.user && data.session) {
+            // Load user profile
+            const { data: profile } = await getProfile(data.user.id);
+            
             set({ 
               user: data.user, 
               session: data.session,
+              profile,
               isAuthenticated: true,
               isLoading: false 
             });
+            
+            // Sync with user store
+            if (profile) {
+              useUserStore.getState().setCurrentUser(profile as any);
+            }
           }
           
           return { error: null };
@@ -92,15 +117,28 @@ export const useAuthStore = create<AuthState>()(
             return { error };
           }
 
+          // Create user profile
+          if (data.user) {
+            await createProfile(data.user.id, email);
+          }
+          
           // Note: Supabase may require email confirmation
           // In that case, user won't be logged in immediately
           if (data.user && data.session) {
+            const { data: profile } = await getProfile(data.user.id);
+            
             set({ 
               user: data.user, 
               session: data.session,
+              profile,
               isAuthenticated: true,
               isLoading: false 
             });
+            
+            // Sync with user store
+            if (profile) {
+              useUserStore.getState().setCurrentUser(profile as any);
+            }
           } else {
             set({ isLoading: false });
           }
@@ -119,9 +157,13 @@ export const useAuthStore = create<AuthState>()(
           set({ 
             user: null, 
             session: null,
+            profile: null,
             isAuthenticated: false,
             isLoading: false 
           });
+          
+          // Clear user store
+          useUserStore.getState().logout();
         } catch (error) {
           console.error('Logout error:', error);
           set({ isLoading: false });
@@ -135,6 +177,18 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user: User | null) => {
         set({ user, isAuthenticated: !!user });
       },
+      
+      loadProfile: async (userId: string) => {
+        try {
+          const { data: profile } = await getProfile(userId);
+          if (profile) {
+            set({ profile });
+            useUserStore.getState().setCurrentUser(profile as any);
+          }
+        } catch (error) {
+          console.error('Error loading profile:', error);
+        }
+      },
     }),
     {
       name: 'harvest-auth-storage',
@@ -143,6 +197,7 @@ export const useAuthStore = create<AuthState>()(
         // Only persist these fields
         user: state.user,
         session: state.session,
+        profile: state.profile,
         isAuthenticated: state.isAuthenticated,
       }),
     }

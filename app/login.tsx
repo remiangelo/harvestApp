@@ -30,9 +30,9 @@ export default function LoginScreen() {
     if (error) {
       Alert.alert('Login Failed', error.message || 'Invalid email or password. Please try again.');
     } else {
-      // Check if user has profile data
-      const userData = useUserStore.getState().currentUser;
-      if (userData?.age) {
+      // Check if user has completed onboarding
+      const authState = useAuthStore.getState();
+      if (authState.profile?.onboarding_completed) {
         router.push('/_tabs');
       } else {
         router.push('/onboarding');

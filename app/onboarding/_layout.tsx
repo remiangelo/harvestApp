@@ -14,6 +14,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="goals" options={{ headerShown: false }} />
       <Stack.Screen name="gender" options={{ headerShown: false }} />
       <Stack.Screen name="location" options={{ headerShown: false }} />
+      <Stack.Screen name="complete" options={{ headerShown: false }} />
     </Stack>
   );
 } 

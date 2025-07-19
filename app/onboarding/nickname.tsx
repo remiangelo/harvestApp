@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
+import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 export default function OnboardingNickname() {
   const [nickname, setNickname] = useState('');
-  const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUserStore();
+  const { currentUser } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {
@@ -15,18 +14,21 @@ export default function OnboardingNickname() {
     }
   }, [currentUser]);
 
-  const handleContinue = () => {
-    // Save nickname to user context
-    updateOnboardingData({ nickname });
-    router.push('/onboarding/photos');
+  const handleValidate = () => {
+    if (nickname.trim()) {
+      return { nickname: nickname.trim() };
+    }
+    return null;
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={styles.container}>
-      <View style={styles.progressBarContainer}>
-        <View style={[styles.progressBar, { width: '70%' }]} />
-      </View>
+    <OnboardingScreen
+      progress={70}
+      currentStep="nickname"
+      nextStep="photos"
+      onValidate={handleValidate}
+      buttonDisabled={!nickname.trim()}
+    >
       <Text style={styles.title}>Your Harvest Name</Text>
       <Text style={styles.subtitle}>Create a unique nickname that represents you. It’s how others will know and remember you.</Text>
       <TextInput
@@ -37,36 +39,11 @@ export default function OnboardingNickname() {
         onChangeText={setNickname}
         maxLength={32}
       />
-              <TouchableOpacity style={styles.button} onPress={handleContinue} disabled={!nickname}>
-          <Text style={styles.buttonText}>Continue</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    </OnboardingScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  progressBarContainer: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    marginBottom: 32,
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 4,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -93,22 +70,6 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     backgroundColor: '#fafafa',
     textAlign: 'center',
-    fontFamily: 'System', // Replace with Figma font if available
-  },
-  button: {
-    width: '100%',
-    height: 48,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    opacity: 1,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
     fontFamily: 'System', // Replace with Figma font if available
   },
 }); 

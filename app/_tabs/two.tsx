@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import useUserStore from '../../stores/useUserStore';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { LogoutButton } from '../../components/LogoutButton';
 
 export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
@@ -228,6 +229,11 @@ export default function ProfileScreen() {
             <Text style={[styles.settingText, styles.resetText]}>Reset Demo Data</Text>
             <Ionicons name="refresh" size={20} color="#8B1E2D" />
           </TouchableOpacity>
+          
+          {/* Logout Button */}
+          <View style={styles.logoutContainer}>
+            <LogoutButton fullWidth />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -370,5 +376,9 @@ const styles = StyleSheet.create({
   resetText: {
     color: '#8B1E2D',
     fontWeight: '600',
+  },
+  logoutContainer: {
+    marginTop: 24,
+    marginBottom: 24,
   },
 });

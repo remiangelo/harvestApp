@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import useUserStore from '../../stores/useUserStore';
+import { useOnboarding } from '../../hooks/useOnboarding';
 
 export default function OnboardingAge() {
   const [date, setDate] = useState(new Date(2000, 0, 1));
   const [show, setShow] = useState(false);
   const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUserStore();
+  const { currentUser } = useUserStore();
+  const { goToNextStep, isSaving } = useOnboarding();
 
   // Pre-fill with demo data if available
   useEffect(() => {
@@ -19,11 +21,9 @@ export default function OnboardingAge() {
     }
   }, [currentUser]);
 
-  const handleContinue = () => {
-    // Save birthDate to user context
-    updateOnboardingData({ age: date });
-    // Navigate to preferences
-    router.push('/onboarding/preferences');
+  const handleContinue = async () => {
+    // Save birthDate and navigate to next step
+    await goToNextStep('age', 'preferences', { age: date });
   };
 
   const onChange = (event: any, selectedDate?: Date) => {
@@ -53,8 +53,16 @@ export default function OnboardingAge() {
             maximumDate={new Date()}
           />
         )}
-        <TouchableOpacity style={styles.button} onPress={handleContinue}>
-          <Text style={styles.buttonText}>Continue</Text>
+        <TouchableOpacity 
+          style={[styles.button, isSaving && styles.buttonDisabled]} 
+          onPress={handleContinue}
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Continue</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -123,5 +131,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
 }); 

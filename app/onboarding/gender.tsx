@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
+import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 const GENDERS = [
   'Asexual', 'Bisexual', 'Gay', 'Intersex', 'Lesbian', 'Trans', 'Straight',
@@ -9,8 +9,7 @@ const GENDERS = [
 
 export default function OnboardingGender() {
   const [selected, setSelected] = useState<string | null>(null);
-  const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUserStore();
+  const { currentUser } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {
@@ -19,20 +18,21 @@ export default function OnboardingGender() {
     }
   }, [currentUser]);
 
-  const handleContinue = () => {
-    // Save selected gender to user context
+  const handleValidate = () => {
     if (selected) {
-      updateOnboardingData({ gender: selected });
-      router.push('/onboarding/location');
+      return { gender: selected };
     }
+    return null;
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={styles.container}>
-      <View style={styles.progressBarContainer}>
-        <View style={[styles.progressBar, { width: '100%' }]} />
-      </View>
+    <OnboardingScreen
+      progress={100}
+      currentStep="gender"
+      nextStep="location"
+      onValidate={handleValidate}
+      buttonDisabled={!selected}
+    >
       <Text style={styles.title}>Be True to Yourself</Text>
       <Text style={styles.subtitle}>Choose the gender that best represents you. Authenticity is key to meaningful connections.</Text>
       <ScrollView contentContainerStyle={styles.optionsContainer}>
@@ -47,36 +47,11 @@ export default function OnboardingGender() {
           </TouchableOpacity>
         ))}
       </ScrollView>
-              <TouchableOpacity style={styles.button} onPress={handleContinue} disabled={!selected}>
-          <Text style={styles.buttonText}>Continue</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    </OnboardingScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  progressBarContainer: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    marginBottom: 32,
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 4,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -141,21 +116,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     letterSpacing: 0.5,
-  },
-  button: {
-    width: '100%',
-    height: 48,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    opacity: 1,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'System',
   },
 }); 

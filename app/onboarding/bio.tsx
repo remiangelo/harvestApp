@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
+import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 export default function OnboardingBio() {
   const [bio, setBio] = useState('');
-  const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUserStore();
+  const { currentUser } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {
@@ -15,18 +14,21 @@ export default function OnboardingBio() {
     }
   }, [currentUser]);
 
-  const handleContinue = () => {
-    // Save bio to user context
-    updateOnboardingData({ bio });
-    router.push('/onboarding/nickname');
+  const handleValidate = () => {
+    if (bio.trim()) {
+      return { bio: bio.trim() };
+    }
+    return null;
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={styles.container}>
-      <View style={styles.progressBarContainer}>
-        <View style={[styles.progressBar, { width: '60%' }]} />
-      </View>
+    <OnboardingScreen
+      progress={60}
+      currentStep="bio"
+      nextStep="nickname"
+      onValidate={handleValidate}
+      buttonDisabled={!bio.trim()}
+    >
       <Text style={styles.title}>Describe Your True Self!</Text>
       <Text style={styles.subtitle}>Add a bio to your profile so people get to know you before swiping!</Text>
       <TextInput
@@ -39,36 +41,11 @@ export default function OnboardingBio() {
         numberOfLines={5}
         textAlignVertical="top"
       />
-              <TouchableOpacity style={styles.button} onPress={handleContinue} disabled={!bio}>
-          <Text style={styles.buttonText}>Continue</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    </OnboardingScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  progressBarContainer: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    marginBottom: 32,
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 4,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -96,22 +73,6 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     backgroundColor: '#fafafa',
     textAlign: 'left',
-    fontFamily: 'System', // Replace with Figma font if available
-  },
-  button: {
-    width: '100%',
-    height: 48,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    opacity: 1,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
     fontFamily: 'System', // Replace with Figma font if available
   },
 }); 

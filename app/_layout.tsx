@@ -8,7 +8,8 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import { UserProvider } from '../context/UserContext';
+import { useAuthStore } from '../stores/useAuthStore';
+import { supabase, onAuthStateChange } from '../lib/supabase';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -52,20 +53,33 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { initialize, setSession } = useAuthStore();
+
+  useEffect(() => {
+    // Initialize auth state
+    initialize();
+
+    // Listen for auth changes
+    const { data: authListener } = onAuthStateChange((session) => {
+      setSession(session);
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <UserProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ headerShown: false }} />
-            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-            <Stack.Screen name="_tabs" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-          </Stack>
-        </ThemeProvider>
-      </UserProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+          <Stack.Screen name="_tabs" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        </Stack>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }

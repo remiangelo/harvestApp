@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
-import { useUser } from '../../context/UserContext';
+import useUserStore from '../../stores/useUserStore';
 
 export default function OnboardingDistance() {
   const [distance, setDistance] = useState(4);
   const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUser();
+  const { currentUser, updateOnboardingData } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {

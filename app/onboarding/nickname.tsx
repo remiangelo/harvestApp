@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useUser } from '../../context/UserContext';
+import useUserStore from '../../stores/useUserStore';
 
 export default function OnboardingNickname() {
   const [nickname, setNickname] = useState('');
   const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUser();
+  const { currentUser, updateOnboardingData } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {

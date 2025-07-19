@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useUser } from '../../context/UserContext';
+import useUserStore from '../../stores/useUserStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
-  const { currentUser, updateOnboardingData } = useUser();
+  const { currentUser, updateOnboardingData } = useUserStore();
+  const { user } = useAuthStore();
   
   const [profile, setProfile] = useState({
     name: 'John Doe',
@@ -20,12 +22,26 @@ export default function ProfileScreen() {
   // Update profile with current user data
   useEffect(() => {
     if (currentUser) {
-      const age = currentUser.age ? new Date().getFullYear() - currentUser.age.getFullYear() : 25;
+      // Handle age properly - it could be a number, string, or Date
+      let age = 25; // default
+      if (currentUser.age) {
+        if (typeof currentUser.age === 'number') {
+          age = currentUser.age;
+        } else if (currentUser.age instanceof Date) {
+          age = new Date().getFullYear() - currentUser.age.getFullYear();
+        } else if (typeof currentUser.age === 'string') {
+          const birthDate = new Date(currentUser.age);
+          if (!isNaN(birthDate.getTime())) {
+            age = new Date().getFullYear() - birthDate.getFullYear();
+          }
+        }
+      }
+      
       setProfile({
-        name: currentUser.nickname || currentUser.name,
+        name: currentUser.nickname || currentUser.name || 'User',
         age,
         bio: currentUser.bio || 'I love hiking, photography, and good coffee. Looking for meaningful connections.',
-        photos: currentUser.photos ? [...currentUser.photos, ...Array(6 - currentUser.photos.length).fill(null)] : [null, null, null, null, null, null],
+        photos: currentUser.photos ? [...currentUser.photos, ...Array(Math.max(0, 6 - currentUser.photos.length)).fill(null)] : [null, null, null, null, null, null],
         hobbies: currentUser.hobbies || ['Photography', 'Hiking', 'Coffee'],
         location: currentUser.location || 'San Francisco, CA'
       });
@@ -46,9 +62,9 @@ export default function ProfileScreen() {
       quality: 0.8,
     });
 
-    if (!result.canceled && result.assets && result.assets.length > 0) {
+    if (!result.canceled && result.assets && result.assets.length > 0 && result.assets[0].uri) {
       const newPhotos = [...profile.photos];
-      newPhotos[index] = result.assets[0].uri;
+      newPhotos[index] = result.assets[0].uri || null;
       setProfile({ ...profile, photos: newPhotos });
       
       // Update user context
@@ -182,12 +198,26 @@ export default function ProfileScreen() {
             onPress={() => {
               // Reset to original demo data
               if (currentUser) {
-                const age = currentUser.age ? new Date().getFullYear() - currentUser.age.getFullYear() : 25;
+                // Reuse the same age calculation logic
+                let age = 25;
+                if (currentUser.age) {
+                  if (typeof currentUser.age === 'number') {
+                    age = currentUser.age;
+                  } else if (currentUser.age instanceof Date) {
+                    age = new Date().getFullYear() - currentUser.age.getFullYear();
+                  } else if (typeof currentUser.age === 'string') {
+                    const birthDate = new Date(currentUser.age);
+                    if (!isNaN(birthDate.getTime())) {
+                      age = new Date().getFullYear() - birthDate.getFullYear();
+                    }
+                  }
+                }
+                
                 setProfile({
-                  name: currentUser.nickname || currentUser.name,
+                  name: currentUser.nickname || currentUser.name || 'User',
                   age,
                   bio: currentUser.bio || 'I love hiking, photography, and good coffee. Looking for meaningful connections.',
-                  photos: currentUser.photos ? [...currentUser.photos, ...Array(6 - currentUser.photos.length).fill(null)] : [null, null, null, null, null, null],
+                  photos: currentUser.photos ? [...currentUser.photos, ...Array(Math.max(0, 6 - currentUser.photos.length)).fill(null)] : [null, null, null, null, null, null],
                   hobbies: currentUser.hobbies || ['Photography', 'Hiking', 'Coffee'],
                   location: currentUser.location || 'San Francisco, CA'
                 });

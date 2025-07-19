@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useUser } from '../../context/UserContext';
+import useUserStore from '../../stores/useUserStore';
 
 const options = [
   'Asexual',
@@ -16,7 +16,7 @@ const options = [
 export default function OnboardingPreferences() {
   const [selected, setSelected] = useState<string | null>(null);
   const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUser();
+  const { currentUser, updateOnboardingData } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {
@@ -27,8 +27,10 @@ export default function OnboardingPreferences() {
 
   const handleContinue = () => {
     // Save selected preference to user context
-    updateOnboardingData({ preferences: selected });
-    router.push('/onboarding/bio');
+    if (selected) {
+      updateOnboardingData({ preferences: selected });
+      router.push('/onboarding/bio');
+    }
   };
 
   return (

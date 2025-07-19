@@ -6,6 +6,7 @@ import { Pressable } from 'react-native';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { ErrorBoundary } from '../../components/ErrorBoundary';
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -19,7 +20,8 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Tabs
+    <ErrorBoundary>
+      <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#8B1E2D',
         tabBarInactiveTintColor: '#888',
@@ -43,5 +45,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </ErrorBoundary>
   );
 }

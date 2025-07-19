@@ -1,0 +1,10 @@
+node_modules/
+build/
+dist/
+coverage/
+.expo/
+.expo-shared/
+*.min.js
+*.bundle.js
+ios/
+android/

@@ -2,11 +2,11 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useUser } from '../../context/UserContext';
+import useUserStore from '../../stores/useUserStore';
 
 export default function OnboardingLocation() {
   const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUser();
+  const { currentUser, updateOnboardingData } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {

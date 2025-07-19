@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useUser } from '../../context/UserContext';
+import useUserStore from '../../stores/useUserStore';
 
 const ALL_HOBBIES = [
   'Art', 'Board Games', 'Cooking', 'Dancing', 'Fitness', 'Gaming', 'Hiking', 'Motorcycling', 'Movies', 'Music', 'Pets', 'Photography', 'Reading', 'Sports', 'Singing', 'Technology', 'Tourism', 'Writing', 'Coffee', 'Travel', 'Coding', 'Guitar', 'Craft Beer', 'Yoga', 'Meditation', 'Nature Walks', 'Design', 'Vintage Fashion', 'Indie Films', 'Art Galleries', 'Wine Tasting', 'Running', 'Volunteering', 'Football', 'Basketball', 'Investing', 'Game Nights', 'Gym', 'Rock Climbing', 'Sustainability', 'Astronomy', 'Camping', 'Gardening',
@@ -11,7 +11,7 @@ export default function OnboardingHobbies() {
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUser();
+  const { currentUser, updateOnboardingData } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {

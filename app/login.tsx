@@ -1,78 +1,38 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, Alert, SafeAreaView } from 'react-native';
+import { View, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { validateLogin } from '../data/demoUsers';
-import { useUser } from '../context/UserContext';
+import { useAuthStore } from '../stores/useAuthStore';
+import useUserStore from '../stores/useUserStore';
+import { Button, Input, Text, Card } from '../components/ui';
+import { theme } from '../constants/theme';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { setCurrentUser } = useUser();
+  const { login, register } = useAuthStore();
+  const { setCurrentUser } = useUserStore();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-    const user = validateLogin(email, password);
-    if (user) {
-      setCurrentUser(user);
-      Alert.alert(
-        'Welcome! 👋',
-        `Hello ${user.name}! You're successfully logged in.`,
-        [
-          {
-            text: 'Continue',
-            onPress: () => {
-              // Check if user has completed onboarding
-              if (user.onboardingCompleted) {
-                router.push('/_tabs');
-              } else {
-                router.push('/onboarding');
-              }
-            }
-          }
-        ]
-      );
+    setLoading(true);
+    const { error } = await login(email, password);
+    setLoading(false);
+
+    if (error) {
+      Alert.alert('Login Failed', error.message || 'Invalid email or password. Please try again.');
     } else {
-      Alert.alert('Login Failed', 'Invalid email or password. Please try again.');
-    }
-  };
-
-  const handleSignup = () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-
-    // For demo purposes, any new email/password combination will work for signup
-    Alert.alert(
-      'Account Created! 🎉',
-      'Your account has been created successfully. Welcome to Harvest!',
-      [
-        {
-          text: 'Continue',
-          onPress: () => router.push('/onboarding')
-        }
-      ]
-    );
-  };
-
-  const fillDemoCredentials = () => {
-    setEmail('demo@harvest.com');
-    setPassword('demo123');
-  };
-
-  const handleDemoLogin = () => {
-    const user = validateLogin('demo@harvest.com', 'demo123');
-    if (user) {
-      setCurrentUser(user);
-      if (user.onboardingCompleted) {
+      // Check if user has profile data
+      const userData = useUserStore.getState().currentUser;
+      if (userData?.age) {
         router.push('/_tabs');
       } else {
         router.push('/onboarding');
@@ -80,90 +40,152 @@ export default function LoginScreen() {
     }
   };
 
+  const handleSignup = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await register(email, password);
+    setLoading(false);
+
+    if (error) {
+      Alert.alert('Signup Failed', error.message || 'Failed to create account. Please try again.');
+    } else {
+      Alert.alert(
+        'Account Created! 🎉',
+        'Your account has been created successfully. Welcome to Harvest!',
+        [
+          {
+            text: 'Continue',
+            onPress: () => router.push('/onboarding')
+          }
+        ]
+      );
+    }
+  };
+
+  // For development/demo purposes only
+  const handleDemoLogin = async () => {
+    setEmail('demo@harvest.com');
+    setPassword('demo123');
+    setLoading(true);
+    
+    // In production, this would be a real demo account
+    setTimeout(() => {
+      setLoading(false);
+      Alert.alert(
+        'Demo Mode',
+        'In production, this would use a real demo account. For now, please create a new account.',
+        [
+          {
+            text: 'OK',
+            onPress: () => setIsLogin(false)
+          }
+        ]
+      );
+    }, 1000);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Logo Section */}
-        <View style={styles.logoSection}>
-          <View style={styles.logo}>
-            <Ionicons name="heart" size={60} color="#8B1E2D" />
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Logo Section */}
+          <View style={styles.logoSection}>
+            <View style={styles.logo}>
+              <Ionicons name="heart" size={60} color={theme.colors.primary} />
+            </View>
+            <Text variant="h1" color="primary" align="center">
+              Welcome to Harvest
+            </Text>
+            <Text variant="body" color="secondary" align="center" style={styles.subtitle}>
+              Mindful Dating, Real Connections
+            </Text>
           </View>
-          <Text style={styles.title}>Welcome to Harvest</Text>
-          <Text style={styles.subtitle}>Mindful Dating, Real Connections</Text>
-        </View>
 
-        {/* Form Section */}
-        <View style={styles.formSection}>
-          <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor="#888"
+          {/* Form Section */}
+          <View style={styles.formSection}>
+            <Input
+              label={isLogin ? "Email" : "Your Email"}
+              placeholder="Enter your email"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              leftIcon={<Ionicons name="mail" size={20} color={theme.colors.text.secondary} />}
             />
-          </View>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#888"
+            <Input
+              label={isLogin ? "Password" : "Create Password"}
+              placeholder={isLogin ? "Enter your password" : "Min. 6 characters"}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
+              leftIcon={<Ionicons name="lock-closed" size={20} color={theme.colors.text.secondary} />}
+              rightIcon={
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color={theme.colors.text.secondary}
+                />
+              }
+              onRightIconPress={() => setShowPassword(!showPassword)}
             />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Ionicons
-                name={showPassword ? "eye-off" : "eye"}
-                size={20}
-                color="#666"
+
+            <Button
+              title={isLogin ? 'Sign In' : 'Create Account'}
+              onPress={isLogin ? handleLogin : handleSignup}
+              loading={loading}
+              style={styles.mainButton}
+            />
+
+            <Button
+              title={isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+              onPress={() => setIsLogin(!isLogin)}
+              variant="ghost"
+              style={styles.switchButton}
+            />
+
+            {/* Demo Button - Only in development */}
+            {__DEV__ && (
+              <Button
+                title="Use Demo Credentials"
+                onPress={handleDemoLogin}
+                variant="outline"
+                loading={loading}
               />
-            </TouchableOpacity>
+            )}
           </View>
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={isLogin ? handleLogin : handleSignup}
-          >
-            <Text style={styles.buttonText}>
-              {isLogin ? 'Login' : 'Sign Up'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.switchButton}
-            onPress={() => setIsLogin(!isLogin)}
-          >
-            <Text style={styles.switchText}>
-              {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Demo Credentials Button */}
-          <TouchableOpacity
-            style={styles.demoButton}
-            onPress={handleDemoLogin}
-          >
-            <Text style={styles.demoButtonText}>Use Demo Credentials</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Demo Info */}
-        <View style={styles.demoInfo}>
-          <Text style={styles.demoInfoTitle}>Demo Credentials:</Text>
-          <Text style={styles.demoInfoText}>Email: demo@harvest.com</Text>
-          <Text style={styles.demoInfoText}>Password: demo123</Text>
-        </View>
-      </View>
+          {/* Info Card for Development */}
+          {__DEV__ && (
+            <Card variant="filled" style={styles.infoCard}>
+              <Text variant="bodySmall" weight="semibold">
+                Development Mode
+              </Text>
+              <Text variant="caption" color="secondary" style={styles.infoText}>
+                Create a new account to test the app. 
+                Supabase integration requires environment variables.
+              </Text>
+            </Card>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -171,129 +193,48 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.background,
   },
-  content: {
+  keyboardView: {
     flex: 1,
-    paddingHorizontal: 24,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.xl,
     justifyContent: 'center',
   },
   logoSection: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: theme.spacing.xxl,
   },
   logo: {
     width: 100,
     height: 100,
-    borderRadius: 50,
-    backgroundColor: '#f8f9fa',
+    borderRadius: theme.borderRadius.full,
+    backgroundColor: theme.colors.secondary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#8B1E2D',
-    marginBottom: 8,
-    textAlign: 'center',
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.lg,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    marginTop: theme.spacing.sm,
   },
   formSection: {
-    marginBottom: 32,
+    marginBottom: theme.spacing.xl,
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#222',
-    paddingVertical: 16,
-  },
-  eyeIcon: {
-    padding: 8,
-  },
-  button: {
-    backgroundColor: '#8B1E2D',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
+  mainButton: {
+    marginTop: theme.spacing.sm,
+    marginBottom: theme.spacing.lg,
   },
   switchButton: {
-    alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
-  switchText: {
-    color: '#8B1E2D',
-    fontSize: 16,
-    fontWeight: '500',
+  infoCard: {
+    marginTop: theme.spacing.lg,
   },
-  demoButton: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#8B1E2D',
-  },
-  demoButtonText: {
-    color: '#8B1E2D',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  demoInfo: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-  },
-  demoInfoTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#222',
-    marginBottom: 8,
-  },
-  demoInfoText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+  infoText: {
+    marginTop: theme.spacing.xs,
   },
 }); 

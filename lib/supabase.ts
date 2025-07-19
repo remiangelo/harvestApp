@@ -12,14 +12,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+// Create a dummy client if credentials are missing to prevent crashes
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: AsyncStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+      },
+    })
+  : {
+      auth: {
+        signUp: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signInWithPassword: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signOut: async () => ({ error: new Error('Supabase not configured') }),
+        getUser: async () => ({ data: { user: null }, error: new Error('Supabase not configured') }),
+        getSession: async () => ({ data: { session: null }, error: new Error('Supabase not configured') }),
+        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+      },
+    } as any;
 
 // Helper functions for common operations
 export const signUp = async (email: string, password: string) => {

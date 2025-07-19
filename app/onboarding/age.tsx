@@ -2,18 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useUser } from '../../context/UserContext';
+import useUserStore from '../../stores/useUserStore';
 
 export default function OnboardingAge() {
   const [date, setDate] = useState(new Date(2000, 0, 1));
   const [show, setShow] = useState(false);
   const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUser();
+  const { currentUser, updateOnboardingData } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {
-    if (currentUser?.age) {
-      setDate(currentUser.age);
+    if (currentUser?.age && typeof currentUser.age === 'number') {
+      // Convert age to Date if it's not already
+      const birthYear = new Date().getFullYear() - currentUser.age;
+      setDate(new Date(birthYear, 0, 1));
     }
   }, [currentUser]);
 
@@ -24,7 +26,7 @@ export default function OnboardingAge() {
     router.push('/onboarding/preferences');
   };
 
-  const onChange = (event, selectedDate) => {
+  const onChange = (event: any, selectedDate?: Date) => {
     setShow(Platform.OS === 'ios');
     if (selectedDate) setDate(selectedDate);
   };

@@ -12,7 +12,6 @@ import { DemoProfile } from '../data/demoProfiles';
 import {
   Gesture,
   GestureDetector,
-  GestureHandlerRootView,
 } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,

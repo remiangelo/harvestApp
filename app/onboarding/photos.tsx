@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView, Platform, KeyboardAvoidingView, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { useUser } from '../../context/UserContext';
+import useUserStore from '../../stores/useUserStore';
 
 const MAX_PHOTOS = 6;
 
 export default function OnboardingPhotos() {
   const [photos, setPhotos] = useState<(string | null)[]>(Array(MAX_PHOTOS).fill(null));
   const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUser();
+  const { currentUser, updateOnboardingData } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function OnboardingPhotos() {
       }
     } catch (error) {
       console.error('Error in pickImage:', error);
-      alert('Error picking image: ' + error.message);
+      alert('Error picking image: ' + (error as Error).message);
     }
   };
 

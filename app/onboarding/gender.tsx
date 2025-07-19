@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useUser } from '../../context/UserContext';
+import useUserStore from '../../stores/useUserStore';
 
 const GENDERS = [
   'Asexual', 'Bisexual', 'Gay', 'Intersex', 'Lesbian', 'Trans', 'Straight',
@@ -10,7 +10,7 @@ const GENDERS = [
 export default function OnboardingGender() {
   const [selected, setSelected] = useState<string | null>(null);
   const router = useRouter();
-  const { currentUser, updateOnboardingData } = useUser();
+  const { currentUser, updateOnboardingData } = useUserStore();
 
   // Pre-fill with demo data if available
   useEffect(() => {
@@ -21,8 +21,10 @@ export default function OnboardingGender() {
 
   const handleContinue = () => {
     // Save selected gender to user context
-    updateOnboardingData({ gender: selected });
-    router.push('/onboarding/location');
+    if (selected) {
+      updateOnboardingData({ gender: selected });
+      router.push('/onboarding/location');
+    }
   };
 
   return (

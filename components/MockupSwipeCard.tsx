@@ -127,7 +127,7 @@ export default function MockupSwipeCard({
       }
     } catch (error) {
       // Silently fail if haptics not available
-      console.log('Haptics not available');
+      // Haptics not available
     }
   };
 
@@ -296,17 +296,17 @@ export default function MockupSwipeCard({
 
             {/* Action buttons */}
             <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.actionButton} onPress={() => console.log('Document pressed')}>
+              <TouchableOpacity style={styles.actionButton} onPress={() => {}}>
                 <View style={styles.iconCircle}>
                   <Ionicons name="document-text-outline" size={24} color="#FFFFFF" />
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton} onPress={() => console.log('Home pressed')}>
+              <TouchableOpacity style={styles.actionButton} onPress={() => {}}>
                 <View style={styles.iconCircle}>
                   <Ionicons name="home-outline" size={24} color="#FFFFFF" />
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton} onPress={() => console.log('Cart pressed')}>
+              <TouchableOpacity style={styles.actionButton} onPress={() => {}}>
                 <View style={styles.iconCircle}>
                   <MaterialCommunityIcons name="cart-outline" size={24} color="#FFFFFF" />
                 </View>

@@ -81,7 +81,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onClose }) => {
           style={[
             styles.messageBubble,
             isGardener ? styles.gardenerBubble : styles.userBubble,
-          ]}
+          ] as any}
         >
           <Text
             variant="body"

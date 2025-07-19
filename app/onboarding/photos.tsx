@@ -17,7 +17,7 @@ export default function OnboardingPhotos() {
       const demoPhotos = [...currentUser.photos];
       // Fill remaining slots with null
       while (demoPhotos.length < MAX_PHOTOS) {
-        demoPhotos.push(null);
+        demoPhotos.push(null as any);
       }
       setPhotos(demoPhotos.slice(0, MAX_PHOTOS));
     }
@@ -25,17 +25,17 @@ export default function OnboardingPhotos() {
 
   const pickImage = async (index: number) => {
     try {
-      console.log('Starting image picker for index:', index);
+      // Starting image picker
       // Request permission first
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      console.log('Permission status:', status);
+      // Permission status checked
       
       if (status !== 'granted') {
         alert('Sorry, we need camera roll permissions to make this work!');
         return;
       }
       
-      console.log('Launching image library...');
+      // Launching image library
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -43,15 +43,15 @@ export default function OnboardingPhotos() {
         quality: 0.8,
       });
       
-      console.log('Image picker result:', result);
+      // Image picker result received
       
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const newPhotos = [...photos];
         newPhotos[index] = result.assets[0].uri;
         setPhotos(newPhotos);
-        console.log('Photo added successfully:', result.assets[0].uri);
+        // Photo added successfully
       } else {
-        console.log('Image picker was canceled or no assets returned');
+        // Image picker was canceled
       }
     } catch (error) {
       console.error('Error in pickImage:', error);

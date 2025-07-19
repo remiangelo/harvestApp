@@ -22,7 +22,7 @@ export default function OnboardingAge() {
   const handleContinue = () => {
     // Save birthDate to user context
     updateOnboardingData({ age: date });
-    console.log('Navigating to preferences...');
+    // Navigate to preferences
     router.push('/onboarding/preferences');
   };
 

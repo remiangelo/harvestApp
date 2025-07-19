@@ -64,7 +64,7 @@ export default function ProfileScreen() {
 
     if (!result.canceled && result.assets && result.assets.length > 0 && result.assets[0].uri) {
       const newPhotos = [...profile.photos];
-      newPhotos[index] = result.assets[0].uri || null;
+      newPhotos[index] = result.assets[0].uri as string;
       setProfile({ ...profile, photos: newPhotos });
       
       // Update user context

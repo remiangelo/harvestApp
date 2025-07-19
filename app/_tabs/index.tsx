@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import MockupSwipeCard from '../../components/MockupSwipeCard';
-import { demoProfiles, DemoProfile } from '../../data/demoProfiles';
+import CleanSwipeCard from '../../components/CleanSwipeCard';
+import { betterDemoProfiles as demoProfiles } from '../../data/betterDemoProfiles';
+import { DemoProfile } from '../../data/demoProfiles';
 import { theme } from '../../constants/theme';
 
 export default function SwipingScreen() {
@@ -72,7 +73,7 @@ export default function SwipingScreen() {
 
   return (
     <View style={styles.container}>
-      <MockupSwipeCard
+      <CleanSwipeCard
         profile={currentProfile}
         onLike={handleLike}
         onDislike={handleDislike}

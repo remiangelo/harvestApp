@@ -4,15 +4,23 @@ import { useAuthStore } from '../stores/useAuthStore';
 import useUserStore from '../stores/useUserStore';
 import { saveOnboardingStep, completeOnboarding } from '../lib/onboarding';
 import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DemoUser } from '../data/demoUsers';
 
 export const useOnboarding = () => {
   const router = useRouter();
-  const { user, loadProfile } = useAuthStore();
-  const { updateOnboardingData, onboardingData } = useUserStore();
+  const { user, loadProfile, isTestMode } = useAuthStore();
+  const { updateOnboardingData, onboardingData, currentUser } = useUserStore();
   const [isSaving, setIsSaving] = useState(false);
 
   // Save current step data to both local store and database
   const saveStepData = useCallback(async (stepData: Record<string, any>) => {
+    // In test mode, only save to local store
+    if (isTestMode) {
+      updateOnboardingData(stepData);
+      return { success: true, error: null };
+    }
+    
     if (!user) {
       console.error('No user found, cannot save onboarding data');
       return { success: false, error: 'No user session' };
@@ -43,7 +51,7 @@ export const useOnboarding = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [user, updateOnboardingData]);
+  }, [user, updateOnboardingData, isTestMode]);
 
   // Navigate to next step with optional data saving
   const goToNextStep = useCallback(async (
@@ -63,6 +71,24 @@ export const useOnboarding = () => {
 
   // Complete onboarding and navigate to main app
   const finishOnboarding = useCallback(async () => {
+    // In test mode, just update local state
+    if (isTestMode) {
+      // Update the current user to mark onboarding as complete
+      const updatedUser = { ...currentUser, onboardingCompleted: true };
+      useUserStore.getState().setCurrentUser(updatedUser as DemoUser);
+      
+      // Update AsyncStorage
+      try {
+        await AsyncStorage.setItem('harvest-test-user', JSON.stringify(updatedUser));
+      } catch (error) {
+        console.error('Error updating test user:', error);
+      }
+      
+      // Navigate to main app
+      router.replace('/_tabs');
+      return { success: true };
+    }
+    
     if (!user) {
       Alert.alert('Error', 'No user session found');
       return { success: false };
@@ -99,7 +125,7 @@ export const useOnboarding = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [user, loadProfile, router]);
+  }, [user, loadProfile, router, isTestMode, currentUser]);
 
   return {
     saveStepData,

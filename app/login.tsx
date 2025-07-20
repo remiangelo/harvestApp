@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../stores/useAuthStore';
 import useUserStore from '../stores/useUserStore';
 import { Button, Input, Text, Card } from '../components/ui';
 import { theme } from '../constants/theme';
+import { DemoUser } from '../data/demoUsers';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -14,7 +16,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login, register } = useAuthStore();
+  const { login, register, setTestMode, setAuthenticated } = useAuthStore();
   const { setCurrentUser } = useUserStore();
 
   const handleLogin = async () => {
@@ -71,26 +73,46 @@ export default function LoginScreen() {
     }
   };
 
-  // For development/demo purposes only
-  const handleDemoLogin = async () => {
-    setEmail('demo@harvest.com');
-    setPassword('demo123');
+  // For development/demo purposes only - TEST MODE
+  const handleTestMode = async () => {
     setLoading(true);
     
-    // In production, this would be a real demo account
-    setTimeout(() => {
+    // Create a mock user for testing without Supabase
+    const mockUser: DemoUser = {
+      email: 'testuser@harvest.com',
+      password: 'testpass', // Not used in test mode
+      name: 'Test User',
+      role: 'user' as const,
+      nickname: 'Test User',
+      age: new Date(1998, 0, 1), // 25 years old approx
+      bio: 'Testing the app without email auth',
+      location: 'Test City',
+      photos: [],
+      onboardingCompleted: false
+    };
+    
+    try {
+      // Store in AsyncStorage first
+      await AsyncStorage.setItem('harvest-test-mode', 'true');
+      await AsyncStorage.setItem('harvest-test-user', JSON.stringify(mockUser));
+      
+      // Update auth store to mark as authenticated in test mode
+      setTestMode(true);
+      setAuthenticated(true);
+      
+      // Set the mock user in the user store
+      setCurrentUser(mockUser);
+      
+      // Small delay to ensure state updates propagate
+      setTimeout(() => {
+        setLoading(false);
+        // Force navigation to onboarding
+        router.replace('/onboarding');
+      }, 100);
+    } catch (error) {
       setLoading(false);
-      Alert.alert(
-        'Demo Mode',
-        'In production, this would use a real demo account. For now, please create a new account.',
-        [
-          {
-            text: 'OK',
-            onPress: () => setIsLogin(false)
-          }
-        ]
-      );
-    }, 1000);
+      Alert.alert('Error', 'Failed to enable test mode');
+    }
   };
 
   return (
@@ -161,14 +183,26 @@ export default function LoginScreen() {
               style={styles.switchButton}
             />
 
-            {/* Demo Button - Only in development */}
+            {/* Test Mode Button - Only in development */}
             {__DEV__ && (
-              <Button
-                title="Use Demo Credentials"
-                onPress={handleDemoLogin}
-                variant="outline"
-                loading={loading}
-              />
+              <>
+                <View style={styles.divider}>
+                  <View style={styles.dividerLine} />
+                  <Text variant="caption" color="secondary" style={styles.dividerText}>
+                    OR
+                  </Text>
+                  <View style={styles.dividerLine} />
+                </View>
+                
+                <Button
+                  title="Enter Test Mode (No Email Required)"
+                  onPress={handleTestMode}
+                  variant="outline"
+                  loading={loading}
+                  style={styles.testButton}
+                  icon={<Ionicons name="flask" size={20} color={theme.colors.primary} />}
+                />
+              </>
             )}
           </View>
 
@@ -179,8 +213,8 @@ export default function LoginScreen() {
                 Development Mode
               </Text>
               <Text variant="caption" color="secondary" style={styles.infoText}>
-                Create a new account to test the app. 
-                Supabase integration requires environment variables.
+                Use "Test Mode" button above to bypass email authentication.
+                This creates a local test user for development.
               </Text>
             </Card>
           )}
@@ -236,5 +270,21 @@ const styles = StyleSheet.create({
   },
   infoText: {
     marginTop: theme.spacing.xs,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: theme.spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.colors.border,
+  },
+  dividerText: {
+    marginHorizontal: theme.spacing.md,
+  },
+  testButton: {
+    marginBottom: theme.spacing.md,
   },
 }); 

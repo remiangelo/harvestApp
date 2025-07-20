@@ -35,7 +35,7 @@ export const PhotoUploadSlot: React.FC<PhotoUploadSlotProps> = ({
       }
       
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [2, 3], // Match the display aspect ratio
         quality: 0.8,

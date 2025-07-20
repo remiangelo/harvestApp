@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '../stores/useAuthStore';
+import useUserStore from '../stores/useUserStore';
 import { getOnboardingProgress } from '../lib/onboarding';
 import { theme } from '../constants/theme';
 
@@ -12,7 +13,8 @@ interface AuthGuardProps {
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const router = useRouter();
   const segments = useSegments();
-  const { isAuthenticated, isLoading, profile, initialize, user } = useAuthStore();
+  const { isAuthenticated, isLoading, profile, initialize, user, isTestMode } = useAuthStore();
+  const { currentUser } = useUserStore();
   const [checkingProgress, setCheckingProgress] = useState(false);
 
   useEffect(() => {
@@ -30,20 +32,34 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       router.replace('/login');
     } else if (isAuthenticated && inAuthGroup) {
       // Redirect authenticated users away from auth screens
-      if (profile?.onboarding_completed) {
+      const isOnboardingComplete = isTestMode ? currentUser?.onboardingCompleted : profile?.onboarding_completed;
+      
+      if (isOnboardingComplete) {
         router.replace('/_tabs');
       } else {
         // Check onboarding progress and redirect to appropriate step
         checkOnboardingProgress();
       }
-    } else if (isAuthenticated && !profile?.onboarding_completed && !inOnboarding) {
-      // Redirect to onboarding if not completed
-      checkOnboardingProgress();
+    } else if (isAuthenticated && !inOnboarding) {
+      const isOnboardingComplete = isTestMode ? currentUser?.onboardingCompleted : profile?.onboarding_completed;
+      
+      if (!isOnboardingComplete) {
+        // Redirect to onboarding if not completed
+        checkOnboardingProgress();
+      }
     }
-  }, [isAuthenticated, isLoading, profile, segments]);
+  }, [isAuthenticated, isLoading, profile, segments, isTestMode, currentUser]);
 
   const checkOnboardingProgress = async () => {
-    if (!user || checkingProgress) return;
+    if (checkingProgress) return;
+    
+    // In test mode, always go to the start of onboarding
+    if (isTestMode) {
+      router.replace('/onboarding');
+      return;
+    }
+    
+    if (!user) return;
     
     setCheckingProgress(true);
     try {
@@ -66,8 +82,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         if (data.location) onboardingData.location = data.location;
         
         // Update the onboarding data in store
-        const userStore = require('../stores/useUserStore').default;
-        userStore.getState().updateOnboardingData(onboardingData);
+        useUserStore.getState().updateOnboardingData(onboardingData);
       }
       
       // Navigate to the appropriate step

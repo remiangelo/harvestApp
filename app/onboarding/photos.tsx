@@ -12,8 +12,8 @@ export default function OnboardingPhotos() {
   const [photos, setPhotos] = useState<(string | null)[]>(Array(MAX_PHOTOS).fill(null));
   const [uploadingIndexes, setUploadingIndexes] = useState<Set<number>>(new Set());
   const [failedUploads, setFailedUploads] = useState<Set<number>>(new Set());
-  const { onboardingData } = useUserStore();
-  const { user } = useAuthStore();
+  const { onboardingData, currentUser } = useUserStore();
+  const { user, isTestMode } = useAuthStore();
 
   // Pre-fill with restored data if available
   useEffect(() => {
@@ -39,6 +39,12 @@ export default function OnboardingPhotos() {
     newPhotos[index] = uri;
     setPhotos(newPhotos);
 
+    // In test mode, just save the local URI
+    if (isTestMode) {
+      // No upload needed in test mode, photos stay local
+      return;
+    }
+
     // Mark as uploading
     setUploadingIndexes(prev => new Set(prev).add(index));
 
@@ -49,7 +55,12 @@ export default function OnboardingPhotos() {
       }
 
       // Upload new photo to Supabase Storage
-      const { url, error } = await uploadPhoto(user.id, uri, index);
+      const userId = user?.id || currentUser?.id;
+      if (!userId) {
+        throw new Error('No user ID available for upload');
+      }
+      
+      const { url, error } = await uploadPhoto(userId, uri, index);
       
       if (error || !url) {
         throw error || new Error('Failed to upload photo');

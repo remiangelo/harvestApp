@@ -1,3 +1,4 @@
+// UNUSED - Replaced by CleanSwipeCard.tsx
 import React, { useState } from 'react';
 import {
   View,

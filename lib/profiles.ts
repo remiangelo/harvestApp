@@ -69,15 +69,17 @@ export const updateProfile = async (userId: string, updates: Partial<UserProfile
       updated_at: new Date().toISOString(),
     };
     
-    // Map fields to database columns
-    if (updates.nickname) dbUpdates.first_name = updates.nickname;
+    // Map fields to database columns (matching migration 003)
+    if (updates.nickname) dbUpdates.nickname = updates.nickname;
     if (updates.age !== undefined) dbUpdates.age = updates.age;
     if (updates.bio) dbUpdates.bio = updates.bio;
-    if (updates.location) dbUpdates.city = updates.location;
+    if (updates.location) dbUpdates.location = updates.location;
     if (updates.gender) dbUpdates.gender = updates.gender;
     if (updates.photos) dbUpdates.photos = updates.photos;
     if (updates.hobbies) dbUpdates.hobbies = updates.hobbies;
-    if (updates.distance_preference !== undefined) dbUpdates.max_distance = updates.distance_preference;
+    if (updates.distance_preference !== undefined) dbUpdates.distance_preference = updates.distance_preference;
+    if (updates.preferences) dbUpdates.preferences = updates.preferences;
+    if (updates.goals) dbUpdates.goals = updates.goals;
     
     const { data, error } = await supabase
       .from('users')

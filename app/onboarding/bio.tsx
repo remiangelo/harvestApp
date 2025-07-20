@@ -5,14 +5,14 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 export default function OnboardingBio() {
   const [bio, setBio] = useState('');
-  const { currentUser } = useUserStore();
+  const { onboardingData } = useUserStore();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored data if available
   useEffect(() => {
-    if (currentUser?.bio) {
-      setBio(currentUser.bio);
+    if (onboardingData?.bio) {
+      setBio(onboardingData.bio);
     }
-  }, [currentUser]);
+  }, [onboardingData]);
 
   const handleValidate = () => {
     if (bio.trim()) {

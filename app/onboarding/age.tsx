@@ -9,17 +9,21 @@ export default function OnboardingAge() {
   const [date, setDate] = useState(new Date(2000, 0, 1));
   const [show, setShow] = useState(false);
   const router = useRouter();
-  const { currentUser } = useUserStore();
+  const { onboardingData } = useUserStore();
   const { goToNextStep, isSaving } = useOnboarding();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored or demo data
   useEffect(() => {
-    if (currentUser?.age && typeof currentUser.age === 'number') {
-      // Convert age to Date if it's not already
-      const birthYear = new Date().getFullYear() - currentUser.age;
-      setDate(new Date(birthYear, 0, 1));
+    if (onboardingData?.age) {
+      if (typeof onboardingData.age === 'number') {
+        // Convert age number back to Date
+        const birthYear = new Date().getFullYear() - onboardingData.age;
+        setDate(new Date(birthYear, 0, 1));
+      } else if (onboardingData.age instanceof Date) {
+        setDate(onboardingData.age);
+      }
     }
-  }, [currentUser]);
+  }, [onboardingData]);
 
   const handleContinue = async () => {
     // Save birthDate and navigate to next step

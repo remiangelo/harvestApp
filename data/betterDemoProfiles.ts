@@ -13,7 +13,7 @@ export const betterDemoProfiles: DemoProfile[] = [
     ],
     hobbies: ['Hiking', 'Photography', 'Coffee', 'Travel', 'Cooking'],
     location: 'San Francisco, CA',
-    gender: 'Woman',
+    gender: 'female',
     sexualIdentity: 'Straight',
     relationshipGoals: ['Long-term relationship', 'Friendship']
   },
@@ -29,7 +29,7 @@ export const betterDemoProfiles: DemoProfile[] = [
     ],
     hobbies: ['Coding', 'Guitar', 'Craft Beer', 'Board Games', 'Hiking'],
     location: 'Austin, TX',
-    gender: 'Man',
+    gender: 'male',
     sexualIdentity: 'Straight',
     relationshipGoals: ['Long-term relationship', 'Casual dating']
   },
@@ -45,7 +45,7 @@ export const betterDemoProfiles: DemoProfile[] = [
     ],
     hobbies: ['Yoga', 'Meditation', 'Cooking', 'Nature Walks', 'Reading'],
     location: 'Portland, OR',
-    gender: 'Woman',
+    gender: 'female',
     sexualIdentity: 'Bisexual',
     relationshipGoals: ['Long-term relationship', 'Friendship']
   },
@@ -77,7 +77,7 @@ export const betterDemoProfiles: DemoProfile[] = [
     ],
     hobbies: ['Design', 'Vintage Fashion', 'Indie Films', 'Art Galleries', 'Coffee'],
     location: 'Los Angeles, CA',
-    gender: 'Woman',
+    gender: 'female',
     sexualIdentity: 'Lesbian',
     relationshipGoals: ['Long-term relationship', 'Friendship']
   },

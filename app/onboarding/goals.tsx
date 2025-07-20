@@ -7,14 +7,14 @@ const GOALS = ['Dating', 'Relationship', 'Marriage'];
 
 export default function OnboardingGoals() {
   const [selected, setSelected] = useState<string | null>(null);
-  const { currentUser } = useUserStore();
+  const { onboardingData } = useUserStore();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored data if available
   useEffect(() => {
-    if (currentUser?.goals) {
-      setSelected(currentUser.goals);
+    if (onboardingData?.goals) {
+      setSelected(onboardingData.goals);
     }
-  }, [currentUser]);
+  }, [onboardingData]);
 
   const handleValidate = () => {
     if (selected) {

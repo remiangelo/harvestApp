@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   Dimensions,
   TouchableOpacity,
@@ -25,6 +24,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { OptimizedImage } from './OptimizedImage';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -42,7 +42,6 @@ export default function CleanSwipeCard({
   onSuperLike,
 }: CleanSwipeCardProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [imageLoading, setImageLoading] = useState(true);
   
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -164,19 +163,12 @@ export default function CleanSwipeCard({
       <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.card, animatedCardStyle]}>
           {/* Main photo */}
-          <Image
+          <OptimizedImage
             source={{ uri: currentPhoto }}
             style={styles.photo}
             resizeMode="cover"
-            onLoadStart={() => setImageLoading(true)}
-            onLoadEnd={() => setImageLoading(false)}
+            showLoadingIndicator={true}
           />
-          
-          {imageLoading && (
-            <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading...</Text>
-            </View>
-          )}
 
           {/* Photo dots indicator */}
           <View style={styles.photoIndicator}>
@@ -306,20 +298,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginTop: 10,
-    color: '#999',
-    fontSize: 16,
-  },
-  loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
     color: '#999',
     fontSize: 16,
   },

@@ -9,14 +9,14 @@ const GENDERS = [
 
 export default function OnboardingGender() {
   const [selected, setSelected] = useState<string | null>(null);
-  const { currentUser } = useUserStore();
+  const { onboardingData } = useUserStore();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored data if available
   useEffect(() => {
-    if (currentUser?.gender) {
-      setSelected(currentUser.gender);
+    if (onboardingData?.gender) {
+      setSelected(onboardingData.gender);
     }
-  }, [currentUser]);
+  }, [onboardingData]);
 
   const handleValidate = () => {
     if (selected) {

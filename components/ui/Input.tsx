@@ -60,7 +60,7 @@ export const Input: React.FC<InputProps> = ({
     rightIcon && styles.inputWithRightIcon,
     !editable && styles.inputDisabled,
     inputStyle,
-  ].filter(Boolean);
+  ].filter(Boolean) as any;
 
   return (
     <View style={containerStyles}>

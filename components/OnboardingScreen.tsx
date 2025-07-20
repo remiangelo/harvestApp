@@ -2,12 +2,25 @@ import React, { ReactNode } from 'react';
 import { View, StyleSheet, SafeAreaView, ActivityIndicator, TouchableOpacity, Text } from 'react-native';
 import { useOnboarding } from '../hooks/useOnboarding';
 
+interface OnboardingStepData {
+  age?: Date;
+  preferences?: string;
+  bio?: string;
+  nickname?: string;
+  photos?: string[];
+  hobbies?: string[];
+  distance?: number;
+  goals?: string;
+  gender?: string;
+  location?: string;
+}
+
 interface OnboardingScreenProps {
   children: ReactNode;
   progress: number;
   currentStep: string;
   nextStep: string;
-  onValidate: () => Record<string, any> | null;
+  onValidate: () => Partial<OnboardingStepData> | null;
   buttonText?: string;
   buttonDisabled?: boolean;
 }

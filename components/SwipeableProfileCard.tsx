@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   Dimensions,
   ScrollView,
@@ -23,6 +22,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { OptimizedImage } from './OptimizedImage';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const SWIPE_THRESHOLD = screenWidth * 0.25;
@@ -192,10 +192,11 @@ export default function SwipeableProfileCard({
       <Animated.View style={[styles.container, animatedCardStyle]}>
         {/* Photo Section */}
         <View style={styles.photoContainer}>
-          <Image
+          <OptimizedImage
             source={{ uri: profile.photos[currentPhotoIndex] }}
             style={styles.photo}
             resizeMode="cover"
+            showLoadingIndicator={true}
           />
           
           {/* Swipe Indicators */}

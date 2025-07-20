@@ -15,14 +15,14 @@ const options = [
 
 export default function OnboardingPreferences() {
   const [selected, setSelected] = useState<string | null>(null);
-  const { currentUser } = useUserStore();
+  const { onboardingData } = useUserStore();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored data if available
   useEffect(() => {
-    if (currentUser?.preferences) {
-      setSelected(currentUser.preferences);
+    if (onboardingData?.preferences) {
+      setSelected(onboardingData.preferences);
     }
-  }, [currentUser]);
+  }, [onboardingData]);
 
   const handleValidate = () => {
     if (selected) {

@@ -22,27 +22,28 @@ export const saveOnboardingStep = async (
       processedData.distance_preference = stepData.distance;
     }
 
-    // Handle photos array - upload to storage
+    // Handle photos array - upload to storage in parallel
     if (stepData.photos && Array.isArray(stepData.photos)) {
-      const uploadedUrls: string[] = [];
-      
-      for (let i = 0; i < stepData.photos.length; i++) {
-        const photoUri = stepData.photos[i];
+      const uploadPromises = stepData.photos.map(async (photoUri, i) => {
         if (photoUri && !photoUri.startsWith('http')) {
           // This is a local URI, needs to be uploaded
           const { url, error } = await uploadPhoto(userId, photoUri, i);
           if (url) {
-            uploadedUrls.push(url);
+            return url;
           } else {
             console.error(`Failed to upload photo ${i}:`, error);
+            // Return the local URI as fallback
+            return photoUri;
           }
         } else if (photoUri) {
           // This is already a URL, keep it
-          uploadedUrls.push(photoUri);
+          return photoUri;
         }
-      }
+        return null;
+      });
       
-      processedData.photos = uploadedUrls;
+      const uploadResults = await Promise.all(uploadPromises);
+      processedData.photos = uploadResults.filter(url => url !== null);
     }
 
     // Copy over other fields directly
@@ -122,32 +123,28 @@ export const getOnboardingProgress = async (userId: string) => {
     let currentStep = 'age'; // Default to first step
     
     if (data) {
-      if (data.location && data.gender && data.goals && data.distance_preference && 
-          data.hobbies && data.photos && data.nickname && data.bio && 
-          data.preferences && data.age) {
+      // Check fields in reverse order to find the last completed step
+      if (data.onboarding_completed) {
         currentStep = 'complete';
-      } else if (data.gender && data.goals && data.distance_preference && 
-                 data.hobbies && data.photos && data.nickname && data.bio && 
-                 data.preferences && data.age) {
+      } else if (data.location) {
+        currentStep = 'complete'; // Location is the last step before complete
+      } else if (data.gender) {
         currentStep = 'location';
-      } else if (data.goals && data.distance_preference && data.hobbies && 
-                 data.photos && data.nickname && data.bio && data.preferences && data.age) {
+      } else if (data.goals) {
         currentStep = 'gender';
-      } else if (data.distance_preference && data.hobbies && data.photos && 
-                 data.nickname && data.bio && data.preferences && data.age) {
+      } else if (data.distance_preference !== null && data.distance_preference !== undefined) {
         currentStep = 'goals';
-      } else if (data.hobbies && data.photos && data.nickname && data.bio && 
-                 data.preferences && data.age) {
+      } else if (data.hobbies && data.hobbies.length > 0) {
         currentStep = 'distance';
-      } else if (data.photos && data.nickname && data.bio && data.preferences && data.age) {
+      } else if (data.photos && data.photos.length > 0) {
         currentStep = 'hobbies';
-      } else if (data.nickname && data.bio && data.preferences && data.age) {
+      } else if (data.nickname) {
         currentStep = 'photos';
-      } else if (data.bio && data.preferences && data.age) {
+      } else if (data.bio) {
         currentStep = 'nickname';
-      } else if (data.preferences && data.age) {
+      } else if (data.preferences) {
         currentStep = 'bio';
-      } else if (data.age) {
+      } else if (data.age !== null && data.age !== undefined) {
         currentStep = 'preferences';
       }
     }

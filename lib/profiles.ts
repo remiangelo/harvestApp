@@ -28,7 +28,7 @@ export const createProfile = async (userId: string, email: string) => {
         {
           id: userId,
           email,
-          onboarding_completed: false,
+          nickname: email.split('@')[0], // Use email prefix as default nickname
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -64,12 +64,24 @@ export const getProfile = async (userId: string) => {
 // Update user profile
 export const updateProfile = async (userId: string, updates: Partial<UserProfile>) => {
   try {
+    // Map the updates to match database schema
+    const dbUpdates: any = {
+      updated_at: new Date().toISOString(),
+    };
+    
+    // Map fields to database columns
+    if (updates.nickname) dbUpdates.first_name = updates.nickname;
+    if (updates.age !== undefined) dbUpdates.age = updates.age;
+    if (updates.bio) dbUpdates.bio = updates.bio;
+    if (updates.location) dbUpdates.city = updates.location;
+    if (updates.gender) dbUpdates.gender = updates.gender;
+    if (updates.photos) dbUpdates.photos = updates.photos;
+    if (updates.hobbies) dbUpdates.hobbies = updates.hobbies;
+    if (updates.distance_preference !== undefined) dbUpdates.max_distance = updates.distance_preference;
+    
     const { data, error } = await supabase
       .from('users')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
+      .update(dbUpdates)
       .eq('id', userId)
       .select()
       .single();
@@ -87,12 +99,16 @@ export const checkOnboardingStatus = async (userId: string) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('onboarding_completed')
+      .select('bio, age, gender, photos')
       .eq('id', userId)
       .single();
 
     if (error) throw error;
-    return { completed: data?.onboarding_completed || false, error: null };
+    
+    // Consider onboarding complete if basic profile fields are filled
+    const completed = !!(data?.bio && data?.age && data?.gender && data?.photos?.length > 0);
+    
+    return { completed, error: null };
   } catch (error) {
     console.error('Error checking onboarding status:', error);
     return { completed: false, error };
@@ -134,9 +150,15 @@ export const uploadPhoto = async (userId: string, photoUri: string, photoIndex: 
 // Delete profile photo
 export const deletePhoto = async (photoUrl: string) => {
   try {
-    // Extract file path from URL
-    const urlParts = photoUrl.split('/');
-    const fileName = urlParts.slice(-2).join('/');
+    // Extract file path from URL more safely
+    const url = new URL(photoUrl);
+    const pathParts = url.pathname.split('/storage/v1/object/public/profile-photos/');
+    
+    if (pathParts.length !== 2) {
+      throw new Error('Invalid photo URL format');
+    }
+    
+    const fileName = pathParts[1];
     
     const { error } = await supabase.storage
       .from('profile-photos')

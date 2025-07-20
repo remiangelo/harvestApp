@@ -1,60 +1,82 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { View, Text, StyleSheet, Platform, KeyboardAvoidingView, Alert } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
+import { PhotoUploadSlot } from '../../components/PhotoUploadSlot';
+import { useAuthStore } from '../../stores/useAuthStore';
+import { uploadPhoto, deletePhoto } from '../../lib/profiles';
 
 const MAX_PHOTOS = 6;
 
 export default function OnboardingPhotos() {
   const [photos, setPhotos] = useState<(string | null)[]>(Array(MAX_PHOTOS).fill(null));
-  const { currentUser } = useUserStore();
+  const [uploadingIndexes, setUploadingIndexes] = useState<Set<number>>(new Set());
+  const [failedUploads, setFailedUploads] = useState<Set<number>>(new Set());
+  const { onboardingData } = useUserStore();
+  const { user } = useAuthStore();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored data if available
   useEffect(() => {
-    if (currentUser?.photos) {
-      const demoPhotos = [...currentUser.photos];
+    if (onboardingData?.photos) {
+      const restoredPhotos = [...onboardingData.photos];
       // Fill remaining slots with null
-      while (demoPhotos.length < MAX_PHOTOS) {
-        demoPhotos.push(null as any);
+      while (restoredPhotos.length < MAX_PHOTOS) {
+        restoredPhotos.push(null as any);
       }
-      setPhotos(demoPhotos.slice(0, MAX_PHOTOS));
+      setPhotos(restoredPhotos.slice(0, MAX_PHOTOS));
     }
-  }, [currentUser]);
+  }, [onboardingData]);
 
-  const pickImage = async (index: number) => {
+  const handlePhotoSelected = async (uri: string, index: number) => {
+    if (!user) {
+      Alert.alert('Error', 'Please log in to upload photos');
+      return;
+    }
+
+    // Update local state immediately
+    const newPhotos = [...photos];
+    const oldPhoto = newPhotos[index];
+    newPhotos[index] = uri;
+    setPhotos(newPhotos);
+
+    // Mark as uploading
+    setUploadingIndexes(prev => new Set(prev).add(index));
+
     try {
-      // Starting image picker
-      // Request permission first
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      // Permission status checked
-      
-      if (status !== 'granted') {
-        alert('Sorry, we need camera roll permissions to make this work!');
-        return;
+      // Delete old photo if it exists and is a cloud URL
+      if (oldPhoto && oldPhoto.startsWith('http')) {
+        await deletePhoto(oldPhoto);
       }
+
+      // Upload new photo to Supabase Storage
+      const { url, error } = await uploadPhoto(user.id, uri, index);
       
-      // Launching image library
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
+      if (error || !url) {
+        throw error || new Error('Failed to upload photo');
+      }
+
+      // Update with cloud URL
+      setPhotos(prev => {
+        const updated = [...prev];
+        updated[index] = url;
+        return updated;
       });
-      
-      // Image picker result received
-      
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const newPhotos = [...photos];
-        newPhotos[index] = result.assets[0].uri;
-        setPhotos(newPhotos);
-        // Photo added successfully
-      } else {
-        // Image picker was canceled
-      }
     } catch (error) {
-      console.error('Error in pickImage:', error);
-      alert('Error picking image: ' + (error as Error).message);
+      console.error('Photo upload error:', error);
+      Alert.alert(
+        'Upload Failed', 
+        'Failed to upload photo. It will be saved when you continue.',
+        [{ text: 'OK' }]
+      );
+      // Keep the local URI - it will be uploaded when saving the step
+      setFailedUploads(prev => new Set(prev).add(index));
+    } finally {
+      // Remove from uploading set
+      setUploadingIndexes(prev => {
+        const next = new Set(prev);
+        next.delete(index);
+        return next;
+      });
     }
   };
 
@@ -66,33 +88,43 @@ export default function OnboardingPhotos() {
     return null;
   };
 
+  const isAnyUploading = uploadingIndexes.size > 0;
+  const hasPhotos = photos.some(p => p !== null);
+
   return (
     <OnboardingScreen
       progress={80}
       currentStep="photos"
       nextStep="hobbies"
       onValidate={handleValidate}
-      buttonDisabled={photos.every(p => !p)}
+      buttonDisabled={!hasPhotos || isAnyUploading}
     >
       <KeyboardAvoidingView style={{ flex: 1, width: '100%' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Text style={styles.title}>Show your Best Self</Text>
         <Text style={styles.subtitle}>Upload up to six of your best photos to make a fantastic first impression. Let your personality shine.</Text>
         <View style={styles.grid}>
           {photos.map((photo, idx) => (
-            <TouchableOpacity
+            <PhotoUploadSlot
               key={idx}
-              style={[styles.photoSlot, photo && styles.filledSlot]}
-              onPress={() => pickImage(idx)}
-              activeOpacity={0.7}
-            >
-              {photo ? (
-                <Image source={{ uri: photo }} style={styles.photo} />
-              ) : (
-                <Text style={styles.plus}>+</Text>
-              )}
-            </TouchableOpacity>
+              photo={photo}
+              index={idx}
+              onPhotoSelected={handlePhotoSelected}
+              isUploading={uploadingIndexes.has(idx)}
+            />
           ))}
         </View>
+
+        {isAnyUploading && (
+          <Text style={styles.uploadingMessage}>
+            Uploading photos... Please wait
+          </Text>
+        )}
+        
+        {failedUploads.size > 0 && (
+          <Text style={styles.errorMessage}>
+            {failedUploads.size} photo{failedUploads.size > 1 ? 's' : ''} failed to upload. They will be saved when you continue.
+          </Text>
+        )}
       </KeyboardAvoidingView>
     </OnboardingScreen>
   );
@@ -121,30 +153,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 32,
   },
-  photoSlot: {
-    width: '30%',
-    aspectRatio: 2/3,
-    backgroundColor: '#fafafa',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    marginHorizontal: '1.5%',
-    overflow: 'hidden',
-  },
-  filledSlot: {
-    borderColor: '#8B1E2D',
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  plus: {
-    fontSize: 36,
+  uploadingMessage: {
+    textAlign: 'center',
     color: '#8B1E2D',
-    fontWeight: 'bold',
+    fontSize: 14,
+    marginTop: -16,
+    marginBottom: 16,
+  },
+  errorMessage: {
+    textAlign: 'center',
+    color: '#FF6B6B',
+    fontSize: 14,
+    marginTop: -16,
+    marginBottom: 16,
   },
 }); 

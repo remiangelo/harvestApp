@@ -6,14 +6,14 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 export default function OnboardingDistance() {
   const [distance, setDistance] = useState(4);
-  const { currentUser } = useUserStore();
+  const { onboardingData } = useUserStore();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored data if available
   useEffect(() => {
-    if (currentUser?.distance) {
-      setDistance(currentUser.distance);
+    if (onboardingData?.distance) {
+      setDistance(onboardingData.distance);
     }
-  }, [currentUser]);
+  }, [onboardingData]);
 
   const handleValidate = () => {
     return { distance };

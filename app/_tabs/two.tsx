@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import useUserStore from '../../stores/useUserStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { LogoutButton } from '../../components/LogoutButton';
+import { OptimizedImage } from '../../components/OptimizedImage';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const { currentUser, updateOnboardingData } = useUserStore();
   const { user } = useAuthStore();
@@ -15,7 +18,7 @@ export default function ProfileScreen() {
     name: 'John Doe',
     age: 25,
     bio: 'I love hiking, photography, and good coffee. Looking for meaningful connections.',
-    photos: [null, null, null, null, null, null],
+    photos: [null, null, null, null, null, null] as (string | null)[],
     hobbies: ['Photography', 'Hiking', 'Coffee'],
     location: 'San Francisco, CA'
   });
@@ -114,7 +117,11 @@ export default function ProfileScreen() {
                 disabled={!isEditing}
               >
                 {photo ? (
-                  <Image source={{ uri: photo }} style={styles.photo} />
+                  <OptimizedImage 
+                    source={{ uri: photo }} 
+                    style={styles.photo}
+                    showLoadingIndicator={true}
+                  />
                 ) : (
                   <View style={styles.emptyPhoto}>
                     <Ionicons name="camera" size={24} color="#ccc" />
@@ -182,16 +189,11 @@ export default function ProfileScreen() {
         {/* Settings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingText}>Privacy Settings</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingText}>Notification Preferences</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingText}>Account Settings</Text>
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={() => router.push('/settings' as any)}
+          >
+            <Text style={styles.settingText}>App Settings</Text>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
           <TouchableOpacity 

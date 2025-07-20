@@ -1,18 +1,36 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import CleanSwipeCard from '../../components/CleanSwipeCard';
 import { betterDemoProfiles as demoProfiles } from '../../data/betterDemoProfiles';
 import { DemoProfile } from '../../data/demoProfiles';
 import { theme } from '../../constants/theme';
+import { useRouter } from 'expo-router';
+import useUserStore from '../../stores/useUserStore';
+import { filterProfiles, sortProfilesByRelevance } from '../../lib/filterProfiles';
 
 export default function SwipingScreen() {
+  const router = useRouter();
+  const { currentUser } = useUserStore();
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [likedProfiles, setLikedProfiles] = useState<string[]>([]);
   const [dislikedProfiles, setDislikedProfiles] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filteredProfiles, setFilteredProfiles] = useState<DemoProfile[]>([]);
+
+  // Filter and sort profiles based on user preferences
+  useEffect(() => {
+    // In a real app, this would fetch profiles from the backend
+    setTimeout(() => {
+      const filtered = filterProfiles(demoProfiles || [], currentUser);
+      const sorted = sortProfilesByRelevance(filtered, currentUser);
+      setFilteredProfiles(sorted);
+      setIsLoading(false);
+    }, 1000);
+  }, [currentUser]);
 
   // Safety check for profiles array
-  const validProfiles = demoProfiles || [];
+  const validProfiles = filteredProfiles;
   const safeIndex = Math.min(currentProfileIndex, validProfiles.length - 1);
   const currentProfile = validProfiles[safeIndex];
 
@@ -57,11 +75,37 @@ export default function SwipingScreen() {
     setDislikedProfiles([]);
   };
 
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.logo}>Harvest</Text>
+          <TouchableOpacity 
+            style={styles.filterButton}
+            onPress={() => router.push('/filters' as any)}
+          >
+            <Ionicons name="options-outline" size={24} color={theme.colors.text.primary} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Loading profiles...</Text>
+        </View>
+      </View>
+    );
+  }
+
   if (!currentProfile) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.logo}>Harvest</Text>
+          <TouchableOpacity 
+            style={styles.filterButton}
+            onPress={() => router.push('/filters' as any)}
+          >
+            <Ionicons name="options-outline" size={24} color={theme.colors.text.primary} />
+          </TouchableOpacity>
         </View>
         <View style={styles.content}>
           <Text style={styles.title}>No Profiles Available</Text>
@@ -89,8 +133,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   header: {
-    padding: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    backgroundColor: 'transparent',
   },
   logo: {
     fontSize: 32,
@@ -115,5 +169,20 @@ const styles = StyleSheet.create({
     color: '#555',
     marginBottom: 24,
     textAlign: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  filterButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 20,
   },
 });

@@ -5,14 +5,14 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 export default function OnboardingNickname() {
   const [nickname, setNickname] = useState('');
-  const { currentUser } = useUserStore();
+  const { onboardingData } = useUserStore();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored data if available
   useEffect(() => {
-    if (currentUser?.nickname) {
-      setNickname(currentUser.nickname);
+    if (onboardingData?.nickname) {
+      setNickname(onboardingData.nickname);
     }
-  }, [currentUser]);
+  }, [onboardingData]);
 
   const handleValidate = () => {
     if (nickname.trim()) {

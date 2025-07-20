@@ -5,16 +5,16 @@ import useUserStore from '../../stores/useUserStore';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 export default function OnboardingLocation() {
-  const { currentUser } = useUserStore();
+  const { onboardingData } = useUserStore();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored data if available
   useEffect(() => {
-    // Demo users already have location data
+    // Location data is restored from onboardingData
     // No auto-navigation needed with new flow
-  }, [currentUser]);
+  }, [onboardingData]);
 
   const handleValidate = () => {
-    const location = currentUser?.location || 'San Francisco, CA';
+    const location = onboardingData?.location || 'San Francisco, CA';
     return { location };
   };
 

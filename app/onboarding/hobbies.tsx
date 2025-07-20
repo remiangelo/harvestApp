@@ -10,14 +10,14 @@ const ALL_HOBBIES = [
 export default function OnboardingHobbies() {
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState('');
-  const { currentUser } = useUserStore();
+  const { onboardingData } = useUserStore();
 
-  // Pre-fill with demo data if available
+  // Pre-fill with restored data if available
   useEffect(() => {
-    if (currentUser?.hobbies) {
-      setSelected(currentUser.hobbies);
+    if (onboardingData?.hobbies) {
+      setSelected(onboardingData.hobbies);
     }
-  }, [currentUser]);
+  }, [onboardingData]);
 
   const filteredHobbies = ALL_HOBBIES.filter(hobby =>
     hobby.toLowerCase().includes(search.toLowerCase())

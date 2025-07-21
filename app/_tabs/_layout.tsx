@@ -30,11 +30,34 @@ export default function TabLayout() {
         headerShown: useClientOnlyValue(false, true),
       }}>
       <Tabs.Screen
+        name="gardener"
+        options={{
+          title: 'Gardener',
+          tabBarIcon: ({ color }) => <TabBarIcon name="graduation-cap" color={color} />,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="matches"
+        options={{
+          title: 'Match',
+          tabBarIcon: ({ color }) => <TabBarIcon name="heart" color={color} />,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
         name="index"
         options={{
           title: 'Discover',
-          tabBarIcon: ({ color }) => <TabBarIcon name="heart" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="copy" color={color} />,
           headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: 'Chat',
+          tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
         }}
       />
       <Tabs.Screen

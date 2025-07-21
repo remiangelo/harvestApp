@@ -8,6 +8,7 @@ import { theme } from '../../constants/theme';
 import { useRouter } from 'expo-router';
 import useUserStore from '../../stores/useUserStore';
 import { filterProfiles, sortProfilesByRelevance } from '../../lib/filterProfiles';
+import { MatchModal } from '../../components/MatchModal';
 
 export default function SwipingScreen() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function SwipingScreen() {
   const [dislikedProfiles, setDislikedProfiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filteredProfiles, setFilteredProfiles] = useState<DemoProfile[]>([]);
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [matchedProfile, setMatchedProfile] = useState<DemoProfile | null>(null);
 
   // Filter and sort profiles based on user preferences
   useEffect(() => {
@@ -37,11 +40,12 @@ export default function SwipingScreen() {
   const handleLike = () => {
     if (currentProfile) {
       setLikedProfiles(prev => [...prev, currentProfile.id]);
-      Alert.alert(
-        'It\'s a Match! 💕',
-        `You liked ${currentProfile.name}! This would trigger a match notification in the real app.`,
-        [{ text: 'Continue Swiping', style: 'default' }]
-      );
+      // Simulate a match (in real app, check if they liked you back)
+      const isMatch = Math.random() > 0.3; // 70% match rate for demo
+      if (isMatch) {
+        setMatchedProfile(currentProfile);
+        setShowMatchModal(true);
+      }
       nextProfile();
     }
   };
@@ -123,6 +127,29 @@ export default function SwipingScreen() {
         onDislike={handleDislike}
         onSuperLike={handleLike}
       />
+      
+      {matchedProfile && (
+        <MatchModal
+          visible={showMatchModal}
+          onClose={() => {
+            setShowMatchModal(false);
+            setMatchedProfile(null);
+          }}
+          userProfile={{
+            name: currentUser?.name || 'You',
+            photo: currentUser?.photos?.[0] || 'https://i.pravatar.cc/150?img=1',
+          }}
+          matchProfile={{
+            name: matchedProfile.name,
+            photo: matchedProfile.photos[0],
+          }}
+          compatibility={{
+            interests: 95,
+            personality: 98,
+            overall: 96,
+          }}
+        />
+      )}
     </View>
   );
 }

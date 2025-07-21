@@ -193,28 +193,59 @@ export default function CleanSwipeCard({
             <Text style={styles.nopeText}>NOPE</Text>
           </Animated.View>
 
-          {/* Bottom info */}
-          <BlurView intensity={25} tint="light" style={styles.infoContainer}>
-            <View style={styles.header}>
-              <Text style={styles.name}>{profile.name}, {profile.age}</Text>
-              <View style={styles.locationRow}>
-                <Ionicons name="location-sharp" size={14} color="#666" />
-                <Text style={styles.location}>{profile.location}</Text>
-              </View>
-            </View>
-
-            <Text style={styles.bio} numberOfLines={2}>
-              {profile.bio}
-            </Text>
-
-            <View style={styles.tags}>
-              {profile.hobbies.slice(0, 3).map((hobby, index) => (
-                <View key={index} style={styles.tag}>
-                  <Text style={styles.tagText}>{hobby}</Text>
+          {/* Bottom info - Liquid Glass */}
+          <View style={styles.infoContainer}>
+            <BlurView intensity={90} tint="light" style={StyleSheet.absoluteFillObject}>
+              <LinearGradient
+                colors={['rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0.15)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFillObject}
+              />
+            </BlurView>
+            
+            <View style={styles.infoContent}>
+              <View style={styles.header}>
+                <Text style={styles.name}>{profile.name} {profile.age}</Text>
+                
+                {/* Compatibility metrics */}
+                <View style={styles.metricsRow}>
+                  <View style={styles.metric}>
+                    <View style={[styles.metricCircle, { borderColor: '#FF6B6B' }]}>
+                      <Text style={styles.metricText}>95%</Text>
+                    </View>
+                    <Text style={styles.metricLabel}>Interests</Text>
+                  </View>
+                  
+                  <View style={styles.metric}>
+                    <View style={[styles.metricCircle, { borderColor: '#FFB901' }]}>
+                      <Text style={styles.metricText}>98%</Text>
+                    </View>
+                    <Text style={styles.metricLabel}>Personality</Text>
+                  </View>
+                  
+                  <View style={styles.metric}>
+                    <View style={[styles.metricCircle, { borderColor: '#4ECDC4' }]}>
+                      <Text style={styles.metricText}>96%</Text>
+                    </View>
+                    <Text style={styles.metricLabel}>Match</Text>
+                  </View>
                 </View>
-              ))}
+              </View>
+
+              <View style={styles.tags}>
+                {['#nature', '#books', '#travel', '#movies', '#filmmaking'].map((tag, index) => (
+                  <View key={index} style={styles.tag}>
+                    <Text style={styles.tagText}>{tag}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <Text style={styles.bio} numberOfLines={3}>
+                {profile.bio}
+              </Text>
             </View>
-          </BlurView>
+          </View>
         </Animated.View>
       </GestureDetector>
 
@@ -355,18 +386,50 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    height: 180,
+    overflow: 'hidden',
+  },
+  infoContent: {
+    flex: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
   },
   header: {
-    marginBottom: 8,
+    marginBottom: 12,
   },
   name: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  metricsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 12,
+  },
+  metric: {
+    alignItems: 'center',
+  },
+  metricCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  metricText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+  },
+  metricLabel: {
+    fontSize: 11,
+    color: '#666',
   },
   locationRow: {
     flexDirection: 'row',
@@ -379,26 +442,28 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   bio: {
-    fontSize: 15,
-    color: '#444',
-    lineHeight: 20,
-    marginBottom: 12,
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 18,
+    marginTop: 10,
   },
   tags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    marginBottom: 10,
   },
   tag: {
     backgroundColor: '#A0354E',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    marginRight: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    marginRight: 6,
+    marginBottom: 6,
   },
   tagText: {
     color: 'white',
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '600',
   },
   actionBar: {
     flexDirection: 'row',

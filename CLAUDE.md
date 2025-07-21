@@ -3,6 +3,9 @@
 ## Project Overview
 **Harvest** is a React Native dating app built with Expo and TypeScript, focused on "Mindful Dating, Real Connections". The app features a comprehensive onboarding flow, swipe-based matching, and is preparing for launch to 5-10k users.
 
+## CRITICAL UI REQUIREMENTS
+**IMPORTANT**: The liquid glass UI implementation MUST follow the UI mockups in the `Harvest Screens SVG:PNG/` folder **EXACTLY 1:1**. Do not deviate from the mockup designs - all glass effects, blur levels, colors, spacing, and visual elements must match the mockups precisely.
+
 ## Current Tech Stack Analysis (As of July 2025)
 
 ### **Architecture**
@@ -124,7 +127,7 @@ constants/               # App configuration and Supabase client
 ## Progress Tracking (Auto-updated every 15 minutes)
 
 ### **Current Session Progress**
-**Last Updated**: July 20, 2025 - Final Verification & Cleanup Completed
+**Last Updated**: July 20, 2025 - Test Mode Implementation & iOS Simulator Issues
 
 #### **Completed Tasks**
 - ✅ Complete codebase analysis and architecture review
@@ -308,10 +311,40 @@ constants/               # App configuration and Supabase client
   2. Must add environment variables (EXPO_PUBLIC_SUPABASE_URL/KEY)
   3. Must create `profile-photos` storage bucket in Supabase
 
+#### **Test Mode Implementation (July 20)**
+- ✅ **Created Test Mode for Development**
+  - Added "Enter Test Mode" button on login screen (dev only)
+  - Bypasses email authentication completely
+  - Creates local mock user with DemoUser interface
+  - Stores test data in AsyncStorage for persistence
+  - Test mode flag in auth store tracks state
+  
+- ✅ **Fixed Test Mode Issues**
+  - Updated AuthGuard to handle test mode users
+  - Fixed onboarding save errors by checking isTestMode
+  - Photos stay local in test mode (no Supabase upload)
+  - Fixed TypeScript errors with DemoUser interface
+  - Changed onboarding_completed to onboardingCompleted
+  
+- ✅ **Fixed Image Picker Deprecation**
+  - Changed MediaTypeOptions to array syntax ['images']
+  - Updated all 3 files using image picker
+  - No more deprecation warnings
+  
+- ✅ **Updated Dependencies**
+  - expo@53.0.20 (was 53.0.19)
+  - expo-router@~5.1.4 (was 5.1.3)
+  - react-native-svg@15.11.2 (was 15.12.0)
+  
+- ✅ **Cleaned Up Documentation**
+  - Removed 16 unnecessary .md files
+  - Kept only CLAUDE.md and TEST_MODE_GUIDE.md
+  - Created clearTestMode.js helper script
+
 #### **Currently Working On**
+- 📋 iOS 18 simulator compatibility issues
+- 📋 User testing on physical device (simulator issues)
 - 📋 App is production-ready for Tier 1 features
-- 📋 All core functionality verified and working
-- 📋 Ready for Tier 2: Swipe persistence and matching
 
 #### **Next Priority Tasks**
 1. **Save swipes to database** - Track likes/dislikes
@@ -321,7 +354,9 @@ constants/               # App configuration and Supabase client
 5. **Implement Gardener AI** - Unique coaching feature
 
 #### **Blockers/Issues**
-- None - app is fully functional with documented setup steps
+- iOS 18 simulator has linking permission errors with Expo SDK 53
+- Workaround: Using physical device with Expo Go app
+- Fix attempted but iOS 18 compatibility requires Expo SDK update
 
 #### **Key Decisions Made**
 - Confirmed Supabase as backend choice (cost-effective, feature-rich)
@@ -333,6 +368,9 @@ constants/               # App configuration and Supabase client
 - Decided to prioritize gestures over dev tools based on criticality analysis
 - Database schema uses `nickname` not `first_name`, `location` not `city`
 - Marked 6 unused swipe components - `CleanSwipeCard` is the active one
+- Implemented Test Mode for easier development without email auth
+- Fixed all deprecation warnings and TypeScript errors
+- Cleaned up documentation files to reduce clutter
 
 #### **Technical Implementation Details**
 - **Zustand Stores**: `/stores/useUserStore.ts`, `/stores/useAuthStore.ts`
@@ -354,7 +392,9 @@ constants/               # App configuration and Supabase client
   - `/hooks/useOnboarding.ts` - Unified saving interface
   - `/components/OnboardingScreen.tsx` - Consistent UI wrapper
   - `/components/AuthGuard.tsx` - Route protection
-- **Documentation**: `AUTH_SETUP.md`, `ONBOARDING_DB_INTEGRATION.md`, `CLEANUP_SUMMARY.md`, `FINAL_VERIFICATION.md`
+- **Documentation**: `TEST_MODE_GUIDE.md` (only essential docs kept)
+- **Test Mode**: Login bypass for development, stores in AsyncStorage
+- **Helper Scripts**: `clearTestMode.js`, `fix-simulator.sh`
 
 ### **App Status Summary**
 **Production Ready**: All Tier 1 features are implemented and tested
@@ -388,3 +428,5 @@ Update the "Last Updated" timestamp and progress sections to maintain accurate p
 - Ready for production backend integration
 - Focus on mindful dating differentiates from competitors
 - Strong emphasis on user experience and performance
+- **UI Mockups**: All screens have been designed and are available in `Harvest Screens SVG:PNG/` folder
+- **Liquid Glass Implementation**: Must match mockups exactly - no creative liberties allowed

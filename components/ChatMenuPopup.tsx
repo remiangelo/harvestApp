@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, Switch, Image } from '
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from './liquid/LiquidGlassView';
 
 interface ChatMenuPopupProps {
@@ -30,12 +31,14 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
   onReportProfile,
   onUnmatch,
 }) => {
+  const insets = useSafeAreaInsets();
+  
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose}>
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFillObject} />
 
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
           <LiquidGlassView
             intensity={90}
             tint="light"

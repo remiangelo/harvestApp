@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { router } from 'expo-router';
 
@@ -72,9 +73,14 @@ const currentLesson = {
 };
 
 export default function GardenerScreen() {
+  const insets = useSafeAreaInsets();
+  
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+      >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>The</Text>
@@ -225,7 +231,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     flex: 1,
     marginTop: 20,
-    paddingBottom: 100,
     paddingHorizontal: 20,
     paddingTop: 30,
   },

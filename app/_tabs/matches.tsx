@@ -18,9 +18,6 @@ interface Match {
   id: string;
   name: string;
   photo: string;
-  lastMessage: string;
-  timestamp: string;
-  unread: boolean;
   online: boolean;
 }
 
@@ -36,45 +33,30 @@ const conversations: Match[] = [
     id: '1',
     name: 'Alfredo Calzoni',
     photo: 'https://i.pravatar.cc/150?img=5',
-    lastMessage: 'What about that new jacket if I...',
-    timestamp: '09:18',
-    unread: true,
     online: true,
   },
   {
     id: '2',
     name: 'Clara Hazel',
     photo: 'https://i.pravatar.cc/150?img=6',
-    lastMessage: 'I know right 😊',
-    timestamp: '12:44',
-    unread: true,
     online: false,
   },
   {
     id: '3',
     name: 'Brandon Aminoff',
     photo: 'https://i.pravatar.cc/150?img=7',
-    lastMessage: "I've already registered, can't wai...",
-    timestamp: '08:06',
-    unread: false,
     online: false,
   },
   {
     id: '4',
     name: 'Amina Mina',
     photo: 'https://i.pravatar.cc/150?img=8',
-    lastMessage: 'It will have two lines of heading ...',
-    timestamp: '09:32',
-    unread: false,
     online: false,
   },
   {
     id: '5',
     name: 'Savanna Hall',
     photo: 'https://i.pravatar.cc/150?img=9',
-    lastMessage: 'It will have two lines of heading ...',
-    timestamp: '06:21',
-    unread: false,
     online: false,
   },
 ];
@@ -145,14 +127,10 @@ export default function MatchesScreen() {
 
               <View style={styles.conversationContent}>
                 <Text style={styles.conversationName}>{match.name}</Text>
-                <Text style={styles.lastMessage} numberOfLines={1}>
-                  {match.lastMessage}
-                </Text>
               </View>
 
               <View style={styles.conversationMeta}>
-                <Text style={styles.timestamp}>{match.timestamp}</Text>
-                {match.unread && <View style={styles.unreadDot} />}
+                <Ionicons name="chevron-forward" size={20} color="#999" />
               </View>
             </TouchableOpacity>
           ))}
@@ -199,7 +177,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     flex: 1,
-    marginTop: -20,
+    marginTop: 10,
     paddingHorizontal: 20,
     paddingTop: 25,
   },

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-nati
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DemoProfile } from '../data/demoProfiles';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -32,6 +33,7 @@ export default function CleanSwipeCard({
   onDislike,
   onSuperLike,
 }: CleanSwipeCardProps) {
+  const insets = useSafeAreaInsets();
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   const translateX = useSharedValue(0);
@@ -239,7 +241,7 @@ export default function CleanSwipeCard({
       </GestureDetector>
 
       {/* Action buttons */}
-      <View style={styles.actionBar}>
+      <View style={[styles.actionBar, { bottom: insets.bottom + 30 }]}>
         <TouchableOpacity style={[styles.actionButton, styles.rewindButton]}>
           <Ionicons name="refresh" size={28} color="#FDB901" />
         </TouchableOpacity>
@@ -270,7 +272,6 @@ export default function CleanSwipeCard({
 const styles = StyleSheet.create({
   actionBar: {
     alignItems: 'center',
-    bottom: 30,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     left: 0,
@@ -390,6 +391,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 60,
     transform: [{ rotate: '-20deg' }],
+    zIndex: 20,
   },
   likeText: {
     color: 'white',
@@ -448,6 +450,7 @@ const styles = StyleSheet.create({
     right: 20,
     top: 60,
     transform: [{ rotate: '20deg' }],
+    zIndex: 20,
   },
   nopeText: {
     color: 'white',
@@ -466,7 +469,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     position: 'absolute',
     right: 0,
-    top: 10,
+    top: 20,
+    zIndex: 10,
   },
   rewindButton: {
     height: 44,

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../constants/theme';
 import { useAuthStore } from '../stores/useAuthStore';
 import useUserStore from '../stores/useUserStore';
@@ -18,6 +19,7 @@ import { LogoutButton } from '../components/LogoutButton';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
   const { currentUser, updateOnboardingData } = useUserStore();
 
@@ -78,7 +80,10 @@ export default function SettingsScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+      >
         {/* Account Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>

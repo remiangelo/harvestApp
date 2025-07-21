@@ -423,8 +423,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 12,
     position: 'absolute',
-    right: 4,
-    top: 4,
+    right: 8,
+    top: 8,
   },
   saveButton: {
     color: theme.colors.primary,

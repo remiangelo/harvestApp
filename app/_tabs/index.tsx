@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CleanSwipeCard from '../../components/CleanSwipeCard';
 import { betterDemoProfiles as demoProfiles } from '../../data/betterDemoProfiles';
 import { DemoProfile } from '../../data/demoProfiles';
@@ -15,6 +16,7 @@ import { ErrorBoundary } from '../../components/ErrorBoundary';
 
 export default function SwipingScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { currentUser } = useUserStore();
   const { user, isTestMode } = useAuthStore();
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
@@ -161,7 +163,7 @@ export default function SwipingScreen() {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
           <Text style={styles.logo}>Harvest</Text>
           <TouchableOpacity
             style={styles.filterButton}
@@ -181,7 +183,7 @@ export default function SwipingScreen() {
   if (!currentProfile) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
           <Text style={styles.logo}>Harvest</Text>
           <TouchableOpacity
             style={styles.filterButton}
@@ -259,7 +261,6 @@ const styles = StyleSheet.create({
     left: 0,
     paddingBottom: 20,
     paddingHorizontal: 24,
-    paddingTop: 60,
     position: 'absolute',
     right: 0,
     top: 0,

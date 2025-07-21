@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOnboarding } from '../hooks/useOnboarding';
 
 interface OnboardingStepData {
@@ -41,6 +42,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   buttonText = 'Continue',
   buttonDisabled = false,
 }) => {
+  const insets = useSafeAreaInsets();
   const { goToNextStep, isSaving } = useOnboarding();
 
   const handleContinue = async () => {
@@ -52,7 +54,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top + 40 }]}>
         <View style={styles.progressBarContainer}>
           <View style={[styles.progressBar, { width: `${progress}%` }]} />
         </View>
@@ -100,7 +102,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingBottom: 32,
     paddingHorizontal: 24,
-    paddingTop: 80,
   },
   progressBar: {
     backgroundColor: '#8B1E2D',

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from './liquid/LiquidGlassView';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -31,10 +32,12 @@ export const MatchModal: React.FC<MatchModalProps> = ({
   matchProfile,
   compatibility,
 }) => {
+  const insets = useSafeAreaInsets();
+  
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <BlurView intensity={30} tint="dark" style={styles.backdrop}>
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
           {/* Profile Cards */}
           <View style={styles.cardsContainer}>
             <View style={styles.cardWrapper}>

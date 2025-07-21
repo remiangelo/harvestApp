@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     flex: 1,
-    marginTop: 10,
+    marginTop: 20,
     paddingHorizontal: 20,
     paddingTop: 25,
   },

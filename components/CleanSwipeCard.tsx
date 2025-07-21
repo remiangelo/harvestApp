@@ -241,7 +241,7 @@ export default function CleanSwipeCard({
       </GestureDetector>
 
       {/* Action buttons */}
-      <View style={[styles.actionBar, { bottom: insets.bottom + 30 }]}>
+      <View style={[styles.actionBar, { bottom: insets.bottom > 0 ? insets.bottom + 20 : 30 }]}>
         <TouchableOpacity style={[styles.actionButton, styles.rewindButton]}>
           <Ionicons name="refresh" size={28} color="#FDB901" />
         </TouchableOpacity>

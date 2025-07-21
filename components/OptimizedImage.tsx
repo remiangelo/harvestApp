@@ -71,9 +71,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         ...imageSource,
         uri,
         cache: 'force-cache',
-        headers: {
-          'Cache-Control': 'max-age=31536000',
-        },
       } as ImageURISource;
     }
 

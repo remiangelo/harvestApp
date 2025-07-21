@@ -50,7 +50,7 @@ export default function TabLayout() {
           name="index"
           options={{
             title: 'Discover',
-            tabBarIcon: ({ color }) => <TabBarIcon name="copy" color={color} />,
+            tabBarIcon: ({ color }) => <TabBarIcon name="compass" color={color} />,
             headerShown: false,
           }}
         />

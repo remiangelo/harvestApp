@@ -35,7 +35,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
   const insets = useSafeAreaInsets();
   
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} presentationStyle="overFullScreen">
       <BlurView intensity={30} tint="dark" style={styles.backdrop}>
         <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
           {/* Profile Cards */}
@@ -127,8 +127,12 @@ export const MatchModal: React.FC<MatchModalProps> = ({
 const styles = StyleSheet.create({
   backdrop: {
     alignItems: 'center',
-    flex: 1,
     justifyContent: 'center',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   card: {
     backgroundColor: 'white',

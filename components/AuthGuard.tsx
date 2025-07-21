@@ -59,7 +59,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
     // In test mode, always go to the start of onboarding
     if (isTestMode) {
-      router.replace('/onboarding');
+      setTimeout(() => router.replace('/onboarding'), 0);
       return;
     }
 
@@ -90,15 +90,17 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       }
 
       // Navigate to the appropriate step
-      if (currentStep === 'complete') {
-        router.replace('/onboarding/complete' as any);
-      } else {
-        router.replace(`/onboarding/${currentStep}` as any);
-      }
+      setTimeout(() => {
+        if (currentStep === 'complete') {
+          router.replace('/onboarding/complete' as any);
+        } else {
+          router.replace(`/onboarding/${currentStep}` as any);
+        }
+      }, 0);
     } catch (error) {
       console.error('Error checking onboarding progress:', error);
       // Fallback to start of onboarding
-      router.replace('/onboarding');
+      setTimeout(() => router.replace('/onboarding'), 0);
     } finally {
       setCheckingProgress(false);
     }

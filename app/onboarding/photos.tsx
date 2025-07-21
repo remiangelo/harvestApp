@@ -28,11 +28,6 @@ export default function OnboardingPhotos() {
   }, [onboardingData]);
 
   const handlePhotoSelected = async (uri: string, index: number) => {
-    if (!user) {
-      Alert.alert('Error', 'Please log in to upload photos');
-      return;
-    }
-
     // Update local state immediately
     const newPhotos = [...photos];
     const oldPhoto = newPhotos[index];
@@ -40,13 +35,13 @@ export default function OnboardingPhotos() {
     setPhotos(newPhotos);
 
     // In test mode, just save the local URI
-    if (isTestMode) {
-      // No upload needed in test mode, photos stay local
+    if (isTestMode || !user) {
+      // No upload needed in test mode or when no user, photos stay local
       return;
     }
 
     // Mark as uploading
-    setUploadingIndexes(prev => new Set(prev).add(index));
+    setUploadingIndexes((prev) => new Set(prev).add(index));
 
     try {
       // Delete old photo if it exists and is a cloud URL
@@ -55,35 +50,35 @@ export default function OnboardingPhotos() {
       }
 
       // Upload new photo to Supabase Storage
-      const userId = user?.id || currentUser?.id;
-      if (!userId) {
-        throw new Error('No user ID available for upload');
+      const userId = user?.id || (currentUser as any)?.id || 'test-user';
+      if (!userId || userId === 'test-user') {
+        // Skip upload in test mode
+        console.log('Skipping upload in test mode');
+        throw new Error('Test mode - keeping local photos');
       }
-      
+
       const { url, error } = await uploadPhoto(userId, uri, index);
-      
+
       if (error || !url) {
         throw error || new Error('Failed to upload photo');
       }
 
       // Update with cloud URL
-      setPhotos(prev => {
+      setPhotos((prev) => {
         const updated = [...prev];
         updated[index] = url;
         return updated;
       });
     } catch (error) {
       console.error('Photo upload error:', error);
-      Alert.alert(
-        'Upload Failed', 
-        'Failed to upload photo. It will be saved when you continue.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Upload Failed', 'Failed to upload photo. It will be saved when you continue.', [
+        { text: 'OK' },
+      ]);
       // Keep the local URI - it will be uploaded when saving the step
-      setFailedUploads(prev => new Set(prev).add(index));
+      setFailedUploads((prev) => new Set(prev).add(index));
     } finally {
       // Remove from uploading set
-      setUploadingIndexes(prev => {
+      setUploadingIndexes((prev) => {
         const next = new Set(prev);
         next.delete(index);
         return next;
@@ -92,7 +87,7 @@ export default function OnboardingPhotos() {
   };
 
   const handleValidate = () => {
-    const validPhotos = photos.filter(photo => photo !== null) as string[];
+    const validPhotos = photos.filter((photo) => photo !== null) as string[];
     if (validPhotos.length > 0) {
       return { photos: validPhotos };
     }
@@ -100,7 +95,7 @@ export default function OnboardingPhotos() {
   };
 
   const isAnyUploading = uploadingIndexes.size > 0;
-  const hasPhotos = photos.some(p => p !== null);
+  const hasPhotos = photos.some((p) => p !== null);
 
   return (
     <OnboardingScreen
@@ -110,9 +105,15 @@ export default function OnboardingPhotos() {
       onValidate={handleValidate}
       buttonDisabled={!hasPhotos || isAnyUploading}
     >
-      <KeyboardAvoidingView style={{ flex: 1, width: '100%' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView
+        style={{ flex: 1, width: '100%' }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <Text style={styles.title}>Show your Best Self</Text>
-        <Text style={styles.subtitle}>Upload up to six of your best photos to make a fantastic first impression. Let your personality shine.</Text>
+        <Text style={styles.subtitle}>
+          Upload up to six of your best photos to make a fantastic first impression. Let your
+          personality shine.
+        </Text>
         <View style={styles.grid}>
           {photos.map((photo, idx) => (
             <PhotoUploadSlot
@@ -126,14 +127,13 @@ export default function OnboardingPhotos() {
         </View>
 
         {isAnyUploading && (
-          <Text style={styles.uploadingMessage}>
-            Uploading photos... Please wait
-          </Text>
+          <Text style={styles.uploadingMessage}>Uploading photos... Please wait</Text>
         )}
-        
+
         {failedUploads.size > 0 && (
           <Text style={styles.errorMessage}>
-            {failedUploads.size} photo{failedUploads.size > 1 ? 's' : ''} failed to upload. They will be saved when you continue.
+            {failedUploads.size} photo{failedUploads.size > 1 ? 's' : ''} failed to upload. They
+            will be saved when you continue.
           </Text>
         )}
       </KeyboardAvoidingView>
@@ -142,40 +142,40 @@ export default function OnboardingPhotos() {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#222',
+  errorMessage: {
+    color: '#FF6B6B',
+    fontSize: 14,
+    marginBottom: 16,
+    marginTop: -16,
     textAlign: 'center',
-    fontFamily: 'System',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 32,
-    textAlign: 'center',
-    fontFamily: 'System',
   },
   grid: {
-    width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 32,
+    width: '100%',
+  },
+  subtitle: {
+    color: '#555',
+    fontFamily: 'System',
+    fontSize: 16,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  title: {
+    color: '#222',
+    fontFamily: 'System',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   uploadingMessage: {
-    textAlign: 'center',
     color: '#8B1E2D',
     fontSize: 14,
-    marginTop: -16,
     marginBottom: 16,
-  },
-  errorMessage: {
+    marginTop: -16,
     textAlign: 'center',
-    color: '#FF6B6B',
-    fontSize: 14,
-    marginTop: -16,
-    marginBottom: 16,
   },
-}); 
+});

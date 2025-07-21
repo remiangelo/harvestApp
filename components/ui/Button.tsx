@@ -72,13 +72,9 @@ export const Button: React.FC<ButtonProps> = ({
           />
         ) : (
           <>
-            {icon && iconPosition === 'left' && (
-              <View style={styles.iconLeft}>{icon}</View>
-            )}
+            {icon && iconPosition === 'left' && <View style={styles.iconLeft}>{icon}</View>}
             <Text style={textStyles}>{title}</Text>
-            {icon && iconPosition === 'right' && (
-              <View style={styles.iconRight}>{icon}</View>
-            )}
+            {icon && iconPosition === 'right' && <View style={styles.iconRight}>{icon}</View>}
           </>
         )}
       </View>
@@ -88,125 +84,125 @@ export const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   base: {
+    alignItems: 'center',
     borderRadius: theme.borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
     flexDirection: 'row',
+    justifyContent: 'center',
   },
-  
+
   content: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'center',
   },
-  
+
   fullWidth: {
     width: '100%',
   },
-  
+
   // Variants
   primary: {
     backgroundColor: theme.colors.primary,
     ...theme.shadows.md,
   },
-  
+
   secondary: {
     backgroundColor: theme.colors.secondary,
     ...theme.shadows.sm,
   },
-  
+
   outline: {
     backgroundColor: 'transparent',
-    borderWidth: 2,
     borderColor: theme.colors.primary,
+    borderWidth: 2,
   },
-  
+
   ghost: {
     backgroundColor: 'transparent',
   },
-  
+
   // Sizes
   small: {
+    minHeight: 36,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
-    minHeight: 36,
   },
-  
+
   medium: {
+    minHeight: 48,
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.md,
-    minHeight: 48,
   },
-  
+
   large: {
+    minHeight: 56,
     paddingHorizontal: theme.spacing.xl,
     paddingVertical: theme.spacing.lg,
-    minHeight: 56,
   },
-  
+
   // Text styles
   text: {
     fontWeight: theme.typography.fontWeight.semibold,
   },
-  
+
   primaryText: {
     color: theme.colors.text.inverse,
   },
-  
+
   secondaryText: {
     color: theme.colors.text.primary,
   },
-  
+
   outlineText: {
     color: theme.colors.primary,
   },
-  
+
   ghostText: {
     color: theme.colors.primary,
   },
-  
+
   smallText: {
     fontSize: theme.typography.fontSize.sm,
   },
-  
+
   mediumText: {
     fontSize: theme.typography.fontSize.base,
   },
-  
+
   largeText: {
     fontSize: theme.typography.fontSize.lg,
   },
-  
+
   // Disabled states
   disabled: {
     opacity: 0.6,
   },
-  
+
   primaryDisabled: {
     backgroundColor: theme.colors.primaryLight,
   },
-  
+
   secondaryDisabled: {
     backgroundColor: theme.colors.secondaryLight,
   },
-  
+
   outlineDisabled: {
     borderColor: theme.colors.border,
   },
-  
+
   ghostDisabled: {
     opacity: 0.4,
   },
-  
+
   disabledText: {
     color: theme.colors.text.tertiary,
   },
-  
+
   // Icons
   iconLeft: {
     marginRight: theme.spacing.sm,
   },
-  
+
   iconRight: {
     marginLeft: theme.spacing.sm,
   },

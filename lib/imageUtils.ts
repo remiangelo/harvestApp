@@ -19,5 +19,5 @@ export const processImageForUpload = async (
 export const validateImageFile = (uri: string): boolean => {
   const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
   const lowerUri = uri.toLowerCase();
-  return validExtensions.some(ext => lowerUri.includes(ext));
+  return validExtensions.some((ext) => lowerUri.includes(ext));
 };

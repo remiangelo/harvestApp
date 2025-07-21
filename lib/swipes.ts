@@ -33,9 +33,9 @@ export const saveSwipe = async (
     if (swipeError) {
       // Handle duplicate swipe error gracefully
       if (swipeError.code === '23505') {
-        return { 
-          success: false, 
-          error: 'You have already swiped on this profile' 
+        return {
+          success: false,
+          error: 'You have already swiped on this profile',
         };
       }
       throw swipeError;
@@ -73,7 +73,8 @@ export const getSwipeHistory = async (userId: string) => {
   try {
     const { data, error } = await supabase
       .from('swipes')
-      .select(`
+      .select(
+        `
         id,
         swiped_id,
         action,
@@ -84,7 +85,8 @@ export const getSwipeHistory = async (userId: string) => {
           age,
           photos
         )
-      `)
+      `
+      )
       .eq('swiper_id', userId)
       .order('created_at', { ascending: false });
 
@@ -99,10 +101,7 @@ export const getSwipeHistory = async (userId: string) => {
 /**
  * Check if user has already swiped on another user
  */
-export const hasUserSwiped = async (
-  swiperId: string,
-  swipedId: string
-): Promise<boolean> => {
+export const hasUserSwiped = async (swiperId: string, swipedId: string): Promise<boolean> => {
   try {
     const { data, error } = await supabase
       .from('swipes')
@@ -128,10 +127,7 @@ export const hasUserSwiped = async (
  */
 export const getSwipeStats = async (userId: string) => {
   try {
-    const { data, error } = await supabase
-      .from('swipes')
-      .select('action')
-      .eq('swiper_id', userId);
+    const { data, error } = await supabase.from('swipes').select('action').eq('swiper_id', userId);
 
     if (error) throw error;
 

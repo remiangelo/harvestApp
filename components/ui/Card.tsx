@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  ViewStyle,
-  TouchableOpacity,
-} from 'react-native';
+import { View, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
 import { theme } from '../../constants/theme';
 
 interface CardProps {
@@ -34,73 +29,65 @@ export const Card: React.FC<CardProps> = ({
 
   if (onPress) {
     return (
-      <TouchableOpacity
-        style={cardStyles}
-        onPress={onPress}
-        activeOpacity={0.8}
-      >
+      <TouchableOpacity style={cardStyles} onPress={onPress} activeOpacity={0.8}>
         {children}
       </TouchableOpacity>
     );
   }
 
-  return (
-    <View style={cardStyles}>
-      {children}
-    </View>
-  );
+  return <View style={cardStyles}>{children}</View>;
 };
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: theme.borderRadius.lg,
     backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.lg,
   },
-  
+
   // Variants
   elevated: {
     ...theme.shadows.md,
   },
-  
+
   outlined: {
-    borderWidth: 1,
     borderColor: theme.colors.border,
+    borderWidth: 1,
   },
-  
+
   filled: {
     backgroundColor: theme.colors.secondaryLight,
   },
-  
+
   // Padding
   padding_none: {
     padding: 0,
   },
-  
+
   padding_small: {
     padding: theme.spacing.sm,
   },
-  
+
   padding_medium: {
     padding: theme.spacing.md,
   },
-  
+
   padding_large: {
     padding: theme.spacing.lg,
   },
-  
+
   // Margin
   margin_none: {
     margin: 0,
   },
-  
+
   margin_small: {
     margin: theme.spacing.sm,
   },
-  
+
   margin_medium: {
     margin: theme.spacing.md,
   },
-  
+
   margin_large: {
     margin: theme.spacing.lg,
   },

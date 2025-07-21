@@ -74,17 +74,17 @@ export const Chip: React.FC<ChipProps> = ({
 };
 
 const styles = StyleSheet.create({
+  closeButton: {
+    marginLeft: 4,
+  },
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: 16,
+    flexDirection: 'row',
+    marginBottom: 8,
+    marginRight: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  selected: {
-    ...theme.shadows.sm,
   },
   icon: {
     marginRight: 4,
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  closeButton: {
-    marginLeft: 4,
+  selected: {
+    ...theme.shadows.sm,
   },
 });

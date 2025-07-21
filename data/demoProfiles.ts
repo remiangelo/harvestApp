@@ -20,13 +20,13 @@ export const demoProfiles: DemoProfile[] = [
     photos: [
       'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
       'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Hiking', 'Photography', 'Coffee', 'Travel', 'Cooking'],
     location: 'San Francisco, CA',
     gender: 'Woman',
     sexualIdentity: 'Straight',
-    relationshipGoals: ['Long-term relationship', 'Friendship']
+    relationshipGoals: ['Long-term relationship', 'Friendship'],
   },
   {
     id: '2',
@@ -36,13 +36,13 @@ export const demoProfiles: DemoProfile[] = [
     photos: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
       'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Coding', 'Guitar', 'Craft Beer', 'Board Games', 'Hiking'],
     location: 'Austin, TX',
     gender: 'Man',
     sexualIdentity: 'Straight',
-    relationshipGoals: ['Long-term relationship', 'Casual dating']
+    relationshipGoals: ['Long-term relationship', 'Casual dating'],
   },
   {
     id: '3',
@@ -52,13 +52,13 @@ export const demoProfiles: DemoProfile[] = [
     photos: [
       'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face',
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Yoga', 'Meditation', 'Cooking', 'Nature Walks', 'Reading'],
     location: 'Portland, OR',
     gender: 'Woman',
     sexualIdentity: 'Bisexual',
-    relationshipGoals: ['Long-term relationship', 'Friendship']
+    relationshipGoals: ['Long-term relationship', 'Friendship'],
   },
   {
     id: '4',
@@ -68,13 +68,13 @@ export const demoProfiles: DemoProfile[] = [
     photos: [
       'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face',
       'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Rock Climbing', 'Sustainability', 'Astronomy', 'Camping', 'Gardening'],
     location: 'Denver, CO',
     gender: 'Non-binary',
     sexualIdentity: 'Pansexual',
-    relationshipGoals: ['Long-term relationship', 'Casual dating']
+    relationshipGoals: ['Long-term relationship', 'Casual dating'],
   },
   {
     id: '5',
@@ -84,13 +84,13 @@ export const demoProfiles: DemoProfile[] = [
     photos: [
       'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face',
       'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Design', 'Vintage Fashion', 'Indie Films', 'Art Galleries', 'Coffee'],
     location: 'Los Angeles, CA',
     gender: 'Woman',
     sexualIdentity: 'Lesbian',
-    relationshipGoals: ['Long-term relationship', 'Friendship']
+    relationshipGoals: ['Long-term relationship', 'Friendship'],
   },
   {
     id: '6',
@@ -100,13 +100,13 @@ export const demoProfiles: DemoProfile[] = [
     photos: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
       'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Cooking', 'Wine Tasting', 'Travel', 'Photography', 'Music'],
     location: 'New York, NY',
     gender: 'Man',
     sexualIdentity: 'Gay',
-    relationshipGoals: ['Long-term relationship', 'Casual dating']
+    relationshipGoals: ['Long-term relationship', 'Casual dating'],
   },
   {
     id: '7',
@@ -116,13 +116,13 @@ export const demoProfiles: DemoProfile[] = [
     photos: [
       'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face',
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Running', 'Reading', 'Volunteering', 'Yoga', 'Travel'],
     location: 'Boston, MA',
     gender: 'Woman',
     sexualIdentity: 'Straight',
-    relationshipGoals: ['Long-term relationship']
+    relationshipGoals: ['Long-term relationship'],
   },
   {
     id: '8',
@@ -132,12 +132,12 @@ export const demoProfiles: DemoProfile[] = [
     photos: [
       'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face',
       'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Football', 'Basketball', 'Investing', 'Game Nights', 'Gym'],
     location: 'Chicago, IL',
     gender: 'Man',
     sexualIdentity: 'Straight',
-    relationshipGoals: ['Long-term relationship', 'Casual dating']
-  }
-]; 
+    relationshipGoals: ['Long-term relationship', 'Casual dating'],
+  },
+];

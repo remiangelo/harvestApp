@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  Switch,
-  Image,
-} from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Switch, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -39,19 +31,10 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
   onUnmatch,
 }) => {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <TouchableOpacity 
-        style={styles.backdrop} 
-        activeOpacity={1} 
-        onPress={onClose}
-      >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose}>
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFillObject} />
-        
+
         <View style={styles.container}>
           <LiquidGlassView
             intensity={90}
@@ -122,92 +105,92 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    width: '85%',
-    maxWidth: 340,
-  },
-  menuContainer: {
-    padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-  },
-  headerInfo: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 4,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ccc',
-    marginRight: 6,
-  },
   activeDot: {
     backgroundColor: '#34C759',
   },
-  statusText: {
-    fontSize: 14,
-    color: '#666',
+  avatar: {
+    borderRadius: 25,
+    height: 50,
+    marginRight: 12,
+    width: 50,
+  },
+  backdrop: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
   },
   closeButton: {
     padding: 8,
   },
-  menuItems: {
-    gap: 5,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 15,
-    paddingHorizontal: 5,
-  },
-  menuIconContainer: {
-    marginRight: 12,
+  container: {
+    maxWidth: 340,
+    width: '85%',
   },
   harvestIcon: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    backgroundColor: '#A0354E',
-    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#A0354E',
+    borderRadius: 8,
+    height: 30,
+    justifyContent: 'center',
+    width: 30,
   },
   harvestIconText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    marginBottom: 20,
+    paddingBottom: 20,
+  },
+  headerInfo: {
+    flex: 1,
+  },
+  menuContainer: {
+    padding: 20,
+  },
+  menuIconContainer: {
+    marginRight: 12,
+  },
+  menuItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
+    paddingVertical: 15,
+  },
   menuItemText: {
-    fontSize: 16,
     color: '#1a1a1a',
     flex: 1,
+    fontSize: 16,
+  },
+  menuItems: {
+    gap: 5,
+  },
+  name: {
+    color: '#1a1a1a',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  statusDot: {
+    backgroundColor: '#ccc',
+    borderRadius: 4,
+    height: 8,
+    marginRight: 6,
+    width: 8,
+  },
+  statusRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  statusText: {
+    color: '#666',
+    fontSize: 14,
   },
   unmatchText: {
     color: '#FF3B30',

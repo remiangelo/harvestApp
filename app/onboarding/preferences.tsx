@@ -3,15 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import useUserStore from '../../stores/useUserStore';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 
-const options = [
-  'Asexual',
-  'Bisexual',
-  'Gay',
-  'Intersex',
-  'Lesbian',
-  'Trans',
-  'Straight',
-];
+const options = ['Asexual', 'Bisexual', 'Gay', 'Intersex', 'Lesbian', 'Trans', 'Straight'];
 
 export default function OnboardingPreferences() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -42,14 +34,16 @@ export default function OnboardingPreferences() {
       <Text style={styles.title}>What is your preference?</Text>
       <Text style={styles.subtitle}>Choose the genders that you wish to meet on Harvest!</Text>
       <ScrollView contentContainerStyle={styles.optionsContainer}>
-        {options.map(option => (
+        {options.map((option) => (
           <TouchableOpacity
             key={option}
             style={[styles.option, selected === option && styles.selectedOption]}
             onPress={() => setSelected(option)}
             activeOpacity={0.8}
           >
-            <Text style={[styles.optionText, selected === option && styles.selectedOptionText]}>{option}</Text>
+            <Text style={[styles.optionText, selected === option && styles.selectedOptionText]}>
+              {option}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -58,35 +52,17 @@ export default function OnboardingPreferences() {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#222',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 32,
-    textAlign: 'center',
-  },
-  optionsContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 32,
-  },
   option: {
-    width: '100%',
-    minWidth: 280,
-    height: 56,
-    borderWidth: 2,
+    alignItems: 'center',
+    backgroundColor: '#fff',
     borderColor: '#8B1E2D',
     borderRadius: 28,
-    alignItems: 'center',
+    borderWidth: 2,
+    elevation: 3,
+    height: 56,
     justifyContent: 'center',
     marginBottom: 16,
-    backgroundColor: '#fff',
+    minWidth: 280,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -94,12 +70,25 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    width: '100%',
+  },
+  optionText: {
+    color: '#8B1E2D',
+    fontFamily: 'System',
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  optionsContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+    width: '100%',
   },
   selectedOption: {
     backgroundColor: '#8B1E2D',
-    borderWidth: 2,
     borderColor: '#8B1E2D',
+    borderWidth: 2,
+    elevation: 6,
     shadowColor: '#8B1E2D',
     shadowOffset: {
       width: 0,
@@ -107,18 +96,23 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 6,
-  },
-  optionText: {
-    color: '#8B1E2D',
-    fontSize: 18,
-    fontWeight: '600',
-    fontFamily: 'System',
-    letterSpacing: 0.5,
   },
   selectedOptionText: {
-    fontWeight: 'bold',
     color: '#fff',
+    fontWeight: 'bold',
     letterSpacing: 0.5,
   },
-}); 
+  subtitle: {
+    color: '#555',
+    fontSize: 16,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  title: {
+    color: '#222',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+});

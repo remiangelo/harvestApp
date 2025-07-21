@@ -4,7 +4,49 @@ import useUserStore from '../../stores/useUserStore';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 const ALL_HOBBIES = [
-  'Art', 'Board Games', 'Cooking', 'Dancing', 'Fitness', 'Gaming', 'Hiking', 'Motorcycling', 'Movies', 'Music', 'Pets', 'Photography', 'Reading', 'Sports', 'Singing', 'Technology', 'Tourism', 'Writing', 'Coffee', 'Travel', 'Coding', 'Guitar', 'Craft Beer', 'Yoga', 'Meditation', 'Nature Walks', 'Design', 'Vintage Fashion', 'Indie Films', 'Art Galleries', 'Wine Tasting', 'Running', 'Volunteering', 'Football', 'Basketball', 'Investing', 'Game Nights', 'Gym', 'Rock Climbing', 'Sustainability', 'Astronomy', 'Camping', 'Gardening',
+  'Art',
+  'Board Games',
+  'Cooking',
+  'Dancing',
+  'Fitness',
+  'Gaming',
+  'Hiking',
+  'Motorcycling',
+  'Movies',
+  'Music',
+  'Pets',
+  'Photography',
+  'Reading',
+  'Sports',
+  'Singing',
+  'Technology',
+  'Tourism',
+  'Writing',
+  'Coffee',
+  'Travel',
+  'Coding',
+  'Guitar',
+  'Craft Beer',
+  'Yoga',
+  'Meditation',
+  'Nature Walks',
+  'Design',
+  'Vintage Fashion',
+  'Indie Films',
+  'Art Galleries',
+  'Wine Tasting',
+  'Running',
+  'Volunteering',
+  'Football',
+  'Basketball',
+  'Investing',
+  'Game Nights',
+  'Gym',
+  'Rock Climbing',
+  'Sustainability',
+  'Astronomy',
+  'Camping',
+  'Gardening',
 ];
 
 export default function OnboardingHobbies() {
@@ -19,13 +61,13 @@ export default function OnboardingHobbies() {
     }
   }, [onboardingData]);
 
-  const filteredHobbies = ALL_HOBBIES.filter(hobby =>
+  const filteredHobbies = ALL_HOBBIES.filter((hobby) =>
     hobby.toLowerCase().includes(search.toLowerCase())
   );
 
   const toggleHobby = (hobby: string) => {
     if (selected.includes(hobby)) {
-      setSelected(selected.filter(h => h !== hobby));
+      setSelected(selected.filter((h) => h !== hobby));
     } else if (selected.length < 6) {
       setSelected([...selected, hobby]);
     }
@@ -47,7 +89,10 @@ export default function OnboardingHobbies() {
       buttonDisabled={selected.length === 0}
     >
       <Text style={styles.title}>Share your Hobbies</Text>
-      <Text style={styles.subtitle}>Share your interests, passions, and hobbies. We’ll connect you with people who share your enthusiasm.</Text>
+      <Text style={styles.subtitle}>
+        Share your interests, passions, and hobbies. We’ll connect you with people who share your
+        enthusiasm.
+      </Text>
       <TextInput
         style={styles.search}
         placeholder="Search interest"
@@ -55,16 +100,20 @@ export default function OnboardingHobbies() {
         value={search}
         onChangeText={setSearch}
       />
-      <Text style={styles.selectedCount}>Select up to 6 hobbies   {selected.length} out of 6 selected</Text>
+      <Text style={styles.selectedCount}>
+        Select up to 6 hobbies {selected.length} out of 6 selected
+      </Text>
       <ScrollView contentContainerStyle={styles.hobbiesContainer}>
-        {filteredHobbies.map(hobby => (
+        {filteredHobbies.map((hobby) => (
           <TouchableOpacity
             key={hobby}
             style={[styles.hobby, selected.includes(hobby) && styles.selectedHobby]}
             onPress={() => toggleHobby(hobby)}
             disabled={!selected.includes(hobby) && selected.length >= 6}
           >
-            <Text style={[styles.hobbyText, selected.includes(hobby) && styles.selectedHobbyText]}>{hobby}</Text>
+            <Text style={[styles.hobbyText, selected.includes(hobby) && styles.selectedHobbyText]}>
+              {hobby}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -73,67 +122,67 @@ export default function OnboardingHobbies() {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#222',
-    textAlign: 'center',
-    fontFamily: 'System',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 16,
-    textAlign: 'center',
-    fontFamily: 'System',
-  },
-  search: {
-    width: '100%',
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    marginBottom: 8,
-    backgroundColor: '#fafafa',
-    fontFamily: 'System',
-  },
-  selectedCount: {
-    fontSize: 14,
-    color: '#8B1E2D',
-    marginBottom: 8,
-    alignSelf: 'flex-start',
-    fontFamily: 'System',
-  },
   hobbiesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
-    width: '100%',
     marginBottom: 32,
+    width: '100%',
   },
   hobby: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
+    backgroundColor: '#fff',
+    borderColor: '#8B1E2D',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#8B1E2D',
-    backgroundColor: '#fff',
     margin: 4,
+    marginBottom: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+  },
+  hobbyText: {
+    color: '#8B1E2D',
+    fontFamily: 'System',
+    fontSize: 16,
+  },
+  search: {
+    backgroundColor: '#fafafa',
+    borderColor: '#ccc',
+    borderRadius: 20,
+    borderWidth: 1,
+    fontFamily: 'System',
+    fontSize: 16,
+    height: 40,
+    marginBottom: 8,
+    paddingHorizontal: 16,
+    width: '100%',
+  },
+  selectedCount: {
+    alignSelf: 'flex-start',
+    color: '#8B1E2D',
+    fontFamily: 'System',
+    fontSize: 14,
     marginBottom: 8,
   },
   selectedHobby: {
     backgroundColor: '#8B1E2D',
   },
-  hobbyText: {
-    color: '#8B1E2D',
-    fontSize: 16,
-    fontFamily: 'System',
-  },
   selectedHobbyText: {
     color: '#fff',
     fontWeight: 'bold',
   },
-}); 
+  subtitle: {
+    color: '#555',
+    fontFamily: 'System',
+    fontSize: 16,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  title: {
+    color: '#222',
+    fontFamily: 'System',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+});

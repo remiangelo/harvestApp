@@ -13,10 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { DemoProfile } from '../data/demoProfiles';
-import {
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -43,7 +40,15 @@ interface MockupSwipeCardProps {
 }
 
 // Circular progress component matching the mockup exactly
-const CircularProgress = ({ percentage, color, label }: { percentage: number; color: string; label: string }) => {
+const CircularProgress = ({
+  percentage,
+  color,
+  label,
+}: {
+  percentage: number;
+  color: string;
+  label: string;
+}) => {
   const radius = 25;
   const strokeWidth = 3;
   const circumference = 2 * Math.PI * radius;
@@ -90,12 +95,12 @@ export default function MockupSwipeCard({
   onSuperLike,
 }: MockupSwipeCardProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  
+
   // Safety check for profile and photos
   if (!profile || !profile.photos || profile.photos.length === 0) {
     return null;
   }
-  
+
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -107,7 +112,7 @@ export default function MockupSwipeCard({
     personality: 98,
     match: 96,
   };
-  
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -142,13 +147,13 @@ export default function MockupSwipeCard({
   const handleSwipeComplete = (direction: 'left' | 'right' | 'up') => {
     'worklet';
     runOnJS(triggerHaptic)();
-    
+
     // Reset animation values
     translateX.value = 0;
     translateY.value = 0;
     scale.value = 1;
     opacity.value = 1;
-    
+
     if (direction === 'left') {
       runOnJS(onDislike)();
     } else if (direction === 'right') {
@@ -162,21 +167,17 @@ export default function MockupSwipeCard({
     .onUpdate((event) => {
       translateX.value = event.translationX;
       translateY.value = event.translationY;
-      
-      const dragDistance = Math.sqrt(
-        event.translationX ** 2 + event.translationY ** 2
-      );
-      scale.value = interpolate(
-        dragDistance,
-        [0, 200],
-        [1, 0.95],
-        Extrapolation.CLAMP
-      );
+
+      const dragDistance = Math.sqrt(event.translationX ** 2 + event.translationY ** 2);
+      scale.value = interpolate(dragDistance, [0, 200], [1, 0.95], Extrapolation.CLAMP);
     })
     .onEnd((event) => {
-      const shouldSwipeLeft = event.translationX < -SWIPE_THRESHOLD || event.velocityX < -SWIPE_VELOCITY;
-      const shouldSwipeRight = event.translationX > SWIPE_THRESHOLD || event.velocityX > SWIPE_VELOCITY;
-      const shouldSwipeUp = event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD;
+      const shouldSwipeLeft =
+        event.translationX < -SWIPE_THRESHOLD || event.velocityX < -SWIPE_VELOCITY;
+      const shouldSwipeRight =
+        event.translationX > SWIPE_THRESHOLD || event.velocityX > SWIPE_VELOCITY;
+      const shouldSwipeUp =
+        event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD;
 
       if (shouldSwipeLeft) {
         translateX.value = withTiming(-screenWidth * 1.5, { duration: 300 });
@@ -219,21 +220,11 @@ export default function MockupSwipeCard({
   });
 
   const likeOpacityStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      translateX.value,
-      [0, screenWidth / 4],
-      [0, 1],
-      Extrapolation.CLAMP
-    ),
+    opacity: interpolate(translateX.value, [0, screenWidth / 4], [0, 1], Extrapolation.CLAMP),
   }));
 
   const nopeOpacityStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      translateX.value,
-      [-screenWidth / 4, 0],
-      [1, 0],
-      Extrapolation.CLAMP
-    ),
+    opacity: interpolate(translateX.value, [-screenWidth / 4, 0], [1, 0], Extrapolation.CLAMP),
   }));
 
   return (
@@ -259,7 +250,7 @@ export default function MockupSwipeCard({
           <Animated.View style={[styles.likeIndicator, likeOpacityStyle]}>
             <Text style={styles.likeText}>LIKE</Text>
           </Animated.View>
-          
+
           <Animated.View style={[styles.nopeIndicator, nopeOpacityStyle]}>
             <Text style={styles.nopeText}>NOPE</Text>
           </Animated.View>
@@ -277,7 +268,11 @@ export default function MockupSwipeCard({
             {/* Compatibility meters */}
             <View style={styles.metersRow}>
               <CircularProgress percentage={scores.interests} color="#4ECDC4" label="Interests" />
-              <CircularProgress percentage={scores.personality} color="#FFE66D" label="Personality" />
+              <CircularProgress
+                percentage={scores.personality}
+                color="#FFE66D"
+                label="Personality"
+              />
               <CircularProgress percentage={scores.match} color="#95E1D3" label="Match" />
             </View>
 
@@ -292,7 +287,8 @@ export default function MockupSwipeCard({
 
             {/* Bio */}
             <Text style={styles.bio} numberOfLines={3}>
-              {profile.bio || "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eu fermentum lorem, vitae gravida sapien. In sed risus nibh. Integer vulputate imperdiet arcu."}
+              {profile.bio ||
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eu fermentum lorem, vitae gravida sapien. In sed risus nibh. Integer vulputate imperdiet arcu.'}
             </Text>
 
             {/* Action buttons */}
@@ -321,38 +317,82 @@ export default function MockupSwipeCard({
 }
 
 const styles = StyleSheet.create({
+  actionButton: {
+    padding: 5,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 30,
+    justifyContent: 'center',
+  },
+  age: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  ageContainer: {
+    backgroundColor: '#A0354E',
+    borderRadius: 15,
+    marginLeft: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  bio: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 20,
+    opacity: 0.9,
+  },
+  card: {
+    backgroundColor: 'transparent',
+    borderRadius: 0,
+    height: CARD_HEIGHT,
+    overflow: 'hidden',
+    width: CARD_WIDTH,
+  },
   container: {
-    flex: 1,
     alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
   },
   gradientBackground: {
-    position: 'absolute',
+    bottom: 0,
     left: 0,
+    position: 'absolute',
     right: 0,
     top: 0,
+  },
+  iconCircle: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 25,
+    borderWidth: 1,
+    height: 50,
+    justifyContent: 'center',
+    width: 50,
+  },
+  infoSection: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
     bottom: 0,
-  },
-  card: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    borderRadius: 0,
-    overflow: 'hidden',
-    backgroundColor: 'transparent',
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
+    left: 0,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    paddingTop: 25,
     position: 'absolute',
+    right: 0,
   },
   likeIndicator: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
     backgroundColor: 'rgba(76, 217, 100, 0.9)',
+    borderRadius: 20,
+    left: 20,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 20,
+    position: 'absolute',
+    top: 50,
     transform: [{ rotate: '-20deg' }],
   },
   likeText: {
@@ -360,14 +400,29 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
   },
+  metersRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  name: {
+    color: '#FFFFFF',
+    fontSize: 36,
+    fontWeight: '800',
+  },
+  nameRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 15,
+  },
   nopeIndicator: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
     backgroundColor: 'rgba(255, 59, 48, 0.9)',
+    borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 20,
+    position: 'absolute',
+    right: 20,
+    top: 50,
     transform: [{ rotate: '20deg' }],
   },
   nopeText: {
@@ -375,109 +430,50 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
   },
-  infoSection: {
+  photo: {
+    height: '100%',
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 25,
-    paddingBottom: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  name: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  ageContainer: {
-    backgroundColor: '#A0354E',
-    borderRadius: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    marginLeft: 10,
-  },
-  age: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  metersRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 15,
+    width: '100%',
   },
   progressContainer: {
     alignItems: 'center',
     position: 'relative',
   },
-  progressTextContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  progressPercentage: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
   progressLabel: {
-    fontSize: 11,
     color: '#FFFFFF',
+    fontSize: 11,
     marginTop: -2,
     opacity: 0.8,
   },
-  tagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 12,
-    gap: 8,
+  progressPercentage: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  progressTextContainer: {
+    alignItems: 'center',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   tag: {
     backgroundColor: '#A0354E',
+    borderRadius: 15,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 15,
   },
   tagText: {
     color: 'white',
     fontSize: 12,
     fontWeight: '500',
   },
-  bio: {
-    fontSize: 15,
-    color: '#FFFFFF',
-    lineHeight: 22,
-    marginBottom: 20,
-    opacity: 0.9,
-  },
-  actionButtons: {
+  tagsRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 30,
-  },
-  actionButton: {
-    padding: 5,
-  },
-  iconCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
   },
 });

@@ -46,17 +46,11 @@ export const Avatar: React.FC<AvatarProps> = ({
     }
 
     if (initials) {
-      return (
-        <Text style={[styles.initials, { fontSize: avatarSize * 0.4 }]}>{initials}</Text>
-      );
+      return <Text style={[styles.initials, { fontSize: avatarSize * 0.4 }]}>{initials}</Text>;
     }
 
     return (
-      <Ionicons
-        name={fallbackIcon}
-        size={avatarSize * 0.5}
-        color={theme.colors.text.inverse}
-      />
+      <Ionicons name={fallbackIcon} size={avatarSize * 0.5} color={theme.colors.text.inverse} />
     );
   };
 
@@ -91,26 +85,26 @@ export const Avatar: React.FC<AvatarProps> = ({
 };
 
 const styles = StyleSheet.create({
+  badge: {
+    borderColor: theme.colors.background,
+    borderWidth: 3,
+    bottom: 0,
+    position: 'absolute',
+    right: 0,
+  },
   container: {
+    alignItems: 'center',
     backgroundColor: theme.colors.primary,
     justifyContent: 'center',
-    alignItems: 'center',
     overflow: 'hidden',
     ...theme.shadows.sm,
   },
   image: {
-    width: '100%',
     height: '100%',
+    width: '100%',
   },
   initials: {
     color: theme.colors.text.inverse,
     fontWeight: theme.typography.fontWeight.bold,
-  },
-  badge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    borderWidth: 3,
-    borderColor: theme.colors.background,
   },
 });

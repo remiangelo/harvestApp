@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  Dimensions,
-  Image,
-} from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LiquidGlassView } from './liquid/LiquidGlassView';
@@ -40,12 +32,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
   compatibility,
 }) => {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <BlurView intensity={30} tint="dark" style={styles.backdrop}>
         <View style={styles.container}>
           {/* Profile Cards */}
@@ -58,7 +45,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
                 <Text style={styles.heartEmoji}>❤️</Text>
               </View>
             </View>
-            
+
             <View style={[styles.card, styles.rightCard]}>
               <Image source={{ uri: matchProfile.photo }} style={styles.photo} />
               <View style={[styles.heartBadge, styles.rightHeartBadge]}>
@@ -73,9 +60,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
             We think you're a great match! Our algorithm{'\n'}
             has given you {compatibility.overall}% compatibility.
           </Text>
-          <Text style={styles.matchHint}>
-            Try asking them about their love for travel
-          </Text>
+          <Text style={styles.matchHint}>Try asking them about their love for travel</Text>
 
           {/* Compatibility Metrics with Liquid Glass */}
           <View style={styles.metricsContainer}>
@@ -138,28 +123,16 @@ export const MatchModal: React.FC<MatchModalProps> = ({
 
 const styles = StyleSheet.create({
   backdrop: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    alignItems: 'center',
-    padding: 20,
-  },
-  cardsContainer: {
-    flexDirection: 'row',
-    marginBottom: 30,
-    height: 200,
-    width: 280,
-  },
-  cardWrapper: {
-    position: 'relative',
   },
   card: {
-    width: 140,
-    height: 180,
-    borderRadius: 16,
     backgroundColor: 'white',
+    borderRadius: 16,
+    elevation: 5,
+    height: 180,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -167,31 +140,31 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 5,
-    overflow: 'hidden',
+    width: 140,
   },
-  leftCard: {
-    transform: [{ rotate: '-10deg' }],
-    zIndex: 1,
+  cardWrapper: {
+    position: 'relative',
   },
-  rightCard: {
-    transform: [{ rotate: '10deg' }],
-    marginLeft: -40,
+  cardsContainer: {
+    flexDirection: 'row',
+    height: 200,
+    marginBottom: 30,
+    width: 280,
   },
-  photo: {
-    width: '100%',
-    height: '100%',
+  container: {
+    alignItems: 'center',
+    padding: 20,
   },
   heartBadge: {
-    position: 'absolute',
-    bottom: -10,
-    right: -10,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'white',
-    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    bottom: -10,
+    elevation: 3,
+    height: 40,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: -10,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -199,76 +172,80 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
-  },
-  rightHeartBadge: {
-    right: 10,
-    bottom: -10,
+    width: 40,
   },
   heartEmoji: {
     fontSize: 24,
   },
-  matchTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#A0354E',
-    marginBottom: 10,
+  leftCard: {
+    transform: [{ rotate: '-10deg' }],
+    zIndex: 1,
+  },
+  matchHint: {
+    color: '#999',
+    fontSize: 14,
+    marginBottom: 30,
     textAlign: 'center',
   },
   matchSubtitle: {
-    fontSize: 16,
     color: '#666',
-    textAlign: 'center',
-    marginBottom: 10,
+    fontSize: 16,
     lineHeight: 22,
-  },
-  matchHint: {
-    fontSize: 14,
-    color: '#999',
+    marginBottom: 10,
     textAlign: 'center',
-    marginBottom: 30,
   },
-  metricsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 30,
-  },
-  metricGlass: {
-    width: 90,
-    height: 90,
-    justifyContent: 'center',
-    alignItems: 'center',
+  matchTitle: {
+    color: '#A0354E',
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
   },
   metric: {
     alignItems: 'center',
   },
   metricCircle: {
-    width: 50,
-    height: 50,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 25,
     borderWidth: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    height: 50,
     justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: 6,
+    width: 50,
   },
-  metricText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+  metricGlass: {
+    alignItems: 'center',
+    height: 90,
+    justifyContent: 'center',
+    width: 90,
   },
   metricLabel: {
-    fontSize: 12,
     color: '#333',
+    fontSize: 12,
     fontWeight: '600',
+  },
+  metricText: {
+    color: '#1a1a1a',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  metricsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 30,
+    width: '100%',
+  },
+  photo: {
+    height: '100%',
+    width: '100%',
   },
   primaryButton: {
     backgroundColor: '#A0354E',
-    paddingHorizontal: 60,
-    paddingVertical: 16,
     borderRadius: 30,
     marginBottom: 15,
+    paddingHorizontal: 60,
+    paddingVertical: 16,
     width: screenWidth - 80,
   },
   primaryButtonText: {
@@ -277,11 +254,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  rightCard: {
+    marginLeft: -40,
+    transform: [{ rotate: '10deg' }],
+  },
+  rightHeartBadge: {
+    bottom: -10,
+    right: 10,
+  },
   secondaryButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 30,
     paddingHorizontal: 60,
     paddingVertical: 16,
-    borderRadius: 30,
     width: screenWidth - 80,
   },
   secondaryButtonText: {

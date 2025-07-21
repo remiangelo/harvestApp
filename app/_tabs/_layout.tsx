@@ -22,52 +22,53 @@ export default function TabLayout() {
   return (
     <ErrorBoundary>
       <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: '#8B1E2D',
-        tabBarInactiveTintColor: '#888',
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
-      <Tabs.Screen
-        name="gardener"
-        options={{
-          title: 'Gardener',
-          tabBarIcon: ({ color }) => <TabBarIcon name="graduation-cap" color={color} />,
-          headerShown: false,
+        screenOptions={{
+          tabBarActiveTintColor: '#8B1E2D',
+          tabBarInactiveTintColor: '#888',
+          // Disable the static render of the header on web
+          // to prevent a hydration error in React Navigation v6.
+          headerShown: useClientOnlyValue(false, true),
         }}
-      />
-      <Tabs.Screen
-        name="matches"
-        options={{
-          title: 'Match',
-          tabBarIcon: ({ color }) => <TabBarIcon name="heart" color={color} />,
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Discover',
-          tabBarIcon: ({ color }) => <TabBarIcon name="copy" color={color} />,
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="chat"
-        options={{
-          title: 'Chat',
-          tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="gardener"
+          options={{
+            title: 'Gardener',
+            tabBarIcon: ({ color }) => <TabBarIcon name="graduation-cap" color={color} />,
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
+          name="matches"
+          options={{
+            title: 'Match',
+            tabBarIcon: ({ color }) => <TabBarIcon name="heart" color={color} />,
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Discover',
+            tabBarIcon: ({ color }) => <TabBarIcon name="copy" color={color} />,
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
+          name="chat"
+          options={{
+            title: 'Chat',
+            tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="two"
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+          }}
+        />
+      </Tabs>
     </ErrorBoundary>
   );
 }

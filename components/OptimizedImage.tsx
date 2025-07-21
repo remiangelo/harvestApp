@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Image, 
-  ImageStyle, 
-  ActivityIndicator, 
-  View, 
+import {
+  Image,
+  ImageStyle,
+  ActivityIndicator,
+  View,
   StyleSheet,
   ImageSourcePropType,
   ImageURISource,
-  ViewStyle 
+  ViewStyle,
 } from 'react-native';
 import { theme } from '../constants/theme';
 
@@ -54,18 +54,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const handleError = () => {
     setLoading(false);
     setError(true);
-    
+
     if (fallbackSource) {
       setImageSource(fallbackSource);
     }
-    
+
     onError?.();
   };
 
   const getOptimizedSource = (): ImageSourcePropType => {
     if (typeof imageSource === 'object' && 'uri' in imageSource) {
       const uri = (imageSource as ImageURISource).uri;
-      
+
       // Add cache control headers for better performance
       return {
         ...imageSource,
@@ -76,7 +76,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         },
       } as ImageURISource;
     }
-    
+
     return imageSource;
   };
 
@@ -92,13 +92,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         onError={handleError}
         resizeMode={resizeMode}
       />
-      
+
       {loading && showLoadingIndicator && (
         <View style={[styles.loadingContainer, StyleSheet.absoluteFillObject]}>
-          <ActivityIndicator 
-            size={loadingIndicatorSize} 
-            color={loadingIndicatorColor}
-          />
+          <ActivityIndicator size={loadingIndicatorSize} color={loadingIndicatorColor} />
         </View>
       )}
     </View>
@@ -110,12 +107,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   image: {
-    width: '100%',
     height: '100%',
+    width: '100%',
   },
   loadingContainer: {
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
   },
 });

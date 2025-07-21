@@ -35,10 +35,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 
   React.useEffect(() => {
     if (animated) {
-      animatedWidth.value = withDelay(
-        delay,
-        withTiming(progress, { duration: 1000 })
-      );
+      animatedWidth.value = withDelay(delay, withTiming(progress, { duration: 1000 }));
     } else {
       animatedWidth.value = progress;
     }
@@ -55,7 +52,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       {showLabel && labelPosition === 'top' && (
         <Text style={[styles.label, styles.labelTop]}>{`${Math.round(clampedProgress)}%`}</Text>
       )}
-      
+
       <View
         style={[
           styles.container,
@@ -77,7 +74,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
             animated ? animatedStyle : { width: `${clampedProgress}%` },
           ]}
         />
-        
+
         {showLabel && labelPosition === 'center' && (
           <View style={styles.centerLabelContainer}>
             <Text style={[styles.label, styles.labelCenter]}>
@@ -86,7 +83,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
           </View>
         )}
       </View>
-      
+
       {showLabel && labelPosition === 'bottom' && (
         <Text style={[styles.label, styles.labelBottom]}>{`${Math.round(clampedProgress)}%`}</Text>
       )}
@@ -95,37 +92,37 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 };
 
 const styles = StyleSheet.create({
+  centerLabelContainer: {
+    alignItems: 'center',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
   container: {
     overflow: 'hidden',
     position: 'relative',
-  },
-  progress: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-  },
-  centerLabelContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   label: {
     fontSize: 12,
     fontWeight: theme.typography.fontWeight.semibold,
   },
-  labelTop: {
-    marginBottom: 4,
+  labelBottom: {
     color: theme.colors.text.primary,
+    marginTop: 4,
   },
   labelCenter: {
     color: theme.colors.text.inverse,
   },
-  labelBottom: {
-    marginTop: 4,
+  labelTop: {
     color: theme.colors.text.primary,
+    marginBottom: 4,
+  },
+  progress: {
+    left: 0,
+    position: 'absolute',
+    top: 0,
   },
 });

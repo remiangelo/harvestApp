@@ -28,19 +28,19 @@ export const PhotoUploadSlot: React.FC<PhotoUploadSlotProps> = ({
   const pickImage = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+
       if (status !== 'granted') {
         alert('Sorry, we need camera roll permissions to make this work!');
         return;
       }
-      
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [2, 3], // Match the display aspect ratio
         quality: 0.8,
       });
-      
+
       if (!result.canceled && result.assets && result.assets.length > 0) {
         onPhotoSelected(result.assets[0].uri, index);
       }
@@ -59,8 +59,8 @@ export const PhotoUploadSlot: React.FC<PhotoUploadSlotProps> = ({
     >
       {photo ? (
         <>
-          <Image 
-            source={{ uri: photo }} 
+          <Image
+            source={{ uri: photo }}
             style={styles.photo}
             onLoad={() => setImageLoading(false)}
             onError={() => setImageLoading(false)}
@@ -68,9 +68,7 @@ export const PhotoUploadSlot: React.FC<PhotoUploadSlotProps> = ({
           {(isUploading || imageLoading) && (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator size="small" color={theme.colors.primary} />
-              {isUploading && (
-                <Text style={styles.uploadingText}>Uploading...</Text>
-              )}
+              {isUploading && <Text style={styles.uploadingText}>Uploading...</Text>}
             </View>
           )}
         </>
@@ -89,45 +87,45 @@ export const PhotoUploadSlot: React.FC<PhotoUploadSlotProps> = ({
 };
 
 const styles = StyleSheet.create({
+  filledSlot: {
+    borderColor: theme.colors.primary,
+  },
+  loadingOverlay: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  photo: {
+    height: '100%',
+    resizeMode: 'cover',
+    width: '100%',
+  },
   photoSlot: {
-    width: '30%',
-    aspectRatio: 2/3,
+    alignItems: 'center',
+    aspectRatio: 2 / 3,
     backgroundColor: '#fafafa',
-    borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 16,
-    alignItems: 'center',
+    borderWidth: 1,
     justifyContent: 'center',
     marginBottom: 16,
     marginHorizontal: '1.5%',
     overflow: 'hidden',
-  },
-  filledSlot: {
-    borderColor: theme.colors.primary,
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+    width: '30%',
   },
   plus: {
-    fontSize: 36,
     color: theme.colors.primary,
+    fontSize: 36,
     fontWeight: 'bold',
   },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   uploadingText: {
-    marginTop: 4,
-    fontSize: 12,
     color: theme.colors.primary,
+    fontSize: 12,
+    marginTop: 4,
   },
 });

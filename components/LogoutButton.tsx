@@ -10,32 +10,28 @@ interface LogoutButtonProps {
   fullWidth?: boolean;
 }
 
-export const LogoutButton: React.FC<LogoutButtonProps> = ({ 
+export const LogoutButton: React.FC<LogoutButtonProps> = ({
   variant = 'outline',
-  fullWidth = false 
+  fullWidth = false,
 }) => {
   const router = useRouter();
   const { logout } = useAuthStore();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          await logout();
+          router.replace('/login');
         },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/login');
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   return (

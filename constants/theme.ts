@@ -8,16 +8,16 @@ export const theme = {
     primary: '#A0354E', // Maroon/burgundy - main brand color
     primaryDark: '#7D2A3D', // Darker variant for pressed states
     primaryLight: '#C4566B', // Lighter variant
-    
+
     // Secondary colors
     secondary: '#F5E6D3', // Cream/beige - app icon background
     secondaryDark: '#E8D4BA',
     secondaryLight: '#FFF9F2',
-    
+
     // Base colors
     background: '#FFFFFF',
     surface: '#FFFFFF',
-    
+
     // Text colors
     text: {
       primary: '#2C2C2C', // Dark charcoal
@@ -25,23 +25,23 @@ export const theme = {
       tertiary: '#999999', // Light gray
       inverse: '#FFFFFF',
     },
-    
+
     // Semantic colors
     error: '#DC2626',
     success: '#10B981',
     warning: '#F59E0B',
     info: '#3B82F6',
-    
+
     // UI colors
     border: '#E5E5E5',
     divider: '#F0F0F0',
     overlay: 'rgba(0, 0, 0, 0.5)',
-    
+
     // Special colors for features
     like: '#10B981', // Green for like
     nope: '#DC2626', // Red for nope
     superLike: '#3B82F6', // Blue for super like
-    
+
     // Gradients
     gradients: {
       profileCard: ['#E8B4F3', '#F3B4E8'], // Purple-pink gradient
@@ -49,7 +49,7 @@ export const theme = {
       overlay: ['rgba(0,0,0,0)', 'rgba(0,0,0,0.6)'],
     },
   },
-  
+
   typography: {
     // Font families (using system fonts for now)
     fontFamily: {
@@ -58,7 +58,7 @@ export const theme = {
       semibold: 'System',
       bold: 'System',
     },
-    
+
     // Font sizes
     fontSize: {
       xs: 12,
@@ -71,7 +71,7 @@ export const theme = {
       '4xl': 32,
       '5xl': 36,
     },
-    
+
     // Font weights
     fontWeight: {
       regular: '400' as const,
@@ -79,14 +79,14 @@ export const theme = {
       semibold: '600' as const,
       bold: '700' as const,
     },
-    
+
     // Line heights
     lineHeight: {
       tight: 1.2,
       normal: 1.5,
       relaxed: 1.75,
     },
-    
+
     // Text styles (pre-composed)
     headers: {
       h1: {
@@ -110,7 +110,7 @@ export const theme = {
         lineHeight: 1.4,
       },
     },
-    
+
     body: {
       large: {
         fontSize: 18,
@@ -134,7 +134,7 @@ export const theme = {
       },
     },
   },
-  
+
   spacing: {
     xxs: 2,
     xs: 4,
@@ -145,7 +145,7 @@ export const theme = {
     xxl: 48,
     xxxl: 64,
   },
-  
+
   borderRadius: {
     none: 0,
     xs: 4,
@@ -156,7 +156,7 @@ export const theme = {
     xxl: 24,
     full: 9999,
   },
-  
+
   shadows: {
     sm: {
       shadowColor: '#000',
@@ -187,20 +187,20 @@ export const theme = {
       elevation: 8,
     },
   },
-  
+
   layout: {
     screenWidth,
     screenHeight,
     containerPadding: 16,
     cardMargin: 8,
   },
-  
+
   animation: {
     fast: 200,
     normal: 300,
     slow: 500,
   },
-  
+
   zIndex: {
     base: 0,
     dropdown: 10,

@@ -26,7 +26,7 @@ const GENDER_OPTIONS = [
 export default function FiltersScreen() {
   const router = useRouter();
   const { currentUser, updateOnboardingData } = useUserStore();
-  
+
   const [filters, setFilters] = useState({
     ageRange: { min: 18, max: 50 },
     maxDistance: 50,
@@ -41,7 +41,8 @@ export default function FiltersScreen() {
           min: (currentUser as any).agePreference?.min || 18,
           max: (currentUser as any).agePreference?.max || 50,
         },
-        maxDistance: (currentUser as any).distance_preference || (currentUser as any).maxDistance || 50,
+        maxDistance:
+          (currentUser as any).distance_preference || (currentUser as any).maxDistance || 50,
         interestedIn: currentUser.preferences || 'all',
         showMe: (currentUser as any).showMe !== false,
       });
@@ -57,33 +58,27 @@ export default function FiltersScreen() {
       showMe: filters.showMe,
     } as any);
 
-    Alert.alert(
-      'Filters Updated',
-      'Your preferences have been saved!',
-      [{ text: 'OK', onPress: () => router.back() }]
-    );
+    Alert.alert('Filters Updated', 'Your preferences have been saved!', [
+      { text: 'OK', onPress: () => router.back() },
+    ]);
   };
 
   const handleReset = () => {
-    Alert.alert(
-      'Reset Filters',
-      'Are you sure you want to reset to default filters?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () => {
-            setFilters({
-              ageRange: { min: 18, max: 50 },
-              maxDistance: 50,
-              interestedIn: 'all',
-              showMe: true,
-            });
-          }
-        }
-      ]
-    );
+    Alert.alert('Reset Filters', 'Are you sure you want to reset to default filters?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: () => {
+          setFilters({
+            ageRange: { min: 18, max: 50 },
+            maxDistance: 50,
+            interestedIn: 'all',
+            showMe: true,
+          });
+        },
+      },
+    ]);
   };
 
   return (
@@ -107,7 +102,7 @@ export default function FiltersScreen() {
             <Text style={styles.rangeSeparator}>-</Text>
             <Text style={styles.rangeText}>{filters.ageRange.max}</Text>
           </View>
-          
+
           <View style={styles.sliderContainer}>
             <Text style={styles.sliderLabel}>Minimum Age</Text>
             <Slider
@@ -117,12 +112,12 @@ export default function FiltersScreen() {
               step={1}
               value={filters.ageRange.min}
               onValueChange={(value) => {
-                setFilters(prev => ({
+                setFilters((prev) => ({
                   ...prev,
                   ageRange: {
                     ...prev.ageRange,
-                    min: Math.min(value, prev.ageRange.max - 1)
-                  }
+                    min: Math.min(value, prev.ageRange.max - 1),
+                  },
                 }));
               }}
               minimumTrackTintColor={theme.colors.primary}
@@ -140,12 +135,12 @@ export default function FiltersScreen() {
               step={1}
               value={filters.ageRange.max}
               onValueChange={(value) => {
-                setFilters(prev => ({
+                setFilters((prev) => ({
                   ...prev,
                   ageRange: {
                     ...prev.ageRange,
-                    max: Math.max(value, prev.ageRange.min + 1)
-                  }
+                    max: Math.max(value, prev.ageRange.min + 1),
+                  },
                 }));
               }}
               minimumTrackTintColor={theme.colors.primary}
@@ -161,7 +156,7 @@ export default function FiltersScreen() {
           <View style={styles.distanceContainer}>
             <Text style={styles.distanceText}>{filters.maxDistance} miles</Text>
           </View>
-          
+
           <Slider
             style={styles.slider}
             minimumValue={1}
@@ -169,16 +164,16 @@ export default function FiltersScreen() {
             step={1}
             value={filters.maxDistance}
             onValueChange={(value) => {
-              setFilters(prev => ({
+              setFilters((prev) => ({
                 ...prev,
-                maxDistance: value
+                maxDistance: value,
               }));
             }}
             minimumTrackTintColor={theme.colors.primary}
             maximumTrackTintColor="#e0e0e0"
             thumbTintColor={theme.colors.primary}
           />
-          
+
           <View style={styles.distanceLabels}>
             <Text style={styles.distanceLabel}>1 mile</Text>
             <Text style={styles.distanceLabel}>500 miles</Text>
@@ -194,14 +189,14 @@ export default function FiltersScreen() {
                 key={option.value}
                 style={[
                   styles.genderOption,
-                  filters.interestedIn === option.value && styles.selectedGenderOption
+                  filters.interestedIn === option.value && styles.selectedGenderOption,
                 ]}
-                onPress={() => setFilters(prev => ({ ...prev, interestedIn: option.value }))}
+                onPress={() => setFilters((prev) => ({ ...prev, interestedIn: option.value }))}
               >
                 <Text
                   style={[
                     styles.genderOptionText,
-                    filters.interestedIn === option.value && styles.selectedGenderOptionText
+                    filters.interestedIn === option.value && styles.selectedGenderOptionText,
                   ]}
                 >
                   {option.label}
@@ -217,21 +212,27 @@ export default function FiltersScreen() {
             <View style={styles.toggleInfo}>
               <Text style={styles.toggleTitle}>Show me on Harvest</Text>
               <Text style={styles.toggleDescription}>
-                While turned off, you will not be shown in the card stack but can still see and message your existing matches
+                While turned off, you will not be shown in the card stack but can still see and
+                message your existing matches
               </Text>
             </View>
             <Toggle
               value={filters.showMe}
-              onValueChange={(value) => setFilters(prev => ({ ...prev, showMe: value }))}
+              onValueChange={(value) => setFilters((prev) => ({ ...prev, showMe: value }))}
             />
           </View>
         </View>
 
         {/* Global Filters Notice */}
         <View style={styles.notice}>
-          <Ionicons name="information-circle-outline" size={20} color={theme.colors.text.secondary} />
+          <Ionicons
+            name="information-circle-outline"
+            size={20}
+            color={theme.colors.text.secondary}
+          />
           <Text style={styles.noticeText}>
-            These are global filters. Only people who meet your criteria will see you and vice versa.
+            These are global filters. Only people who meet your criteria will see you and vice
+            versa.
           </Text>
         </View>
 
@@ -245,155 +246,155 @@ export default function FiltersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  bottomSection: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    paddingVertical: 24,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: theme.colors.text.primary,
-  },
-  resetButton: {
-    fontSize: 16,
-    color: theme.colors.primary,
-    fontWeight: '600',
+  container: {
+    backgroundColor: '#fff',
+    flex: 1,
   },
   content: {
     flex: 1,
-  },
-  section: {
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: theme.colors.text.primary,
-    marginBottom: 16,
-  },
-  rangeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  rangeText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-  },
-  rangeSeparator: {
-    fontSize: 24,
-    color: theme.colors.text.secondary,
-    marginHorizontal: 16,
-  },
-  sliderContainer: {
-    marginVertical: 8,
-  },
-  sliderLabel: {
-    fontSize: 14,
-    color: theme.colors.text.secondary,
-    marginBottom: 8,
-  },
-  slider: {
-    width: '100%',
-    height: 40,
   },
   distanceContainer: {
     alignItems: 'center',
     marginBottom: 16,
   },
-  distanceText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
+  distanceLabel: {
+    color: theme.colors.text.tertiary,
+    fontSize: 12,
   },
   distanceLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: -8,
   },
-  distanceLabel: {
-    fontSize: 12,
-    color: theme.colors.text.tertiary,
+  distanceText: {
+    color: theme.colors.primary,
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  genderOption: {
+    alignItems: 'center',
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    borderWidth: 2,
+    flex: 1,
+    margin: 6,
+    minWidth: '45%',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  genderOptionText: {
+    color: theme.colors.text.primary,
+    fontSize: 16,
+    fontWeight: '500',
   },
   genderOptions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginHorizontal: -6,
   },
-  genderOption: {
-    flex: 1,
-    minWidth: '45%',
-    margin: 6,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
+  header: {
     alignItems: 'center',
+    borderBottomColor: '#eee',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  notice: {
+    alignItems: 'flex-start',
+    backgroundColor: '#f9f9f9',
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  noticeText: {
+    color: theme.colors.text.secondary,
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+    marginLeft: 8,
+  },
+  rangeContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  rangeSeparator: {
+    color: theme.colors.text.secondary,
+    fontSize: 24,
+    marginHorizontal: 16,
+  },
+  rangeText: {
+    color: theme.colors.primary,
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  resetButton: {
+    color: theme.colors.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  section: {
+    borderBottomColor: '#f5f5f5',
+    borderBottomWidth: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+  },
+  sectionTitle: {
+    color: theme.colors.text.primary,
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
   selectedGenderOption: {
-    borderColor: theme.colors.primary,
     backgroundColor: `${theme.colors.primary}15`,
-  },
-  genderOptionText: {
-    fontSize: 16,
-    color: theme.colors.text.primary,
-    fontWeight: '500',
+    borderColor: theme.colors.primary,
   },
   selectedGenderOptionText: {
     color: theme.colors.primary,
     fontWeight: '600',
   },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  slider: {
+    height: 40,
+    width: '100%',
+  },
+  sliderContainer: {
+    marginVertical: 8,
+  },
+  sliderLabel: {
+    color: theme.colors.text.secondary,
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  title: {
+    color: theme.colors.text.primary,
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  toggleDescription: {
+    color: theme.colors.text.secondary,
+    fontSize: 14,
+    lineHeight: 20,
   },
   toggleInfo: {
     flex: 1,
     marginRight: 16,
   },
+  toggleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   toggleTitle: {
+    color: theme.colors.text.primary,
     fontSize: 16,
     fontWeight: '600',
-    color: theme.colors.text.primary,
     marginBottom: 4,
-  },
-  toggleDescription: {
-    fontSize: 14,
-    color: theme.colors.text.secondary,
-    lineHeight: 20,
-  },
-  notice: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  noticeText: {
-    flex: 1,
-    fontSize: 14,
-    color: theme.colors.text.secondary,
-    lineHeight: 20,
-    marginLeft: 8,
-  },
-  bottomSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 24,
   },
 });

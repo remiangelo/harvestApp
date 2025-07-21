@@ -24,7 +24,7 @@ const onboardingScreenUpdates = {
           ) : (
             <Text style={styles.buttonText}>Continue</Text>
           )}
-        </TouchableOpacity>`
+        </TouchableOpacity>`,
   },
 
   'bio.tsx': {
@@ -33,7 +33,7 @@ const onboardingScreenUpdates = {
     if (bio.trim()) {
       await goToNextStep('bio', 'nickname', { bio: bio.trim() });
     }
-  };`
+  };`,
   },
 
   'nickname.tsx': {
@@ -42,7 +42,7 @@ const onboardingScreenUpdates = {
     if (nickname.trim()) {
       await goToNextStep('nickname', 'photos', { nickname: nickname.trim() });
     }
-  };`
+  };`,
   },
 
   'photos.tsx': {
@@ -52,7 +52,7 @@ const onboardingScreenUpdates = {
     if (validPhotos.length > 0) {
       await goToNextStep('photos', 'hobbies', { photos: validPhotos });
     }
-  };`
+  };`,
   },
 
   'hobbies.tsx': {
@@ -61,14 +61,14 @@ const onboardingScreenUpdates = {
     if (selectedHobbies.length > 0) {
       await goToNextStep('hobbies', 'distance', { hobbies: selectedHobbies });
     }
-  };`
+  };`,
   },
 
   'distance.tsx': {
     handleContinue: `
   const handleContinue = async () => {
     await goToNextStep('distance', 'goals', { distance });
-  };`
+  };`,
   },
 
   'goals.tsx': {
@@ -77,7 +77,7 @@ const onboardingScreenUpdates = {
     if (selected) {
       await goToNextStep('goals', 'gender', { goals: selected });
     }
-  };`
+  };`,
   },
 
   'gender.tsx': {
@@ -86,7 +86,7 @@ const onboardingScreenUpdates = {
     if (selected) {
       await goToNextStep('gender', 'location', { gender: selected });
     }
-  };`
+  };`,
   },
 
   'location.tsx': {
@@ -94,8 +94,8 @@ const onboardingScreenUpdates = {
   const handleAllowLocation = async () => {
     const location = currentUser?.location || 'San Francisco, CA';
     await goToNextStep('location', 'complete', { location });
-  };`
-  }
+  };`,
+  },
 };
 
 console.log(`

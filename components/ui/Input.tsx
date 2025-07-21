@@ -42,10 +42,7 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
-  const containerStyles = [
-    styles.container,
-    containerStyle,
-  ];
+  const containerStyles = [styles.container, containerStyle];
 
   const inputContainerStyles = [
     styles.inputContainer,
@@ -64,15 +61,11 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <View style={containerStyles}>
-      {label && (
-        <Text style={[styles.label, labelStyle]}>{label}</Text>
-      )}
-      
+      {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
+
       <View style={inputContainerStyles}>
-        {leftIcon && (
-          <View style={styles.leftIcon}>{leftIcon}</View>
-        )}
-        
+        {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
+
         <TextInput
           style={inputStyles}
           placeholderTextColor={theme.colors.text.tertiary}
@@ -81,7 +74,7 @@ export const Input: React.FC<InputProps> = ({
           onBlur={() => setIsFocused(false)}
           {...textInputProps}
         />
-        
+
         {rightIcon && (
           <TouchableOpacity
             style={styles.rightIcon}
@@ -92,14 +85,10 @@ export const Input: React.FC<InputProps> = ({
           </TouchableOpacity>
         )}
       </View>
-      
-      {error && (
-        <Text style={[styles.error, errorStyle]}>{error}</Text>
-      )}
-      
-      {hint && !error && (
-        <Text style={[styles.hint, hintStyle]}>{hint}</Text>
-      )}
+
+      {error && <Text style={[styles.error, errorStyle]}>{error}</Text>}
+
+      {hint && !error && <Text style={[styles.hint, hintStyle]}>{hint}</Text>}
     </View>
   );
 };
@@ -108,76 +97,76 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: theme.spacing.md,
   },
-  
-  label: {
+
+  error: {
+    color: theme.colors.error,
     fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.medium,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.xs,
+    marginTop: theme.spacing.xs,
   },
-  
+
+  hint: {
+    color: theme.colors.text.secondary,
+    fontSize: theme.typography.fontSize.sm,
+    marginTop: theme.spacing.xs,
+  },
+
+  input: {
+    color: theme.colors.text.primary,
+    flex: 1,
+    fontSize: theme.typography.fontSize.base,
+    minHeight: 48,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+  },
+
   inputContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
+    backgroundColor: theme.colors.background,
     borderColor: theme.colors.border,
     borderRadius: theme.borderRadius.md,
-    backgroundColor: theme.colors.background,
+    borderWidth: 1,
+    flexDirection: 'row',
     minHeight: 48,
   },
-  
-  inputContainerFocused: {
-    borderColor: theme.colors.primary,
-    borderWidth: 2,
-  },
-  
-  inputContainerError: {
-    borderColor: theme.colors.error,
-  },
-  
+
   inputContainerDisabled: {
     backgroundColor: theme.colors.secondaryLight,
     opacity: 0.6,
   },
-  
-  input: {
-    flex: 1,
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text.primary,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    minHeight: 48,
+
+  inputContainerError: {
+    borderColor: theme.colors.error,
   },
-  
-  inputWithLeftIcon: {
-    paddingLeft: theme.spacing.xs,
+
+  inputContainerFocused: {
+    borderColor: theme.colors.primary,
+    borderWidth: 2,
   },
-  
-  inputWithRightIcon: {
-    paddingRight: theme.spacing.xs,
-  },
-  
+
   inputDisabled: {
     color: theme.colors.text.tertiary,
   },
-  
+
+  inputWithLeftIcon: {
+    paddingLeft: theme.spacing.xs,
+  },
+
+  inputWithRightIcon: {
+    paddingRight: theme.spacing.xs,
+  },
+
+  label: {
+    color: theme.colors.text.primary,
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
+    marginBottom: theme.spacing.xs,
+  },
+
   leftIcon: {
     marginLeft: theme.spacing.md,
   },
-  
+
   rightIcon: {
     marginRight: theme.spacing.md,
-  },
-  
-  error: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.error,
-    marginTop: theme.spacing.xs,
-  },
-  
-  hint: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    marginTop: theme.spacing.xs,
   },
 });

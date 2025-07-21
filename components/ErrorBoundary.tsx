@@ -56,35 +56,35 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.spacing.xl,
-    backgroundColor: theme.colors.background,
-  },
-  title: {
-    fontSize: theme.typography.fontSize['2xl'],
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.sm,
-  },
-  message: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: theme.spacing.xl,
-  },
   button: {
     backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.md,
     paddingHorizontal: theme.spacing.xl,
     paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
   },
   buttonText: {
     color: theme.colors.text.inverse,
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.semibold,
+  },
+  container: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+    flex: 1,
+    justifyContent: 'center',
+    padding: theme.spacing.xl,
+  },
+  message: {
+    color: theme.colors.text.secondary,
+    fontSize: theme.typography.fontSize.base,
+    marginBottom: theme.spacing.xl,
+    textAlign: 'center',
+  },
+  title: {
+    color: theme.colors.text.primary,
+    fontSize: theme.typography.fontSize['2xl'],
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing.sm,
+    marginTop: theme.spacing.lg,
   },
 });

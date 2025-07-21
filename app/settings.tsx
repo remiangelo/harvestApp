@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  SafeAreaView, 
-  ScrollView, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
   TouchableOpacity,
   Switch,
-  Alert
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +20,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { currentUser, updateOnboardingData } = useUserStore();
-  
+
   const [notifications, setNotifications] = useState({
     matches: true,
     messages: true,
@@ -28,7 +28,7 @@ export default function SettingsScreen() {
     superLikes: true,
     promotions: false,
   });
-  
+
   const [privacy, setPrivacy] = useState({
     showLocation: true,
     showAge: true,
@@ -37,16 +37,16 @@ export default function SettingsScreen() {
   });
 
   const handleNotificationToggle = (key: keyof typeof notifications) => {
-    setNotifications(prev => ({
+    setNotifications((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
   };
 
   const handlePrivacyToggle = (key: keyof typeof privacy) => {
-    setPrivacy(prev => ({
+    setPrivacy((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
   };
 
@@ -56,14 +56,14 @@ export default function SettingsScreen() {
       'Are you sure you want to delete your account? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
+        {
+          text: 'Delete',
           style: 'destructive',
           onPress: () => {
             Alert.alert('Account Deleted', 'Your account has been deleted.');
             router.replace('/login');
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -82,8 +82,8 @@ export default function SettingsScreen() {
         {/* Account Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.settingItem}
             onPress={() => router.push('/profile-edit' as any)}
           >
@@ -96,7 +96,11 @@ export default function SettingsScreen() {
 
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Ionicons name="shield-checkmark-outline" size={20} color={theme.colors.text.primary} />
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={20}
+                color={theme.colors.text.primary}
+              />
               <Text style={styles.settingText}>Verify Account</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
@@ -114,7 +118,7 @@ export default function SettingsScreen() {
         {/* Notifications Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notifications</Text>
-          
+
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <Ionicons name="heart-outline" size={20} color={theme.colors.text.primary} />
@@ -171,7 +175,7 @@ export default function SettingsScreen() {
         {/* Privacy Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Privacy</Text>
-          
+
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <Ionicons name="location-outline" size={20} color={theme.colors.text.primary} />
@@ -215,7 +219,7 @@ export default function SettingsScreen() {
         {/* Support Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Support</Text>
-          
+
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <Ionicons name="help-circle-outline" size={20} color={theme.colors.text.primary} />
@@ -251,7 +255,7 @@ export default function SettingsScreen() {
 
         {/* Danger Zone */}
         <View style={styles.section}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.settingItem, styles.dangerItem]}
             onPress={handleDeleteAccount}
           >
@@ -273,55 +277,11 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: theme.colors.text.primary,
+    flex: 1,
   },
   content: {
     flex: 1,
-  },
-  section: {
-    marginTop: 24,
-    paddingHorizontal: 20,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text.secondary,
-    marginBottom: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  settingInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  settingText: {
-    fontSize: 16,
-    color: theme.colors.text.primary,
-    marginLeft: 12,
   },
   dangerItem: {
     borderBottomColor: '#ffecec',
@@ -329,9 +289,53 @@ const styles = StyleSheet.create({
   dangerText: {
     color: '#e74c3c',
   },
-  logoutSection: {
-    marginTop: 32,
-    marginBottom: 32,
+  header: {
+    alignItems: 'center',
+    borderBottomColor: '#eee',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  logoutSection: {
+    marginBottom: 32,
+    marginTop: 32,
+    paddingHorizontal: 20,
+  },
+  section: {
+    marginTop: 24,
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    color: theme.colors.text.secondary,
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    marginBottom: 12,
+    textTransform: 'uppercase',
+  },
+  settingInfo: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+  },
+  settingItem: {
+    alignItems: 'center',
+    borderBottomColor: '#f0f0f0',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+  },
+  settingText: {
+    color: theme.colors.text.primary,
+    fontSize: 16,
+    marginLeft: 12,
+  },
+  title: {
+    color: theme.colors.text.primary,
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });

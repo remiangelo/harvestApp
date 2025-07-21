@@ -17,4 +17,4 @@ export default function OnboardingLayout() {
       <Stack.Screen name="complete" options={{ headerShown: false }} />
     </Stack>
   );
-} 
+}

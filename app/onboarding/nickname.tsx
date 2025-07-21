@@ -30,7 +30,9 @@ export default function OnboardingNickname() {
       buttonDisabled={!nickname.trim()}
     >
       <Text style={styles.title}>Your Harvest Name</Text>
-      <Text style={styles.subtitle}>Create a unique nickname that represents you. It’s how others will know and remember you.</Text>
+      <Text style={styles.subtitle}>
+        Create a unique nickname that represents you. It’s how others will know and remember you.
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="Nickname"
@@ -44,32 +46,32 @@ export default function OnboardingNickname() {
 }
 
 const styles = StyleSheet.create({
+  input: {
+    backgroundColor: '#fafafa',
+    borderColor: '#ccc',
+    borderRadius: 24,
+    borderWidth: 1,
+    fontFamily: 'System',
+    fontSize: 18,
+    height: 48,
+    marginBottom: 32,
+    paddingHorizontal: 16,
+    textAlign: 'center',
+    width: '100%', // Replace with Figma font if available
+  },
+  subtitle: {
+    color: '#555',
+    fontFamily: 'System',
+    fontSize: 16,
+    marginBottom: 32,
+    textAlign: 'center', // Replace with Figma font if available
+  },
   title: {
+    color: '#222',
+    fontFamily: 'System',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#222',
-    textAlign: 'center',
-    fontFamily: 'System', // Replace with Figma font if available
+    textAlign: 'center', // Replace with Figma font if available
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 32,
-    textAlign: 'center',
-    fontFamily: 'System', // Replace with Figma font if available
-  },
-  input: {
-    width: '100%',
-    height: 48,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    fontSize: 18,
-    marginBottom: 32,
-    backgroundColor: '#fafafa',
-    textAlign: 'center',
-    fontFamily: 'System', // Replace with Figma font if available
-  },
-}); 
+});

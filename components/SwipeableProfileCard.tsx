@@ -1,18 +1,9 @@
 // UNUSED - Replaced by CleanSwipeCard.tsx
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  ScrollView,
-} from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DemoProfile } from '../data/demoProfiles';
-import {
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -43,7 +34,7 @@ export default function SwipeableProfileCard({
   onSuperLike,
 }: SwipeableProfileCardProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  
+
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -80,22 +71,16 @@ export default function SwipeableProfileCard({
     .onUpdate((event) => {
       translateX.value = event.translationX;
       translateY.value = event.translationY;
-      
+
       // Scale down slightly when dragging
-      const dragDistance = Math.sqrt(
-        event.translationX ** 2 + event.translationY ** 2
-      );
-      scale.value = interpolate(
-        dragDistance,
-        [0, 200],
-        [1, 0.95],
-        Extrapolation.CLAMP
-      );
-      
+      const dragDistance = Math.sqrt(event.translationX ** 2 + event.translationY ** 2);
+      scale.value = interpolate(dragDistance, [0, 200], [1, 0.95], Extrapolation.CLAMP);
+
       // Trigger haptic when crossing threshold
-      const shouldTriggerHaptic = Math.abs(event.translationX) > SWIPE_THRESHOLD || 
-                                  (event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD);
-      
+      const shouldTriggerHaptic =
+        Math.abs(event.translationX) > SWIPE_THRESHOLD ||
+        (event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD);
+
       if (shouldTriggerHaptic && !hasTriggeredHaptic.value) {
         hasTriggeredHaptic.value = true;
         runOnJS(triggerHaptic)();
@@ -104,9 +89,12 @@ export default function SwipeableProfileCard({
       }
     })
     .onEnd((event) => {
-      const shouldSwipeLeft = event.translationX < -SWIPE_THRESHOLD || event.velocityX < -SWIPE_VELOCITY;
-      const shouldSwipeRight = event.translationX > SWIPE_THRESHOLD || event.velocityX > SWIPE_VELOCITY;
-      const shouldSwipeUp = event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD;
+      const shouldSwipeLeft =
+        event.translationX < -SWIPE_THRESHOLD || event.velocityX < -SWIPE_VELOCITY;
+      const shouldSwipeRight =
+        event.translationX > SWIPE_THRESHOLD || event.velocityX > SWIPE_VELOCITY;
+      const shouldSwipeUp =
+        event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD;
 
       if (shouldSwipeLeft) {
         translateX.value = withSpring(-screenWidth * 1.5);
@@ -143,48 +131,32 @@ export default function SwipeableProfileCard({
 
   const likeOpacityStyle = useAnimatedStyle(() => {
     return {
-      opacity: interpolate(
-        translateX.value,
-        [0, screenWidth / 4],
-        [0, 1],
-        Extrapolation.CLAMP
-      ),
+      opacity: interpolate(translateX.value, [0, screenWidth / 4], [0, 1], Extrapolation.CLAMP),
     };
   });
 
   const nopeOpacityStyle = useAnimatedStyle(() => {
     return {
-      opacity: interpolate(
-        translateX.value,
-        [-screenWidth / 4, 0],
-        [1, 0],
-        Extrapolation.CLAMP
-      ),
+      opacity: interpolate(translateX.value, [-screenWidth / 4, 0], [1, 0], Extrapolation.CLAMP),
     };
   });
 
   const superLikeOpacityStyle = useAnimatedStyle(() => {
     return {
-      opacity: interpolate(
-        translateY.value,
-        [-screenHeight / 6, 0],
-        [1, 0],
-        Extrapolation.CLAMP
-      ),
+      opacity: interpolate(translateY.value, [-screenHeight / 6, 0], [1, 0], Extrapolation.CLAMP),
     };
   });
 
-  const tapGesture = Gesture.Tap()
-    .onEnd((event) => {
-      const tapX = event.x;
-      const cardWidth = screenWidth - 40;
-      
-      if (tapX < cardWidth / 3 && currentPhotoIndex > 0) {
-        setCurrentPhotoIndex(currentPhotoIndex - 1);
-      } else if (tapX > (cardWidth * 2) / 3 && currentPhotoIndex < profile.photos.length - 1) {
-        setCurrentPhotoIndex(currentPhotoIndex + 1);
-      }
-    });
+  const tapGesture = Gesture.Tap().onEnd((event) => {
+    const tapX = event.x;
+    const cardWidth = screenWidth - 40;
+
+    if (tapX < cardWidth / 3 && currentPhotoIndex > 0) {
+      setCurrentPhotoIndex(currentPhotoIndex - 1);
+    } else if (tapX > (cardWidth * 2) / 3 && currentPhotoIndex < profile.photos.length - 1) {
+      setCurrentPhotoIndex(currentPhotoIndex + 1);
+    }
+  });
 
   const composedGesture = Gesture.Simultaneous(tapGesture, panGesture);
 
@@ -199,16 +171,16 @@ export default function SwipeableProfileCard({
             resizeMode="cover"
             showLoadingIndicator={true}
           />
-          
+
           {/* Swipe Indicators */}
           <Animated.View style={[styles.likeLabel, likeOpacityStyle]}>
             <Text style={styles.likeText}>LIKE</Text>
           </Animated.View>
-          
+
           <Animated.View style={[styles.nopeLabel, nopeOpacityStyle]}>
             <Text style={styles.nopeText}>NOPE</Text>
           </Animated.View>
-          
+
           {onSuperLike && (
             <Animated.View style={[styles.superLikeLabel, superLikeOpacityStyle]}>
               <Text style={styles.superLikeText}>SUPER LIKE</Text>
@@ -220,10 +192,7 @@ export default function SwipeableProfileCard({
             {profile.photos.map((_, index) => (
               <View
                 key={index}
-                style={[
-                  styles.indicator,
-                  index === currentPhotoIndex && styles.activeIndicator,
-                ]}
+                style={[styles.indicator, index === currentPhotoIndex && styles.activeIndicator]}
               />
             ))}
           </View>
@@ -232,7 +201,9 @@ export default function SwipeableProfileCard({
         {/* Profile Info */}
         <View style={styles.infoContainer}>
           <View style={styles.basicInfo}>
-            <Text style={styles.name}>{profile.name}, {profile.age}</Text>
+            <Text style={styles.name}>
+              {profile.name}, {profile.age}
+            </Text>
             <Text style={styles.location}>{profile.location}</Text>
           </View>
 
@@ -270,11 +241,28 @@ export default function SwipeableProfileCard({
 }
 
 const styles = StyleSheet.create({
+  activeIndicator: {
+    backgroundColor: 'white',
+  },
+  basicInfo: {
+    marginBottom: 12,
+  },
+  bio: {
+    color: '#444',
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  bioContainer: {
+    marginBottom: 16,
+    maxHeight: 80,
+  },
   container: {
-    width: screenWidth - 40,
-    height: screenHeight * 0.7,
     backgroundColor: 'white',
     borderRadius: 20,
+    elevation: 5,
+    height: screenHeight * 0.7,
+    overflow: 'hidden',
+    position: 'absolute',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -282,140 +270,19 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
-    overflow: 'hidden',
-    position: 'absolute',
+    width: screenWidth - 40,
   },
-  photoContainer: {
-    flex: 1,
-    position: 'relative',
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-  },
-  photoIndicators: {
-    position: 'absolute',
-    top: 20,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  indicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.5)',
-  },
-  activeIndicator: {
-    backgroundColor: 'white',
-  },
-  likeLabel: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    padding: 8,
-    borderWidth: 3,
-    borderColor: '#44d362',
-    borderRadius: 8,
-    transform: [{ rotate: '-20deg' }],
-  },
-  likeText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#44d362',
-  },
-  nopeLabel: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    padding: 8,
-    borderWidth: 3,
-    borderColor: '#ff4757',
-    borderRadius: 8,
-    transform: [{ rotate: '20deg' }],
-  },
-  nopeText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#ff4757',
-  },
-  superLikeLabel: {
-    position: 'absolute',
-    bottom: 50,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  superLikeText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#00b8d4',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  },
-  infoContainer: {
-    padding: 20,
-    backgroundColor: 'white',
-  },
-  basicInfo: {
-    marginBottom: 12,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 4,
-  },
-  location: {
-    fontSize: 16,
-    color: '#666',
-  },
-  bioContainer: {
-    maxHeight: 80,
-    marginBottom: 16,
-  },
-  bio: {
-    fontSize: 16,
-    color: '#444',
-    lineHeight: 22,
-  },
-  hobbiesContainer: {
-    marginBottom: 12,
-  },
-  hobbiesTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#222',
-    marginBottom: 8,
-  },
-  hobbiesList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  hobbyTag: {
-    backgroundColor: '#f8f9fa',
+  goalTag: {
+    backgroundColor: '#8B1E2D',
+    borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
   },
-  hobbyText: {
+  goalText: {
+    color: 'white',
     fontSize: 14,
-    color: '#495057',
   },
   goalsContainer: {
-    marginBottom: 8,
-  },
-  goalsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#222',
     marginBottom: 8,
   },
   goalsList: {
@@ -423,14 +290,118 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
-  goalTag: {
-    backgroundColor: '#8B1E2D',
+  goalsTitle: {
+    color: '#222',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  hobbiesContainer: {
+    marginBottom: 12,
+  },
+  hobbiesList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  hobbiesTitle: {
+    color: '#222',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  hobbyTag: {
+    backgroundColor: '#f8f9fa',
+    borderColor: '#e9ecef',
+    borderRadius: 16,
+    borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
   },
-  goalText: {
+  hobbyText: {
+    color: '#495057',
     fontSize: 14,
-    color: 'white',
+  },
+  indicator: {
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    borderRadius: 4,
+    height: 8,
+    width: 8,
+  },
+  infoContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+  },
+  likeLabel: {
+    borderColor: '#44d362',
+    borderRadius: 8,
+    borderWidth: 3,
+    left: 20,
+    padding: 8,
+    position: 'absolute',
+    top: 50,
+    transform: [{ rotate: '-20deg' }],
+  },
+  likeText: {
+    color: '#44d362',
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  location: {
+    color: '#666',
+    fontSize: 16,
+  },
+  name: {
+    color: '#222',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  nopeLabel: {
+    borderColor: '#ff4757',
+    borderRadius: 8,
+    borderWidth: 3,
+    padding: 8,
+    position: 'absolute',
+    right: 20,
+    top: 50,
+    transform: [{ rotate: '20deg' }],
+  },
+  nopeText: {
+    color: '#ff4757',
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  photo: {
+    height: '100%',
+    width: '100%',
+  },
+  photoContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  photoIndicators: {
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 20,
+  },
+  superLikeLabel: {
+    alignItems: 'center',
+    bottom: 50,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+  },
+  superLikeText: {
+    color: '#00b8d4',
+    fontSize: 32,
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 });

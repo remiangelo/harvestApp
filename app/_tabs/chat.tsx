@@ -11,13 +11,13 @@ export default function ChatScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FAFAFA',
+    flex: 1,
+    justifyContent: 'center',
   },
   text: {
-    fontSize: 20,
     color: '#666',
+    fontSize: 20,
   },
 });

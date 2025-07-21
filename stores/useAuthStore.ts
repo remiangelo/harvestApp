@@ -13,7 +13,7 @@ interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   isTestMode: boolean;
-  
+
   // Actions
   initialize: () => Promise<void>;
   login: (email: string, password: string) => Promise<{ error: any }>;
@@ -39,51 +39,53 @@ export const useAuthStore = create<AuthState>()(
       initialize: async () => {
         try {
           set({ isLoading: true });
-          
+
           // Check for test mode first
           const testMode = await AsyncStorage.getItem('harvest-test-mode');
           const testUserData = await AsyncStorage.getItem('harvest-test-user');
-          
+
           if (testMode === 'true' && testUserData) {
             // Load test user
             const testUser = JSON.parse(testUserData);
             useUserStore.getState().setCurrentUser(testUser);
-            set({ 
+            set({
               isAuthenticated: true,
               isTestMode: true,
-              isLoading: false 
+              isLoading: false,
             });
             return;
           }
-          
+
           // Normal Supabase authentication
           const { user, error } = await getCurrentUser();
-          
+
           if (user && !error) {
-            const { data: { session } } = await supabase.auth.getSession();
-            
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
+
             // Load user profile
             const { data: profile } = await getProfile(user.id);
-            
-            set({ 
-              user, 
+
+            set({
+              user,
               session,
               profile,
               isAuthenticated: true,
-              isLoading: false 
+              isLoading: false,
             });
-            
+
             // Sync with user store
             if (profile) {
               useUserStore.getState().setCurrentUser(profile as any);
             }
           } else {
-            set({ 
-              user: null, 
+            set({
+              user: null,
               session: null,
               profile: null,
               isAuthenticated: false,
-              isLoading: false 
+              isLoading: false,
             });
           }
         } catch (error) {
@@ -96,7 +98,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
           const { data, error } = await signIn(email, password);
-          
+
           if (error) {
             set({ isLoading: false });
             return { error };
@@ -105,21 +107,21 @@ export const useAuthStore = create<AuthState>()(
           if (data.user && data.session) {
             // Load user profile
             const { data: profile } = await getProfile(data.user.id);
-            
-            set({ 
-              user: data.user, 
+
+            set({
+              user: data.user,
               session: data.session,
               profile,
               isAuthenticated: true,
-              isLoading: false 
+              isLoading: false,
             });
-            
+
             // Sync with user store
             if (profile) {
               useUserStore.getState().setCurrentUser(profile as any);
             }
           }
-          
+
           return { error: null };
         } catch (error) {
           set({ isLoading: false });
@@ -131,7 +133,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
           const { data, error } = await signUp(email, password);
-          
+
           if (error) {
             set({ isLoading: false });
             return { error };
@@ -141,20 +143,20 @@ export const useAuthStore = create<AuthState>()(
           if (data.user) {
             await createProfile(data.user.id, email);
           }
-          
+
           // Note: Supabase may require email confirmation
           // In that case, user won't be logged in immediately
           if (data.user && data.session) {
             const { data: profile } = await getProfile(data.user.id);
-            
-            set({ 
-              user: data.user, 
+
+            set({
+              user: data.user,
               session: data.session,
               profile,
               isAuthenticated: true,
-              isLoading: false 
+              isLoading: false,
             });
-            
+
             // Sync with user store
             if (profile) {
               useUserStore.getState().setCurrentUser(profile as any);
@@ -162,7 +164,7 @@ export const useAuthStore = create<AuthState>()(
           } else {
             set({ isLoading: false });
           }
-          
+
           return { error: null };
         } catch (error) {
           set({ isLoading: false });
@@ -173,7 +175,7 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         try {
           set({ isLoading: true });
-          
+
           // Clear test mode if enabled
           const testMode = get().isTestMode;
           if (testMode) {
@@ -182,16 +184,16 @@ export const useAuthStore = create<AuthState>()(
           } else {
             await signOut();
           }
-          
-          set({ 
-            user: null, 
+
+          set({
+            user: null,
             session: null,
             profile: null,
             isAuthenticated: false,
             isTestMode: false,
-            isLoading: false 
+            isLoading: false,
           });
-          
+
           // Clear user store
           useUserStore.getState().logout();
         } catch (error) {
@@ -207,7 +209,7 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user: User | null) => {
         set({ user, isAuthenticated: !!user });
       },
-      
+
       loadProfile: async (userId: string) => {
         try {
           const { data: profile } = await getProfile(userId);
@@ -219,11 +221,11 @@ export const useAuthStore = create<AuthState>()(
           console.error('Error loading profile:', error);
         }
       },
-      
+
       setTestMode: (enabled: boolean) => {
         set({ isTestMode: enabled });
       },
-      
+
       setAuthenticated: (authenticated: boolean) => {
         set({ isAuthenticated: authenticated });
       },
@@ -231,7 +233,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'harvest-auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({ 
+      partialize: (state) => ({
         // Only persist these fields
         user: state.user,
         session: state.session,

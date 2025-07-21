@@ -17,23 +17,23 @@ const useUserStore = create<UserState>()(
     (set) => ({
       currentUser: null,
       onboardingData: {},
-      
+
       setCurrentUser: (user) => set({ currentUser: user }),
-      
-      updateOnboardingData: (data) => 
+
+      updateOnboardingData: (data) =>
         set((state) => ({
-          onboardingData: { ...state.onboardingData, ...data }
+          onboardingData: { ...state.onboardingData, ...data },
         })),
-      
+
       clearOnboardingData: () => set({ onboardingData: {} }),
-      
+
       logout: () => set({ currentUser: null, onboardingData: {} }),
     }),
     {
       name: 'user-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({ 
-        currentUser: state.currentUser 
+      partialize: (state) => ({
+        currentUser: state.currentUser,
       }),
     }
   )

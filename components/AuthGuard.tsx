@@ -24,51 +24,55 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === 'login';
+    const inAuthGroup = segments[0] === 'login' || segments[0] === 'auth';
     const inOnboarding = segments[0] === 'onboarding';
+    const inTabs = segments[0] === '_tabs';
 
     if (!isAuthenticated && !inAuthGroup) {
-      // Redirect to login if not authenticated
-      router.replace('/login');
-    } else if (isAuthenticated && inAuthGroup) {
-      // Redirect authenticated users away from auth screens
-      const isOnboardingComplete = isTestMode ? currentUser?.onboardingCompleted : profile?.onboarding_completed;
-      
-      if (isOnboardingComplete) {
-        router.replace('/_tabs');
-      } else {
-        // Check onboarding progress and redirect to appropriate step
-        checkOnboardingProgress();
-      }
-    } else if (isAuthenticated && !inOnboarding) {
-      const isOnboardingComplete = isTestMode ? currentUser?.onboardingCompleted : profile?.onboarding_completed;
-      
-      if (!isOnboardingComplete) {
-        // Redirect to onboarding if not completed
-        checkOnboardingProgress();
+      // Redirect to auth if not authenticated
+      router.replace('/auth');
+    } else if (isAuthenticated) {
+      // Check if onboarding is complete
+      const isOnboardingComplete = isTestMode
+        ? currentUser?.onboardingCompleted
+        : profile?.onboarding_completed;
+
+      if (inAuthGroup) {
+        // Authenticated user on login page
+        if (isOnboardingComplete) {
+          router.replace('/_tabs');
+        } else {
+          router.replace('/onboarding');
+        }
+      } else if (inTabs && !isOnboardingComplete) {
+        // User trying to access main app without completing onboarding
+        router.replace('/onboarding');
+      } else if (!inOnboarding && !inTabs && !isOnboardingComplete) {
+        // User not in onboarding or tabs and hasn't completed onboarding
+        router.replace('/onboarding');
       }
     }
   }, [isAuthenticated, isLoading, profile, segments, isTestMode, currentUser]);
 
   const checkOnboardingProgress = async () => {
     if (checkingProgress) return;
-    
+
     // In test mode, always go to the start of onboarding
     if (isTestMode) {
       router.replace('/onboarding');
       return;
     }
-    
+
     if (!user) return;
-    
+
     setCheckingProgress(true);
     try {
       const { currentStep, data } = await getOnboardingProgress(user.id);
-      
+
       // Update local store with saved data
       if (data) {
         const onboardingData: any = {};
-        
+
         // Map database fields to local state fields
         if (data.age) onboardingData.age = data.age;
         if (data.preferences) onboardingData.preferences = data.preferences;
@@ -80,11 +84,11 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         if (data.goals) onboardingData.goals = data.goals;
         if (data.gender) onboardingData.gender = data.gender;
         if (data.location) onboardingData.location = data.location;
-        
+
         // Update the onboarding data in store
         useUserStore.getState().updateOnboardingData(onboardingData);
       }
-      
+
       // Navigate to the appropriate step
       if (currentStep === 'complete') {
         router.replace('/onboarding/complete' as any);
@@ -113,9 +117,9 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
 const styles = StyleSheet.create({
   loading: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: theme.colors.background,
+    flex: 1,
+    justifyContent: 'center',
   },
 });

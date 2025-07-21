@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  SafeAreaView,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import useUserStore from '../../stores/useUserStore';
@@ -57,8 +65,8 @@ export default function OnboardingAge() {
             maximumDate={new Date()}
           />
         )}
-        <TouchableOpacity 
-          style={[styles.button, isSaving && styles.buttonDisabled]} 
+        <TouchableOpacity
+          style={[styles.button, isSaving && styles.buttonDisabled]}
           onPress={handleContinue}
           disabled={isSaving}
         >
@@ -74,69 +82,69 @@ export default function OnboardingAge() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  progressBarContainer: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    marginBottom: 32,
-  },
-  progressBar: {
-    width: '33%',
-    height: 8,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#222',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 32,
-    textAlign: 'center',
-  },
-  input: {
-    width: '100%',
-    height: 48,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    fontSize: 18,
-    marginBottom: 32,
-    backgroundColor: '#fafafa',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   button: {
-    width: '100%',
-    height: 48,
+    alignItems: 'center',
     backgroundColor: '#8B1E2D',
     borderRadius: 24,
-    alignItems: 'center',
+    height: 48,
     justifyContent: 'center',
     marginTop: 16,
+    width: '100%',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  buttonDisabled: {
-    opacity: 0.7,
+  container: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    flex: 1,
+    justifyContent: 'flex-start',
+    paddingBottom: 32,
+    paddingHorizontal: 24,
+    paddingTop: 80,
   },
-}); 
+  input: {
+    alignItems: 'center',
+    backgroundColor: '#fafafa',
+    borderColor: '#ccc',
+    borderRadius: 24,
+    borderWidth: 1,
+    fontSize: 18,
+    height: 48,
+    justifyContent: 'center',
+    marginBottom: 32,
+    paddingHorizontal: 16,
+    width: '100%',
+  },
+  progressBar: {
+    backgroundColor: '#8B1E2D',
+    borderRadius: 4,
+    height: 8,
+    width: '33%',
+  },
+  progressBarContainer: {
+    backgroundColor: '#eee',
+    borderRadius: 4,
+    height: 8,
+    marginBottom: 32,
+    width: '100%',
+  },
+  subtitle: {
+    color: '#555',
+    fontSize: 16,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  title: {
+    color: '#222',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+});

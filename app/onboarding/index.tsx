@@ -24,11 +24,11 @@ export default function OnboardingIndex() {
 
     try {
       const { currentStep, data } = await getOnboardingProgress(user.id);
-      
+
       // Restore saved onboarding data
       if (data) {
         const restoredData: any = {};
-        
+
         // Map database fields to local state
         if (data.age) restoredData.age = data.age;
         if (data.preferences) restoredData.preferences = data.preferences;
@@ -40,10 +40,10 @@ export default function OnboardingIndex() {
         if (data.goals) restoredData.goals = data.goals;
         if (data.gender) restoredData.gender = data.gender;
         if (data.location) restoredData.location = data.location;
-        
+
         updateOnboardingData(restoredData);
       }
-      
+
       setNextStep(currentStep);
     } catch (error) {
       console.error('Error checking onboarding progress:', error);
@@ -65,9 +65,9 @@ export default function OnboardingIndex() {
 
 const styles = StyleSheet.create({
   loading: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: theme.colors.background,
+    flex: 1,
+    justifyContent: 'center',
   },
-}); 
+});

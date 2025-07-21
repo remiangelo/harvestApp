@@ -9,10 +9,14 @@ import { useRouter } from 'expo-router';
 import useUserStore from '../../stores/useUserStore';
 import { filterProfiles, sortProfilesByRelevance } from '../../lib/filterProfiles';
 import { MatchModal } from '../../components/MatchModal';
+import { saveSwipe } from '../../lib/swipes';
+import { useAuthStore } from '../../stores/useAuthStore';
+import { ErrorBoundary } from '../../components/ErrorBoundary';
 
 export default function SwipingScreen() {
   const router = useRouter();
   const { currentUser } = useUserStore();
+  const { user, isTestMode } = useAuthStore();
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [likedProfiles, setLikedProfiles] = useState<string[]>([]);
   const [dislikedProfiles, setDislikedProfiles] = useState<string[]>([]);
@@ -33,44 +37,119 @@ export default function SwipingScreen() {
   }, [currentUser]);
 
   // Safety check for profiles array
-  const validProfiles = filteredProfiles;
-  const safeIndex = Math.min(currentProfileIndex, validProfiles.length - 1);
-  const currentProfile = validProfiles[safeIndex];
+  const validProfiles = filteredProfiles || [];
+  const safeIndex = Math.max(0, Math.min(currentProfileIndex, validProfiles.length - 1));
+  const currentProfile = validProfiles.length > 0 ? validProfiles[safeIndex] : null;
 
-  const handleLike = () => {
-    if (currentProfile) {
-      setLikedProfiles(prev => [...prev, currentProfile.id]);
-      // Simulate a match (in real app, check if they liked you back)
-      const isMatch = Math.random() > 0.3; // 70% match rate for demo
-      if (isMatch) {
-        setMatchedProfile(currentProfile);
-        setShowMatchModal(true);
+  const handleLike = async () => {
+    try {
+      if (!currentProfile) return;
+
+      if (currentProfile && user && !isTestMode) {
+        setLikedProfiles((prev) => [...prev, currentProfile.id]);
+
+        // Save swipe to database
+        const result = await saveSwipe(user.id, currentProfile.id, 'like');
+
+        if (result.success && result.isMatch) {
+          setMatchedProfile(currentProfile);
+          setShowMatchModal(true);
+        } else if (!result.success) {
+          console.error('Failed to save swipe:', result.error);
+        }
+
+        nextProfile();
+      } else if (currentProfile) {
+        // Test mode or no user - just simulate
+        setLikedProfiles((prev) => [...prev, currentProfile.id]);
+        const isMatch = Math.random() > 0.3; // 70% match rate for demo
+        if (isMatch) {
+          setMatchedProfile(currentProfile);
+          setShowMatchModal(true);
+        }
+        nextProfile();
       }
+    } catch (error) {
+      console.error('Error in handleLike:', error);
       nextProfile();
     }
   };
 
-  const handleDislike = () => {
-    if (currentProfile) {
-      setDislikedProfiles(prev => [...prev, currentProfile.id]);
+  const handleDislike = async () => {
+    try {
+      if (!currentProfile) return;
+
+      if (currentProfile && user && !isTestMode) {
+        setDislikedProfiles((prev) => [...prev, currentProfile.id]);
+
+        // Save swipe to database
+        const result = await saveSwipe(user.id, currentProfile.id, 'nope');
+
+        if (!result.success) {
+          console.error('Failed to save swipe:', result.error);
+        }
+
+        nextProfile();
+      } else if (currentProfile) {
+        // Test mode or no user - just track locally
+        setDislikedProfiles((prev) => [...prev, currentProfile.id]);
+        nextProfile();
+      }
+    } catch (error) {
+      console.error('Error in handleDislike:', error);
+      nextProfile();
+    }
+  };
+
+  const handleSuperLike = async () => {
+    try {
+      if (!currentProfile) return;
+
+      if (currentProfile && user && !isTestMode) {
+        setLikedProfiles((prev) => [...prev, currentProfile.id]);
+
+        // Save swipe to database
+        const result = await saveSwipe(user.id, currentProfile.id, 'super_like');
+
+        if (result.success && result.isMatch) {
+          setMatchedProfile(currentProfile);
+          setShowMatchModal(true);
+        } else if (!result.success) {
+          console.error('Failed to save swipe:', result.error);
+        }
+
+        nextProfile();
+      } else if (currentProfile) {
+        // Test mode or no user - just simulate
+        setLikedProfiles((prev) => [...prev, currentProfile.id]);
+        // Super likes have higher match rate
+        const isMatch = Math.random() > 0.1; // 90% match rate for super likes
+        if (isMatch) {
+          setMatchedProfile(currentProfile);
+          setShowMatchModal(true);
+        }
+        nextProfile();
+      }
+    } catch (error) {
+      console.error('Error in handleSuperLike:', error);
       nextProfile();
     }
   };
 
   const nextProfile = () => {
-    if (currentProfileIndex < validProfiles.length - 1) {
-      setCurrentProfileIndex(currentProfileIndex + 1);
-    } else {
-      // Reset to beginning when we run out of profiles
-      setCurrentProfileIndex(0);
-      setLikedProfiles([]);
-      setDislikedProfiles([]);
-      Alert.alert(
-        'No More Profiles! 🔄',
-        'You\'ve seen all the demo profiles. Starting over...',
-        [{ text: 'OK', style: 'default' }]
-      );
-    }
+    setTimeout(() => {
+      if (currentProfileIndex < validProfiles.length - 1) {
+        setCurrentProfileIndex((prev) => prev + 1);
+      } else {
+        // Reset to beginning when we run out of profiles
+        setCurrentProfileIndex(0);
+        setLikedProfiles([]);
+        setDislikedProfiles([]);
+        Alert.alert('No More Profiles! 🔄', "You've seen all the demo profiles. Starting over...", [
+          { text: 'OK', style: 'default' },
+        ]);
+      }
+    }, 350); // Wait for animation to complete
   };
 
   const resetProfiles = () => {
@@ -84,7 +163,7 @@ export default function SwipingScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.logo}>Harvest</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.filterButton}
             onPress={() => router.push('/filters' as any)}
           >
@@ -104,7 +183,7 @@ export default function SwipingScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.logo}>Harvest</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.filterButton}
             onPress={() => router.push('/filters' as any)}
           >
@@ -120,96 +199,98 @@ export default function SwipingScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <CleanSwipeCard
-        profile={currentProfile}
-        onLike={handleLike}
-        onDislike={handleDislike}
-        onSuperLike={handleLike}
-      />
-      
-      {matchedProfile && (
-        <MatchModal
-          visible={showMatchModal}
-          onClose={() => {
-            setShowMatchModal(false);
-            setMatchedProfile(null);
-          }}
-          userProfile={{
-            name: currentUser?.name || 'You',
-            photo: currentUser?.photos?.[0] || 'https://i.pravatar.cc/150?img=1',
-          }}
-          matchProfile={{
-            name: matchedProfile.name,
-            photo: matchedProfile.photos[0],
-          }}
-          compatibility={{
-            interests: 95,
-            personality: 98,
-            overall: 96,
-          }}
+    <ErrorBoundary>
+      <View style={styles.container}>
+        <CleanSwipeCard
+          profile={currentProfile}
+          onLike={handleLike}
+          onDislike={handleDislike}
+          onSuperLike={handleSuperLike}
         />
-      )}
-    </View>
+
+        {matchedProfile && (
+          <MatchModal
+            visible={showMatchModal}
+            onClose={() => {
+              setShowMatchModal(false);
+              setMatchedProfile(null);
+            }}
+            userProfile={{
+              name: currentUser?.name || 'You',
+              photo: currentUser?.photos?.[0] || 'https://i.pravatar.cc/150?img=1',
+            }}
+            matchProfile={{
+              name: matchedProfile.name,
+              photo: matchedProfile.photos[0],
+            }}
+            compatibility={{
+              interests: 95,
+              personality: 98,
+              overall: 96,
+            }}
+          />
+        )}
+      </View>
+    </ErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: '#000',
-  },
-  header: {
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 24,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    backgroundColor: 'transparent',
-  },
-  logo: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
+    flex: 1,
   },
   content: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  filterButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 20,
+    padding: 8,
+  },
+  header: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    left: 0,
+    paddingBottom: 20,
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 10,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#666',
+    fontSize: 16,
+    marginTop: 16,
+  },
+  logo: {
     color: theme.colors.primary,
-    marginBottom: 16,
-    textAlign: 'center',
+    fontSize: 32,
+    fontWeight: 'bold',
   },
   subtitle: {
-    fontSize: 18,
     color: '#555',
+    fontSize: 18,
     marginBottom: 24,
     textAlign: 'center',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666',
-  },
-  filterButton: {
-    padding: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 20,
+  title: {
+    color: theme.colors.primary,
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
   },
 });

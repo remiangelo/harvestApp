@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import useUserStore from '../../stores/useUserStore';
@@ -13,14 +21,14 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const { currentUser, updateOnboardingData } = useUserStore();
   const { user } = useAuthStore();
-  
+
   const [profile, setProfile] = useState({
     name: 'John Doe',
     age: 25,
     bio: 'I love hiking, photography, and good coffee. Looking for meaningful connections.',
     photos: [null, null, null, null, null, null] as (string | null)[],
     hobbies: ['Photography', 'Hiking', 'Coffee'],
-    location: 'San Francisco, CA'
+    location: 'San Francisco, CA',
   });
 
   // Update profile with current user data
@@ -40,14 +48,18 @@ export default function ProfileScreen() {
           }
         }
       }
-      
+
       setProfile({
         name: currentUser.nickname || currentUser.name || 'User',
         age,
-        bio: currentUser.bio || 'I love hiking, photography, and good coffee. Looking for meaningful connections.',
-        photos: currentUser.photos ? [...currentUser.photos, ...Array(Math.max(0, 6 - currentUser.photos.length)).fill(null)] : [null, null, null, null, null, null],
+        bio:
+          currentUser.bio ||
+          'I love hiking, photography, and good coffee. Looking for meaningful connections.',
+        photos: currentUser.photos
+          ? [...currentUser.photos, ...Array(Math.max(0, 6 - currentUser.photos.length)).fill(null)]
+          : [null, null, null, null, null, null],
         hobbies: currentUser.hobbies || ['Photography', 'Hiking', 'Coffee'],
-        location: currentUser.location || 'San Francisco, CA'
+        location: currentUser.location || 'San Francisco, CA',
       });
     }
   }, [currentUser]);
@@ -70,9 +82,9 @@ export default function ProfileScreen() {
       const newPhotos = [...profile.photos];
       newPhotos[index] = result.assets[0].uri as string;
       setProfile({ ...profile, photos: newPhotos });
-      
+
       // Update user context
-      const validPhotos = newPhotos.filter(photo => photo !== null) as string[];
+      const validPhotos = newPhotos.filter((photo) => photo !== null) as string[];
       updateOnboardingData({ photos: validPhotos });
     }
   };
@@ -83,7 +95,7 @@ export default function ProfileScreen() {
       nickname: profile.name,
       bio: profile.bio,
       hobbies: profile.hobbies,
-      location: profile.location
+      location: profile.location,
     });
     setIsEditing(false);
   };
@@ -92,18 +104,14 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>My Profile</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.editButton}
-          onPress={() => isEditing ? handleSave() : setIsEditing(true)}
+          onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
         >
-          <Ionicons 
-            name={isEditing ? "checkmark" : "pencil"} 
-            size={20} 
-            color="#8B1E2D" 
-          />
+          <Ionicons name={isEditing ? 'checkmark' : 'pencil'} size={20} color="#8B1E2D" />
         </TouchableOpacity>
       </View>
-      
+
       <ScrollView style={styles.content}>
         {/* Profile Photos */}
         <View style={styles.section}>
@@ -117,8 +125,8 @@ export default function ProfileScreen() {
                 disabled={!isEditing}
               >
                 {photo ? (
-                  <OptimizedImage 
-                    source={{ uri: photo }} 
+                  <OptimizedImage
+                    source={{ uri: photo }}
                     style={styles.photo}
                     showLoadingIndicator={true}
                   />
@@ -189,15 +197,15 @@ export default function ProfileScreen() {
         {/* Settings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.settingItem}
             onPress={() => router.push('/settings' as any)}
           >
             <Text style={styles.settingText}>App Settings</Text>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.settingItem, styles.resetButton]} 
+          <TouchableOpacity
+            style={[styles.settingItem, styles.resetButton]}
             onPress={() => {
               // Reset to original demo data
               if (currentUser) {
@@ -215,14 +223,21 @@ export default function ProfileScreen() {
                     }
                   }
                 }
-                
+
                 setProfile({
                   name: currentUser.nickname || currentUser.name || 'User',
                   age,
-                  bio: currentUser.bio || 'I love hiking, photography, and good coffee. Looking for meaningful connections.',
-                  photos: currentUser.photos ? [...currentUser.photos, ...Array(Math.max(0, 6 - currentUser.photos.length)).fill(null)] : [null, null, null, null, null, null],
+                  bio:
+                    currentUser.bio ||
+                    'I love hiking, photography, and good coffee. Looking for meaningful connections.',
+                  photos: currentUser.photos
+                    ? [
+                        ...currentUser.photos,
+                        ...Array(Math.max(0, 6 - currentUser.photos.length)).fill(null),
+                      ]
+                    : [null, null, null, null, null, null],
                   hobbies: currentUser.hobbies || ['Photography', 'Hiking', 'Coffee'],
-                  location: currentUser.location || 'San Francisco, CA'
+                  location: currentUser.location || 'San Francisco, CA',
                 });
                 setIsEditing(false);
               }
@@ -231,7 +246,7 @@ export default function ProfileScreen() {
             <Text style={[styles.settingText, styles.resetText]}>Reset Demo Data</Text>
             <Ionicons name="refresh" size={20} color="#8B1E2D" />
           </TouchableOpacity>
-          
+
           {/* Logout Button */}
           <View style={styles.logoutContainer}>
             <LogoutButton fullWidth />
@@ -243,104 +258,48 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  bioInput: {
+    borderColor: '#ddd',
+    borderRadius: 8,
+    borderWidth: 1,
+    fontSize: 16,
+    minHeight: 100,
+    padding: 12,
+    textAlignVertical: 'top',
+  },
+  bioText: {
+    color: '#555',
+    fontSize: 16,
+    lineHeight: 24,
+  },
   container: {
-    flex: 1,
     backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#8B1E2D',
-  },
-  editButton: {
-    padding: 8,
+    flex: 1,
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
   },
-  section: {
-    marginVertical: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 12,
-  },
-  photosGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  photoSlot: {
-    width: '30%',
-    aspectRatio: 1,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    marginBottom: 8,
-    overflow: 'hidden',
-  },
-  filledSlot: {
-    borderWidth: 2,
-    borderColor: '#8B1E2D',
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+  editButton: {
+    padding: 8,
   },
   emptyPhoto: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+  },
+  filledSlot: {
+    borderColor: '#8B1E2D',
+    borderWidth: 2,
+  },
+  header: {
     alignItems: 'center',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#555',
-    width: 80,
-  },
-  value: {
-    fontSize: 16,
-    color: '#222',
-    flex: 1,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#222',
+    borderBottomColor: '#eee',
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingVertical: 4,
-  },
-  bioInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  bioText: {
-    fontSize: 16,
-    color: '#555',
-    lineHeight: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
   },
   hobbiesContainer: {
     flexDirection: 'row',
@@ -348,28 +307,57 @@ const styles = StyleSheet.create({
   },
   hobbyTag: {
     backgroundColor: '#8B1E2D',
+    borderRadius: 16,
+    marginBottom: 8,
+    marginRight: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 8,
-    marginBottom: 8,
   },
   hobbyText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '500',
   },
-  settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  infoRow: {
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    flexDirection: 'row',
+    marginBottom: 8,
   },
-  settingText: {
-    fontSize: 16,
+  input: {
+    borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
     color: '#222',
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 4,
+  },
+  label: {
+    color: '#555',
+    fontSize: 16,
+    fontWeight: '600',
+    width: 80,
+  },
+  logoutContainer: {
+    marginBottom: 24,
+    marginTop: 24,
+  },
+  photo: {
+    height: '100%',
+    resizeMode: 'cover',
+    width: '100%',
+  },
+  photoSlot: {
+    aspectRatio: 1,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    marginBottom: 8,
+    overflow: 'hidden',
+    width: '30%',
+  },
+  photosGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   resetButton: {
     borderBottomColor: '#8B1E2D',
@@ -379,8 +367,35 @@ const styles = StyleSheet.create({
     color: '#8B1E2D',
     fontWeight: '600',
   },
-  logoutContainer: {
-    marginTop: 24,
-    marginBottom: 24,
+  section: {
+    marginVertical: 16,
+  },
+  sectionTitle: {
+    color: '#222',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  settingItem: {
+    alignItems: 'center',
+    borderBottomColor: '#f0f0f0',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  settingText: {
+    color: '#222',
+    fontSize: 16,
+  },
+  title: {
+    color: '#8B1E2D',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  value: {
+    color: '#222',
+    flex: 1,
+    fontSize: 16,
   },
 });

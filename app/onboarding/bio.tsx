@@ -30,7 +30,9 @@ export default function OnboardingBio() {
       buttonDisabled={!bio.trim()}
     >
       <Text style={styles.title}>Describe Your True Self!</Text>
-      <Text style={styles.subtitle}>Add a bio to your profile so people get to know you before swiping!</Text>
+      <Text style={styles.subtitle}>
+        Add a bio to your profile so people get to know you before swiping!
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="I'm a person that loves...."
@@ -46,33 +48,33 @@ export default function OnboardingBio() {
 }
 
 const styles = StyleSheet.create({
+  input: {
+    backgroundColor: '#fafafa',
+    borderColor: '#ccc',
+    borderRadius: 24,
+    borderWidth: 1,
+    fontFamily: 'System',
+    fontSize: 18,
+    marginBottom: 32,
+    minHeight: 120,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    textAlign: 'left',
+    width: '100%', // Replace with Figma font if available
+  },
+  subtitle: {
+    color: '#555',
+    fontFamily: 'System',
+    fontSize: 16,
+    marginBottom: 32,
+    textAlign: 'center', // Replace with Figma font if available
+  },
   title: {
+    color: '#222',
+    fontFamily: 'System',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#222',
-    textAlign: 'center',
-    fontFamily: 'System', // Replace with Figma font if available
+    textAlign: 'center', // Replace with Figma font if available
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 32,
-    textAlign: 'center',
-    fontFamily: 'System', // Replace with Figma font if available
-  },
-  input: {
-    width: '100%',
-    minHeight: 120,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    fontSize: 18,
-    marginBottom: 32,
-    backgroundColor: '#fafafa',
-    textAlign: 'left',
-    fontFamily: 'System', // Replace with Figma font if available
-  },
-}); 
+});

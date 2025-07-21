@@ -1,5 +1,12 @@
 import React, { ReactNode } from 'react';
-import { View, StyleSheet, SafeAreaView, ActivityIndicator, TouchableOpacity, Text } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  ActivityIndicator,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
 import { useOnboarding } from '../hooks/useOnboarding';
 
 interface OnboardingStepData {
@@ -49,12 +56,12 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
         <View style={styles.progressBarContainer}>
           <View style={[styles.progressBar, { width: `${progress}%` }]} />
         </View>
-        
+
         {children}
-        
-        <TouchableOpacity 
-          style={[styles.button, (buttonDisabled || isSaving) && styles.buttonDisabled]} 
-          onPress={handleContinue} 
+
+        <TouchableOpacity
+          style={[styles.button, (buttonDisabled || isSaving) && styles.buttonDisabled]}
+          onPress={handleContinue}
           disabled={buttonDisabled || isSaving}
         >
           {isSaving ? (
@@ -69,46 +76,46 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  progressBarContainer: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    marginBottom: 32,
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#8B1E2D',
-    borderRadius: 4,
-  },
   button: {
-    width: '100%',
-    height: 48,
+    alignItems: 'center',
     backgroundColor: '#8B1E2D',
     borderRadius: 24,
-    alignItems: 'center',
+    height: 48,
     justifyContent: 'center',
     marginTop: 16,
+    width: '100%',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  buttonDisabled: {
-    opacity: 0.7,
+  container: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    flex: 1,
+    justifyContent: 'flex-start',
+    paddingBottom: 32,
+    paddingHorizontal: 24,
+    paddingTop: 80,
+  },
+  progressBar: {
+    backgroundColor: '#8B1E2D',
+    borderRadius: 4,
+    height: 8,
+  },
+  progressBarContainer: {
+    backgroundColor: '#eee',
+    borderRadius: 4,
+    height: 8,
+    marginBottom: 32,
+    width: '100%',
+  },
+  safeArea: {
+    backgroundColor: '#fff',
+    flex: 1,
   },
 });

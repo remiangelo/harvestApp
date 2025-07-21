@@ -2,10 +2,7 @@ import { supabase } from './supabase';
 import { uploadPhoto } from './profiles';
 
 // Save onboarding data after each step
-export const saveOnboardingStep = async (
-  userId: string,
-  stepData: Record<string, any>
-) => {
+export const saveOnboardingStep = async (userId: string, stepData: Record<string, any>) => {
   try {
     // Handle special cases for data transformation
     const processedData: Record<string, any> = {};
@@ -41,14 +38,22 @@ export const saveOnboardingStep = async (
         }
         return null;
       });
-      
+
       const uploadResults = await Promise.all(uploadPromises);
-      processedData.photos = uploadResults.filter(url => url !== null);
+      processedData.photos = uploadResults.filter((url) => url !== null);
     }
 
     // Copy over other fields directly
-    const directFields = ['preferences', 'bio', 'nickname', 'hobbies', 'goals', 'gender', 'location'];
-    directFields.forEach(field => {
+    const directFields = [
+      'preferences',
+      'bio',
+      'nickname',
+      'hobbies',
+      'goals',
+      'gender',
+      'location',
+    ];
+    directFields.forEach((field) => {
       if (stepData[field] !== undefined) {
         processedData[field] = stepData[field];
       }
@@ -66,7 +71,7 @@ export const saveOnboardingStep = async (
       .single();
 
     if (error) throw error;
-    
+
     return { data, error: null };
   } catch (error) {
     console.error('Error saving onboarding step:', error);
@@ -88,7 +93,7 @@ export const completeOnboarding = async (userId: string) => {
       .single();
 
     if (error) throw error;
-    
+
     return { data, error: null };
   } catch (error) {
     console.error('Error completing onboarding:', error);
@@ -101,7 +106,8 @@ export const getOnboardingProgress = async (userId: string) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select(`
+      .select(
+        `
         age,
         preferences,
         bio,
@@ -113,7 +119,8 @@ export const getOnboardingProgress = async (userId: string) => {
         gender,
         location,
         onboarding_completed
-      `)
+      `
+      )
       .eq('id', userId)
       .single();
 
@@ -121,7 +128,7 @@ export const getOnboardingProgress = async (userId: string) => {
 
     // Calculate which step the user is on based on completed fields
     let currentStep = 'age'; // Default to first step
-    
+
     if (data) {
       // Check fields in reverse order to find the last completed step
       if (data.onboarding_completed) {
@@ -148,12 +155,12 @@ export const getOnboardingProgress = async (userId: string) => {
         currentStep = 'preferences';
       }
     }
-    
-    return { 
-      data, 
+
+    return {
+      data,
       currentStep,
       isComplete: data?.onboarding_completed || false,
-      error: null 
+      error: null,
     };
   } catch (error) {
     console.error('Error getting onboarding progress:', error);

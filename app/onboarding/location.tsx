@@ -40,19 +40,19 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     marginTop: 16,
   },
+  subtitle: {
+    color: '#555',
+    fontFamily: 'System',
+    fontSize: 16,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
   title: {
+    color: '#222',
+    fontFamily: 'System',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#222',
     textAlign: 'center',
-    fontFamily: 'System',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 32,
-    textAlign: 'center',
-    fontFamily: 'System',
-  },
-}); 
+});

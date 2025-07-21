@@ -95,36 +95,33 @@ export default function GardenerScreen() {
         </View>
 
         {/* Growth Opportunities Section */}
-        <LinearGradient
-          colors={['#A0354E', '#8B1E2D']}
-          style={styles.growthSection}
-        >
+        <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.growthSection}>
           <Text style={styles.growthTitle}>Growth</Text>
           <Text style={styles.growthTitle}>Opportunities</Text>
 
           {/* Unit Cards */}
           <View style={styles.unitsRow}>
             {units.map((unit) => (
-              <TouchableOpacity 
-                key={unit.id} 
-                style={styles.unitCard}
-                disabled={unit.isLocked}
-              >
+              <TouchableOpacity key={unit.id} style={styles.unitCard} disabled={unit.isLocked}>
                 <Text style={styles.unitLabel}>Unit {unit.number}</Text>
-                <View style={[
-                  styles.unitCircle,
-                  unit.isCompleted && styles.unitCompleted,
-                  unit.isCurrent && styles.unitCurrent,
-                  unit.isLocked && styles.unitLocked,
-                ]}>
+                <View
+                  style={[
+                    styles.unitCircle,
+                    unit.isCompleted && styles.unitCompleted,
+                    unit.isCurrent && styles.unitCurrent,
+                    unit.isLocked && styles.unitLocked,
+                  ]}
+                >
                   {unit.isLocked ? (
                     <Ionicons name="lock-closed" size={24} color="#666" />
                   ) : (
-                    <Text style={[
-                      styles.unitNumber,
-                      unit.isCompleted && styles.unitNumberCompleted,
-                      unit.isCurrent && styles.unitNumberCurrent,
-                    ]}>
+                    <Text
+                      style={[
+                        styles.unitNumber,
+                        unit.isCompleted && styles.unitNumberCompleted,
+                        unit.isCurrent && styles.unitNumberCurrent,
+                      ]}
+                    >
                       {unit.title}
                     </Text>
                   )}
@@ -190,97 +187,182 @@ export default function GardenerScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAFAFA',
+  additionalLessons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
-  header: {
+  avatar: {
     alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5,
-    textAlign: 'center',
-    paddingHorizontal: 40,
+    backgroundColor: '#F5E6F0',
+    borderRadius: 50,
+    height: 100,
+    justifyContent: 'center',
+    marginBottom: 15,
+    width: 100,
   },
   avatarContainer: {
     alignItems: 'center',
     paddingVertical: 20,
   },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#F5E6F0',
-    justifyContent: 'center',
+  coinEmoji: {
+    fontSize: 20,
+  },
+  coinIcon: {
     alignItems: 'center',
-    marginBottom: 15,
+    backgroundColor: '#FFB901',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    marginRight: 10,
+    width: 40,
+  },
+  container: {
+    backgroundColor: '#FAFAFA',
+    flex: 1,
+  },
+  growthSection: {
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    flex: 1,
+    marginTop: 20,
+    paddingBottom: 100,
+    paddingHorizontal: 20,
+    paddingTop: 30,
+  },
+  growthTitle: {
+    color: 'white',
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    paddingBottom: 10,
+    paddingTop: 20,
+  },
+  headerSubtitle: {
+    color: '#666',
+    fontSize: 14,
+    marginTop: 5,
+    paddingHorizontal: 40,
+    textAlign: 'center',
+  },
+  headerTitle: {
+    color: '#1a1a1a',
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  lessonCard: {
+    marginBottom: 20,
+    padding: 25,
+  },
+  lessonDescription: {
+    color: '#666',
+    fontSize: 14,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  lessonNumber: {
+    color: '#1a1a1a',
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  lessonTitle: {
+    color: '#1a1a1a',
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  miniLessonCard: {
+    alignItems: 'center',
+    padding: 20,
+    width: (screenWidth - 60) / 2,
+  },
+  miniLessonTitle: {
+    color: '#1a1a1a',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  rewardItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  rewardLabel: {
+    color: '#666',
+    fontSize: 12,
+  },
+  rewardValue: {
+    color: '#1a1a1a',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  rewardsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 25,
+  },
+  starEmoji: {
+    fontSize: 20,
+  },
+  starIcon: {
+    alignItems: 'center',
+    backgroundColor: '#FFD700',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    marginRight: 10,
+    width: 40,
+  },
+  startButton: {
+    backgroundColor: '#A0354E',
+    borderRadius: 25,
+    paddingVertical: 15,
+  },
+  startButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   startChatButton: {
     backgroundColor: '#A0354E',
+    borderRadius: 25,
     paddingHorizontal: 30,
     paddingVertical: 12,
-    borderRadius: 25,
   },
   startChatText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
   },
-  growthSection: {
-    flex: 1,
-    marginTop: 20,
-    paddingTop: 30,
-    paddingHorizontal: 20,
-    paddingBottom: 100,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-  },
-  growthTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'center',
-  },
-  unitsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 25,
-    marginBottom: 25,
-  },
   unitCard: {
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    padding: 15,
     borderRadius: 16,
+    padding: 15,
     width: (screenWidth - 60) / 3,
   },
-  unitLabel: {
-    color: 'white',
-    fontSize: 12,
-    marginBottom: 8,
-  },
   unitCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 25,
+    height: 50,
+    justifyContent: 'center',
+    width: 50,
   },
   unitCompleted: {
     backgroundColor: '#34C759',
   },
   unitCurrent: {
     backgroundColor: '#FF3B5C',
+  },
+  unitLabel: {
+    color: 'white',
+    fontSize: 12,
+    marginBottom: 8,
   },
   unitLocked: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -296,95 +378,10 @@ const styles = StyleSheet.create({
   unitNumberCurrent: {
     color: 'white',
   },
-  lessonCard: {
-    padding: 25,
-    marginBottom: 20,
-  },
-  lessonNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  lessonTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  lessonDescription: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  rewardsRow: {
+  unitsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: 25,
-  },
-  rewardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  coinIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFB901',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  starIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFD700',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  coinEmoji: {
-    fontSize: 20,
-  },
-  starEmoji: {
-    fontSize: 20,
-  },
-  rewardValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-  },
-  rewardLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  startButton: {
-    backgroundColor: '#A0354E',
-    paddingVertical: 15,
-    borderRadius: 25,
-  },
-  startButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  additionalLessons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  miniLessonCard: {
-    width: (screenWidth - 60) / 2,
-    padding: 20,
-    alignItems: 'center',
-  },
-  miniLessonTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    marginTop: 25,
   },
 });

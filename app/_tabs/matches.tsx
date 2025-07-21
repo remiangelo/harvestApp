@@ -83,12 +83,9 @@ export default function MatchesScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      
+
       {/* Header with gradient background */}
-      <LinearGradient
-        colors={['#A0354E', '#8B1E2D']}
-        style={styles.headerGradient}
-      >
+      <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.headerGradient}>
         <SafeAreaView>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()}>
@@ -102,8 +99,8 @@ export default function MatchesScreen() {
         {/* Recent Matches */}
         <View style={styles.recentMatchesContainer}>
           <Text style={styles.sectionTitle}>Recent Matches</Text>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.matchesScroll}
           >
@@ -134,25 +131,25 @@ export default function MatchesScreen() {
       >
         <ScrollView showsVerticalScrollIndicator={false}>
           {conversations.map((match, index) => (
-            <TouchableOpacity 
-              key={match.id} 
+            <TouchableOpacity
+              key={match.id}
               style={[
                 styles.conversationItem,
-                index === conversations.length - 1 && styles.lastItem
+                index === conversations.length - 1 && styles.lastItem,
               ]}
             >
               <View style={styles.avatarContainer}>
                 <Image source={{ uri: match.photo }} style={styles.avatar} />
                 {match.online && <View style={styles.onlineDot} />}
               </View>
-              
+
               <View style={styles.conversationContent}>
                 <Text style={styles.conversationName}>{match.name}</Text>
                 <Text style={styles.lastMessage} numberOfLines={1}>
                   {match.lastMessage}
                 </Text>
               </View>
-              
+
               <View style={styles.conversationMeta}>
                 <Text style={styles.timestamp}>{match.timestamp}</Text>
                 {match.unread && <View style={styles.unreadDot} />}
@@ -166,61 +163,79 @@ export default function MatchesScreen() {
 }
 
 const styles = StyleSheet.create({
+  avatar: {
+    borderRadius: 25,
+    height: 50,
+    width: 50,
+  },
+  avatarContainer: {
+    marginRight: 12,
+    position: 'relative',
+  },
   container: {
-    flex: 1,
     backgroundColor: '#F5F5F5',
+    flex: 1,
+  },
+  conversationContent: {
+    flex: 1,
+  },
+  conversationItem: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    paddingVertical: 15,
+  },
+  conversationMeta: {
+    alignItems: 'flex-end',
+  },
+  conversationName: {
+    color: '#1a1a1a',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  conversationsContainer: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    flex: 1,
+    marginTop: -20,
+    paddingHorizontal: 20,
+    paddingTop: 25,
+  },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 10,
   },
   headerGradient: {
     paddingBottom: 20,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
   headerTitle: {
+    color: 'white',
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'white',
   },
-  recentMatchesContainer: {
-    paddingHorizontal: 20,
+  lastItem: {
+    borderBottomWidth: 0,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 15,
-  },
-  matchesScroll: {
-    paddingRight: 20,
-  },
-  matchItem: {
-    marginRight: 15,
-  },
-  matchImageContainer: {
-    position: 'relative',
-  },
-  matchImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+  lastMessage: {
+    color: '#666',
+    fontSize: 14,
   },
   likeBadge: {
-    position: 'absolute',
-    bottom: -5,
-    right: -5,
+    alignItems: 'center',
     backgroundColor: '#FF3B5C',
     borderRadius: 12,
+    bottom: -5,
+    flexDirection: 'row',
     paddingHorizontal: 8,
     paddingVertical: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
+    position: 'absolute',
+    right: -5,
   },
   likeCount: {
     color: 'white',
@@ -228,69 +243,51 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 2,
   },
-  conversationsContainer: {
-    flex: 1,
-    marginTop: -20,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 25,
-    paddingHorizontal: 20,
+  matchImage: {
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 35,
+    borderWidth: 3,
+    height: 70,
+    width: 70,
   },
-  conversationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
-  },
-  lastItem: {
-    borderBottomWidth: 0,
-  },
-  avatarContainer: {
+  matchImageContainer: {
     position: 'relative',
-    marginRight: 12,
   },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  matchItem: {
+    marginRight: 15,
+  },
+  matchesScroll: {
+    paddingRight: 20,
   },
   onlineDot: {
-    position: 'absolute',
+    backgroundColor: '#34C759',
+    borderColor: 'white',
+    borderRadius: 6,
+    borderWidth: 2,
     bottom: 2,
+    height: 12,
+    position: 'absolute',
     right: 2,
     width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#34C759',
-    borderWidth: 2,
-    borderColor: 'white',
   },
-  conversationContent: {
-    flex: 1,
+  recentMatchesContainer: {
+    paddingHorizontal: 20,
   },
-  conversationName: {
+  sectionTitle: {
+    color: 'rgba(255, 255, 255, 0.9)',
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 4,
-  },
-  lastMessage: {
-    fontSize: 14,
-    color: '#666',
-  },
-  conversationMeta: {
-    alignItems: 'flex-end',
+    marginBottom: 15,
   },
   timestamp: {
-    fontSize: 12,
     color: '#999',
+    fontSize: 12,
     marginBottom: 8,
   },
   unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
     backgroundColor: '#A0354E',
+    borderRadius: 4,
+    height: 8,
+    width: 8,
   },
 });

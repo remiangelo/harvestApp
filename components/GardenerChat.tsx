@@ -65,10 +65,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onClose }) => {
     return (
       <View
         key={message.id}
-        style={[
-          styles.messageContainer,
-          isGardener ? styles.gardenerMessage : styles.userMessage,
-        ]}
+        style={[styles.messageContainer, isGardener ? styles.gardenerMessage : styles.userMessage]}
       >
         {isGardener && (
           <Avatar
@@ -79,10 +76,9 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onClose }) => {
         )}
         <Card
           variant={isGardener ? 'outlined' : 'filled'}
-          style={[
-            styles.messageBubble,
-            isGardener ? styles.gardenerBubble : styles.userBubble,
-          ] as any}
+          style={
+            [styles.messageBubble, isGardener ? styles.gardenerBubble : styles.userBubble] as any
+          }
         >
           <Text
             variant="body"
@@ -169,29 +165,60 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onClose }) => {
 };
 
 const styles = StyleSheet.create({
+  avatar: {
+    marginRight: theme.spacing.sm,
+    marginTop: theme.spacing.xs,
+  },
+  closeButton: {
+    padding: theme.spacing.sm,
+  },
   container: {
-    flex: 1,
     backgroundColor: theme.colors.background,
+    flex: 1,
+  },
+  gardenerBubble: {
+    backgroundColor: theme.colors.background,
+    marginLeft: 0,
+  },
+  gardenerMessage: {
+    justifyContent: 'flex-start',
   },
   header: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+    borderBottomColor: theme.colors.border,
+    borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     padding: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    backgroundColor: theme.colors.background,
     ...theme.shadows.sm,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   headerInfo: {
     marginLeft: theme.spacing.md,
   },
-  closeButton: {
-    padding: theme.spacing.sm,
+  headerLeft: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  input: {
+    marginBottom: 0,
+  },
+  inputContainer: {
+    backgroundColor: theme.colors.background,
+    borderTopColor: theme.colors.border,
+    borderTopWidth: 1,
+    padding: theme.spacing.md,
+  },
+  messageBubble: {
+    maxWidth: '75%',
+    padding: theme.spacing.md,
+  },
+  messageContainer: {
+    flexDirection: 'row',
+    marginBottom: theme.spacing.md,
+  },
+  messageText: {
+    marginBottom: theme.spacing.xs,
   },
   messagesContainer: {
     flex: 1,
@@ -199,44 +226,13 @@ const styles = StyleSheet.create({
   messagesContent: {
     padding: theme.spacing.md,
   },
-  messageContainer: {
-    flexDirection: 'row',
-    marginBottom: theme.spacing.md,
-  },
-  gardenerMessage: {
-    justifyContent: 'flex-start',
-  },
-  userMessage: {
-    justifyContent: 'flex-end',
-  },
-  avatar: {
-    marginRight: theme.spacing.sm,
-    marginTop: theme.spacing.xs,
-  },
-  messageBubble: {
-    maxWidth: '75%',
-    padding: theme.spacing.md,
-  },
-  gardenerBubble: {
-    backgroundColor: theme.colors.background,
-    marginLeft: 0,
+  timestamp: {
+    fontSize: 11,
   },
   userBubble: {
     backgroundColor: theme.colors.primary,
   },
-  messageText: {
-    marginBottom: theme.spacing.xs,
-  },
-  timestamp: {
-    fontSize: 11,
-  },
-  inputContainer: {
-    padding: theme.spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    backgroundColor: theme.colors.background,
-  },
-  input: {
-    marginBottom: 0,
+  userMessage: {
+    justifyContent: 'flex-end',
   },
 });

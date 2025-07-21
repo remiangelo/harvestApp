@@ -1,19 +1,10 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { DemoProfile } from '../data/demoProfiles';
-import {
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -42,7 +33,7 @@ export default function CleanSwipeCard({
   onSuperLike,
 }: CleanSwipeCardProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  
+
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -68,21 +59,30 @@ export default function CleanSwipeCard({
 
   const handleSwipeComplete = (direction: 'left' | 'right' | 'up') => {
     'worklet';
-    runOnJS(triggerHaptic)();
-    
-    // Reset animation values
-    translateX.value = 0;
-    translateY.value = 0;
-    scale.value = 1;
-    opacity.value = 1;
-    
-    if (direction === 'left') {
-      runOnJS(onDislike)();
-    } else if (direction === 'right') {
-      runOnJS(onLike)();
-    } else if (direction === 'up' && onSuperLike) {
-      runOnJS(onSuperLike)();
-    }
+    runOnJS(() => {
+      try {
+        triggerHaptic();
+
+        // Reset animation values immediately
+        translateX.value = 0;
+        translateY.value = 0;
+        scale.value = 1;
+        opacity.value = 1;
+
+        // Call the appropriate handler after a small delay
+        setTimeout(() => {
+          if (direction === 'left') {
+            onDislike();
+          } else if (direction === 'right') {
+            onLike();
+          } else if (direction === 'up' && onSuperLike) {
+            onSuperLike();
+          }
+        }, 50);
+      } catch (error) {
+        console.error('Error in handleSwipeComplete:', error);
+      }
+    })();
   };
 
   const panGesture = Gesture.Pan()
@@ -97,19 +97,22 @@ export default function CleanSwipeCard({
 
       if (shouldSwipeLeft) {
         translateX.value = withTiming(-screenWidth * 1.5, { duration: 300 });
-        opacity.value = withTiming(0, { duration: 300 }, () => {
-          runOnJS(handleSwipeComplete)('left');
-        });
+        opacity.value = withTiming(0, { duration: 300 });
+        runOnJS(() => {
+          setTimeout(() => handleSwipeComplete('left'), 300);
+        })();
       } else if (shouldSwipeRight) {
         translateX.value = withTiming(screenWidth * 1.5, { duration: 300 });
-        opacity.value = withTiming(0, { duration: 300 }, () => {
-          runOnJS(handleSwipeComplete)('right');
-        });
+        opacity.value = withTiming(0, { duration: 300 });
+        runOnJS(() => {
+          setTimeout(() => handleSwipeComplete('right'), 300);
+        })();
       } else if (shouldSwipeUp && onSuperLike) {
         translateY.value = withTiming(-screenHeight, { duration: 300 });
-        opacity.value = withTiming(0, { duration: 300 }, () => {
-          runOnJS(handleSwipeComplete)('up');
-        });
+        opacity.value = withTiming(0, { duration: 300 });
+        runOnJS(() => {
+          setTimeout(() => handleSwipeComplete('up'), 300);
+        })();
       } else {
         resetPosition();
       }
@@ -134,31 +137,18 @@ export default function CleanSwipeCard({
   });
 
   const likeOpacityStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      translateX.value,
-      [0, 100],
-      [0, 1],
-      Extrapolation.CLAMP
-    ),
+    opacity: interpolate(translateX.value, [0, 100], [0, 1], Extrapolation.CLAMP),
   }));
 
   const nopeOpacityStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      translateX.value,
-      [-100, 0],
-      [1, 0],
-      Extrapolation.CLAMP
-    ),
+    opacity: interpolate(translateX.value, [-100, 0], [1, 0], Extrapolation.CLAMP),
   }));
 
   const currentPhoto = profile.photos[currentPhotoIndex];
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#F5E6F0', '#FCF4F9', '#FFFFFF']}
-        style={styles.background}
-      />
+      <LinearGradient colors={['#F5E6F0', '#FCF4F9', '#FFFFFF']} style={styles.background} />
 
       <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.card, animatedCardStyle]}>
@@ -176,10 +166,7 @@ export default function CleanSwipeCard({
               <TouchableOpacity
                 key={index}
                 onPress={() => setCurrentPhotoIndex(index)}
-                style={[
-                  styles.dot,
-                  index === currentPhotoIndex && styles.activeDot,
-                ]}
+                style={[styles.dot, index === currentPhotoIndex && styles.activeDot]}
               />
             ))}
           </View>
@@ -188,7 +175,7 @@ export default function CleanSwipeCard({
           <Animated.View style={[styles.likeLabel, likeOpacityStyle]}>
             <Text style={styles.likeText}>LIKE</Text>
           </Animated.View>
-          
+
           <Animated.View style={[styles.nopeLabel, nopeOpacityStyle]}>
             <Text style={styles.nopeText}>NOPE</Text>
           </Animated.View>
@@ -203,11 +190,13 @@ export default function CleanSwipeCard({
                 style={StyleSheet.absoluteFillObject}
               />
             </BlurView>
-            
+
             <View style={styles.infoContent}>
               <View style={styles.header}>
-                <Text style={styles.name}>{profile.name} {profile.age}</Text>
-                
+                <Text style={styles.name}>
+                  {profile.name} {profile.age}
+                </Text>
+
                 {/* Compatibility metrics */}
                 <View style={styles.metricsRow}>
                   <View style={styles.metric}>
@@ -216,14 +205,14 @@ export default function CleanSwipeCard({
                     </View>
                     <Text style={styles.metricLabel}>Interests</Text>
                   </View>
-                  
+
                   <View style={styles.metric}>
                     <View style={[styles.metricCircle, { borderColor: '#FFB901' }]}>
                       <Text style={styles.metricText}>98%</Text>
                     </View>
                     <Text style={styles.metricLabel}>Personality</Text>
                   </View>
-                  
+
                   <View style={styles.metric}>
                     <View style={[styles.metricCircle, { borderColor: '#4ECDC4' }]}>
                       <Text style={styles.metricText}>96%</Text>
@@ -254,28 +243,22 @@ export default function CleanSwipeCard({
         <TouchableOpacity style={[styles.actionButton, styles.rewindButton]}>
           <Ionicons name="refresh" size={28} color="#FDB901" />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.dislikeButton]}
-          onPress={onDislike}
-        >
+
+        <TouchableOpacity style={[styles.actionButton, styles.dislikeButton]} onPress={onDislike}>
           <Ionicons name="close" size={35} color="#FF3B30" />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.actionButton, styles.superLikeButton]}
           onPress={onSuperLike}
         >
           <Ionicons name="star" size={28} color="#44BFFF" />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.likeButton]}
-          onPress={onLike}
-        >
+
+        <TouchableOpacity style={[styles.actionButton, styles.likeButton]} onPress={onLike}>
           <Ionicons name="heart" size={30} color="#34C759" />
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={[styles.actionButton, styles.boostButton]}>
           <Ionicons name="flash" size={28} color="#8E5AF7" />
         </TouchableOpacity>
@@ -285,203 +268,23 @@ export default function CleanSwipeCard({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  background: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
-  card: {
-    width: screenWidth - 20,
-    height: screenHeight * 0.7,
-    marginHorizontal: 10,
-    marginTop: 20,
-    borderRadius: 20,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    overflow: 'hidden',
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
-  errorContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    marginTop: 10,
-    color: '#999',
-    fontSize: 16,
-  },
-  photoIndicator: {
-    position: 'absolute',
-    top: 10,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  dot: {
-    width: 30,
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    borderRadius: 2,
-    marginHorizontal: 2,
-  },
-  activeDot: {
-    backgroundColor: 'white',
-  },
-  likeLabel: {
-    position: 'absolute',
-    top: 60,
-    left: 20,
-    backgroundColor: 'rgba(52, 199, 89, 0.9)',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 10,
-    transform: [{ rotate: '-20deg' }],
-  },
-  likeText: {
-    color: 'white',
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  nopeLabel: {
-    position: 'absolute',
-    top: 60,
-    right: 20,
-    backgroundColor: 'rgba(255, 59, 48, 0.9)',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 10,
-    transform: [{ rotate: '20deg' }],
-  },
-  nopeText: {
-    color: 'white',
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  infoContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 180,
-    overflow: 'hidden',
-  },
-  infoContent: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-  },
-  header: {
-    marginBottom: 12,
-  },
-  name: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 8,
-  },
-  metricsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 12,
-  },
-  metric: {
-    alignItems: 'center',
-  },
-  metricCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  metricText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-  },
-  metricLabel: {
-    fontSize: 11,
-    color: '#666',
-  },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  location: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 4,
-  },
-  bio: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 18,
-    marginTop: 10,
-  },
-  tags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 10,
-  },
-  tag: {
-    backgroundColor: '#A0354E',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-    marginRight: 6,
-    marginBottom: 6,
-  },
-  tagText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-  },
   actionBar: {
+    alignItems: 'center',
+    bottom: 30,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: 30,
     left: 0,
-    right: 0,
     paddingHorizontal: 20,
+    position: 'absolute',
+    right: 0,
   },
   actionButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'white',
-    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 25,
+    elevation: 3,
+    height: 50,
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -489,26 +292,206 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-    elevation: 3,
+    width: 50,
   },
-  rewindButton: {
-    width: 44,
-    height: 44,
+  activeDot: {
+    backgroundColor: 'white',
   },
-  dislikeButton: {
-    width: 56,
-    height: 56,
+  background: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
-  superLikeButton: {
-    width: 44,
-    height: 44,
-  },
-  likeButton: {
-    width: 56,
-    height: 56,
+  bio: {
+    color: '#333',
+    fontSize: 14,
+    lineHeight: 18,
+    marginTop: 10,
   },
   boostButton: {
-    width: 44,
     height: 44,
+    width: 44,
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    elevation: 5,
+    height: screenHeight * 0.7,
+    marginHorizontal: 10,
+    marginTop: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    width: screenWidth - 20,
+  },
+  container: {
+    flex: 1,
+  },
+  dislikeButton: {
+    height: 56,
+    width: 56,
+  },
+  dot: {
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: 2,
+    height: 4,
+    marginHorizontal: 2,
+    width: 30,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  errorText: {
+    color: '#999',
+    fontSize: 16,
+    marginTop: 10,
+  },
+  header: {
+    marginBottom: 12,
+  },
+  infoContainer: {
+    bottom: 0,
+    height: 180,
+    left: 0,
+    overflow: 'hidden',
+    position: 'absolute',
+    right: 0,
+  },
+  infoContent: {
+    flex: 1,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  likeButton: {
+    height: 56,
+    width: 56,
+  },
+  likeLabel: {
+    backgroundColor: 'rgba(52, 199, 89, 0.9)',
+    borderRadius: 10,
+    left: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    position: 'absolute',
+    top: 60,
+    transform: [{ rotate: '-20deg' }],
+  },
+  likeText: {
+    color: 'white',
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  location: {
+    color: '#666',
+    fontSize: 14,
+    marginLeft: 4,
+  },
+  locationRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 4,
+  },
+  metric: {
+    alignItems: 'center',
+  },
+  metricCircle: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 20,
+    borderWidth: 2,
+    height: 40,
+    justifyContent: 'center',
+    marginBottom: 4,
+    width: 40,
+  },
+  metricLabel: {
+    color: '#666',
+    fontSize: 11,
+  },
+  metricText: {
+    color: '#1a1a1a',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  metricsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 12,
+  },
+  name: {
+    color: '#1a1a1a',
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  nopeLabel: {
+    backgroundColor: 'rgba(255, 59, 48, 0.9)',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    position: 'absolute',
+    right: 20,
+    top: 60,
+    transform: [{ rotate: '20deg' }],
+  },
+  nopeText: {
+    color: 'white',
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  photo: {
+    height: '100%',
+    position: 'absolute',
+    width: '100%',
+  },
+  photoIndicator: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    left: 0,
+    paddingHorizontal: 20,
+    position: 'absolute',
+    right: 0,
+    top: 10,
+  },
+  rewindButton: {
+    height: 44,
+    width: 44,
+  },
+  superLikeButton: {
+    height: 44,
+    width: 44,
+  },
+  tag: {
+    backgroundColor: '#A0354E',
+    borderRadius: 12,
+    marginBottom: 6,
+    marginRight: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  tagText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 10,
   },
 });

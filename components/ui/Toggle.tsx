@@ -37,11 +37,7 @@ export const Toggle: React.FC<ToggleProps> = ({
   }, [value]);
 
   const animatedTrackStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(
-      translateX.value,
-      [0, 1],
-      [inactiveColor, activeColor]
-    ),
+    backgroundColor: interpolateColor(translateX.value, [0, 1], [inactiveColor, activeColor]),
   }));
 
   const animatedThumbStyle = useAnimatedStyle(() => ({
@@ -65,52 +61,42 @@ export const Toggle: React.FC<ToggleProps> = ({
       activeOpacity={0.8}
       disabled={disabled}
     >
-      <Animated.View
-        style={[
-          styles.track,
-          animatedTrackStyle,
-          disabled && styles.disabled,
-        ]}
-      >
+      <Animated.View style={[styles.track, animatedTrackStyle, disabled && styles.disabled]}>
         <Animated.View style={[styles.thumb, animatedThumbStyle]} />
       </Animated.View>
-      {label && (
-        <Text style={[styles.label, disabled && styles.labelDisabled]}>
-          {label}
-        </Text>
-      )}
+      {label && <Text style={[styles.label, disabled && styles.labelDisabled]}>{label}</Text>}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
-  },
-  track: {
-    width: 48,
-    height: 28,
-    borderRadius: 14,
-    padding: 4,
-    justifyContent: 'center',
-  },
-  thumb: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: theme.colors.background,
-    ...theme.shadows.sm,
+    flexDirection: 'row',
   },
   disabled: {
     opacity: 0.5,
   },
   label: {
-    marginLeft: 12,
-    fontSize: 16,
     color: theme.colors.text.primary,
+    fontSize: 16,
+    marginLeft: 12,
   },
   labelDisabled: {
     color: theme.colors.text.tertiary,
+  },
+  thumb: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 10,
+    height: 20,
+    width: 20,
+    ...theme.shadows.sm,
+  },
+  track: {
+    borderRadius: 14,
+    height: 28,
+    justifyContent: 'center',
+    padding: 4,
+    width: 48,
   },
 });

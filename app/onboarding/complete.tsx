@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView } from 'react-native';
+import { View, StyleSheet, SafeAreaView, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useOnboarding } from '../../hooks/useOnboarding';
-import { Button, Text, Card } from '../../components/ui';
+import { Button, Card } from '../../components/ui';
 import { theme } from '../../constants/theme';
 
 export default function OnboardingComplete() {
@@ -19,34 +19,26 @@ export default function OnboardingComplete() {
           <Ionicons name="checkmark-circle" size={120} color={theme.colors.success} />
         </View>
 
-        <Text variant="h1" align="center" style={styles.title}>
-          You're All Set! 🎉
-        </Text>
+        <Text style={styles.title}>You're All Set! 🎉</Text>
 
-        <Text variant="body" align="center" color="secondary" style={styles.subtitle}>
+        <Text style={styles.subtitle}>
           Your profile is complete and you're ready to start your mindful dating journey.
         </Text>
 
         <Card variant="filled" style={styles.infoCard}>
           <View style={styles.infoRow}>
             <Ionicons name="shield-checkmark" size={24} color={theme.colors.primary} />
-            <Text variant="body" style={styles.infoText}>
-              Your profile has been verified
-            </Text>
+            <Text style={styles.infoText}>Your profile has been verified</Text>
           </View>
-          
+
           <View style={styles.infoRow}>
             <Ionicons name="lock-closed" size={24} color={theme.colors.primary} />
-            <Text variant="body" style={styles.infoText}>
-              Your data is secure and private
-            </Text>
+            <Text style={styles.infoText}>Your data is secure and private</Text>
           </View>
-          
+
           <View style={styles.infoRow}>
             <Ionicons name="heart" size={24} color={theme.colors.primary} />
-            <Text variant="body" style={styles.infoText}>
-              Ready to find meaningful connections
-            </Text>
+            <Text style={styles.infoText}>Ready to find meaningful connections</Text>
           </View>
         </Card>
 
@@ -58,7 +50,7 @@ export default function OnboardingComplete() {
           style={styles.button}
         />
 
-        <Text variant="caption" align="center" color="secondary" style={styles.tip}>
+        <Text style={styles.tip}>
           💡 Tip: Visit your Gardener AI coach anytime for dating advice
         </Text>
       </View>
@@ -67,44 +59,56 @@ export default function OnboardingComplete() {
 }
 
 const styles = StyleSheet.create({
+  button: {
+    marginBottom: theme.spacing.xl,
+  },
   container: {
-    flex: 1,
     backgroundColor: theme.colors.background,
+    flex: 1,
   },
   content: {
-    flex: 1,
-    paddingHorizontal: theme.spacing.lg,
-    justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: theme.spacing.lg,
   },
   iconContainer: {
     marginBottom: theme.spacing.xl,
   },
-  title: {
-    marginBottom: theme.spacing.md,
-  },
-  subtitle: {
-    marginBottom: theme.spacing.xxl,
-    paddingHorizontal: theme.spacing.lg,
-  },
   infoCard: {
-    width: '100%',
     marginBottom: theme.spacing.xxl,
     padding: theme.spacing.lg,
+    width: '100%',
   },
   infoRow: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     marginBottom: theme.spacing.md,
   },
   infoText: {
-    marginLeft: theme.spacing.md,
+    color: theme.colors.text.primary,
     flex: 1,
+    fontSize: 14,
+    marginLeft: theme.spacing.md,
   },
-  button: {
-    marginBottom: theme.spacing.xl,
+  subtitle: {
+    color: theme.colors.text.secondary,
+    fontSize: 16,
+    marginBottom: theme.spacing.xxl,
+    paddingHorizontal: theme.spacing.lg,
+    textAlign: 'center',
   },
   tip: {
+    color: theme.colors.text.secondary,
+    fontSize: 14,
     paddingHorizontal: theme.spacing.lg,
+    textAlign: 'center',
+  },
+  title: {
+    color: theme.colors.text.primary,
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: theme.spacing.md,
+    textAlign: 'center',
   },
 });

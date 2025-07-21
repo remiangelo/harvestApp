@@ -27,7 +27,10 @@ export default function OnboardingDistance() {
       onValidate={handleValidate}
     >
       <Text style={styles.title}>Find Match Nearby</Text>
-      <Text style={styles.subtitle}>Select your preferred distance range to discover matches conveniently. We’ll help you find love close by.</Text>
+      <Text style={styles.subtitle}>
+        Select your preferred distance range to discover matches conveniently. We’ll help you find
+        love close by.
+      </Text>
       <View style={styles.sliderRow}>
         <Text style={styles.sliderLabel}>Distance Preference</Text>
         <Text style={styles.sliderValue}>{distance} km</Text>
@@ -48,42 +51,42 @@ export default function OnboardingDistance() {
 }
 
 const styles = StyleSheet.create({
+  slider: {
+    height: 40,
+    marginBottom: 32,
+    width: '100%',
+  },
+  sliderLabel: {
+    color: '#222',
+    fontFamily: 'System',
+    fontSize: 16,
+  },
+  sliderRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    width: '100%',
+  },
+  sliderValue: {
+    color: '#8B1E2D',
+    fontFamily: 'System',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  subtitle: {
+    color: '#555',
+    fontFamily: 'System',
+    fontSize: 16,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
   title: {
+    color: '#222',
+    fontFamily: 'System',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#222',
     textAlign: 'center',
-    fontFamily: 'System',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 32,
-    textAlign: 'center',
-    fontFamily: 'System',
-  },
-  sliderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 8,
-  },
-  sliderLabel: {
-    fontSize: 16,
-    color: '#222',
-    fontFamily: 'System',
-  },
-  sliderValue: {
-    fontSize: 16,
-    color: '#8B1E2D',
-    fontWeight: 'bold',
-    fontFamily: 'System',
-  },
-  slider: {
-    width: '100%',
-    height: 40,
-    marginBottom: 32,
-  },
-}); 
+});

@@ -1,21 +1,11 @@
 // UNUSED - Replaced by CleanSwipeCard.tsx
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { DemoProfile } from '../data/demoProfiles';
-import {
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -44,7 +34,15 @@ interface EnhancedSwipeCardProps {
 // Animated circular progress component
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-const CircularProgress = ({ percentage, color, label }: { percentage: number; color: string; label: string }) => {
+const CircularProgress = ({
+  percentage,
+  color,
+  label,
+}: {
+  percentage: number;
+  color: string;
+  label: string;
+}) => {
   const radius = 30;
   const strokeWidth = 4;
   const circumference = 2 * Math.PI * radius;
@@ -93,7 +91,7 @@ export default function EnhancedSwipeCard({
   onSuperLike,
 }: EnhancedSwipeCardProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  
+
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -137,20 +135,14 @@ export default function EnhancedSwipeCard({
     .onUpdate((event) => {
       translateX.value = event.translationX;
       translateY.value = event.translationY;
-      
-      const dragDistance = Math.sqrt(
-        event.translationX ** 2 + event.translationY ** 2
-      );
-      scale.value = interpolate(
-        dragDistance,
-        [0, 200],
-        [1, 0.98],
-        Extrapolation.CLAMP
-      );
-      
-      const shouldTriggerHaptic = Math.abs(event.translationX) > SWIPE_THRESHOLD || 
-                                  (event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD);
-      
+
+      const dragDistance = Math.sqrt(event.translationX ** 2 + event.translationY ** 2);
+      scale.value = interpolate(dragDistance, [0, 200], [1, 0.98], Extrapolation.CLAMP);
+
+      const shouldTriggerHaptic =
+        Math.abs(event.translationX) > SWIPE_THRESHOLD ||
+        (event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD);
+
       if (shouldTriggerHaptic && !hasTriggeredHaptic.value) {
         hasTriggeredHaptic.value = true;
         runOnJS(triggerHaptic)();
@@ -159,9 +151,12 @@ export default function EnhancedSwipeCard({
       }
     })
     .onEnd((event) => {
-      const shouldSwipeLeft = event.translationX < -SWIPE_THRESHOLD || event.velocityX < -SWIPE_VELOCITY;
-      const shouldSwipeRight = event.translationX > SWIPE_THRESHOLD || event.velocityX > SWIPE_VELOCITY;
-      const shouldSwipeUp = event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD;
+      const shouldSwipeLeft =
+        event.translationX < -SWIPE_THRESHOLD || event.velocityX < -SWIPE_VELOCITY;
+      const shouldSwipeRight =
+        event.translationX > SWIPE_THRESHOLD || event.velocityX > SWIPE_VELOCITY;
+      const shouldSwipeUp =
+        event.translationY < -SWIPE_THRESHOLD && Math.abs(event.translationX) < SWIPE_THRESHOLD;
 
       if (shouldSwipeLeft) {
         translateX.value = withSpring(-screenWidth * 1.5);
@@ -197,43 +192,27 @@ export default function EnhancedSwipeCard({
   });
 
   const likeOpacityStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      translateX.value,
-      [0, screenWidth / 4],
-      [0, 1],
-      Extrapolation.CLAMP
-    ),
+    opacity: interpolate(translateX.value, [0, screenWidth / 4], [0, 1], Extrapolation.CLAMP),
   }));
 
   const nopeOpacityStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      translateX.value,
-      [-screenWidth / 4, 0],
-      [1, 0],
-      Extrapolation.CLAMP
-    ),
+    opacity: interpolate(translateX.value, [-screenWidth / 4, 0], [1, 0], Extrapolation.CLAMP),
   }));
 
   const superLikeOpacityStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      translateY.value,
-      [-screenHeight / 6, 0],
-      [1, 0],
-      Extrapolation.CLAMP
-    ),
+    opacity: interpolate(translateY.value, [-screenHeight / 6, 0], [1, 0], Extrapolation.CLAMP),
   }));
 
-  const tapGesture = Gesture.Tap()
-    .onEnd((event) => {
-      const tapX = event.x;
-      const cardWidth = screenWidth - 32;
-      
-      if (tapX < cardWidth / 3 && currentPhotoIndex > 0) {
-        setCurrentPhotoIndex(currentPhotoIndex - 1);
-      } else if (tapX > (cardWidth * 2) / 3 && currentPhotoIndex < profile.photos.length - 1) {
-        setCurrentPhotoIndex(currentPhotoIndex + 1);
-      }
-    });
+  const tapGesture = Gesture.Tap().onEnd((event) => {
+    const tapX = event.x;
+    const cardWidth = screenWidth - 32;
+
+    if (tapX < cardWidth / 3 && currentPhotoIndex > 0) {
+      setCurrentPhotoIndex(currentPhotoIndex - 1);
+    } else if (tapX > (cardWidth * 2) / 3 && currentPhotoIndex < profile.photos.length - 1) {
+      setCurrentPhotoIndex(currentPhotoIndex + 1);
+    }
+  });
 
   const composedGesture = Gesture.Simultaneous(tapGesture, panGesture);
 
@@ -247,22 +226,16 @@ export default function EnhancedSwipeCard({
             style={styles.photo}
             resizeMode="cover"
           />
-          
+
           {/* Gradient overlay */}
-          <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.8)']}
-            style={styles.gradient}
-          />
+          <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} style={styles.gradient} />
 
           {/* Photo indicators */}
           <View style={styles.photoIndicators}>
             {profile.photos.map((_, index) => (
               <View
                 key={index}
-                style={[
-                  styles.indicator,
-                  index === currentPhotoIndex && styles.activeIndicator,
-                ]}
+                style={[styles.indicator, index === currentPhotoIndex && styles.activeIndicator]}
               />
             ))}
           </View>
@@ -271,11 +244,11 @@ export default function EnhancedSwipeCard({
           <Animated.View style={[styles.likeLabel, likeOpacityStyle]}>
             <Text style={styles.likeText}>LIKE</Text>
           </Animated.View>
-          
+
           <Animated.View style={[styles.nopeLabel, nopeOpacityStyle]}>
             <Text style={styles.nopeText}>NOPE</Text>
           </Animated.View>
-          
+
           {onSuperLike && (
             <Animated.View style={[styles.superLikeLabel, superLikeOpacityStyle]}>
               <Text style={styles.superLikeText}>SUPER LIKE</Text>
@@ -298,19 +271,19 @@ export default function EnhancedSwipeCard({
 
               {/* Compatibility metrics */}
               <View style={styles.metricsRow}>
-                <CircularProgress 
-                  percentage={compatibilityScores.interests} 
-                  color={theme.colors.primary} 
+                <CircularProgress
+                  percentage={compatibilityScores.interests}
+                  color={theme.colors.primary}
                   label="Interests"
                 />
-                <CircularProgress 
-                  percentage={compatibilityScores.personality} 
-                  color={theme.colors.success} 
+                <CircularProgress
+                  percentage={compatibilityScores.personality}
+                  color={theme.colors.success}
                   label="Personality"
                 />
-                <CircularProgress 
-                  percentage={compatibilityScores.overall} 
-                  color={theme.colors.info} 
+                <CircularProgress
+                  percentage={compatibilityScores.overall}
+                  color={theme.colors.info}
                   label="Match"
                 />
               </View>
@@ -343,7 +316,7 @@ export default function EnhancedSwipeCard({
 
               {/* Action buttons */}
               <View style={styles.actionButtons}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.actionButton, styles.rejectButton]}
                   onPress={() => {
                     triggerHaptic();
@@ -352,7 +325,7 @@ export default function EnhancedSwipeCard({
                 >
                   <Ionicons name="close" size={30} color={theme.colors.nope} />
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.actionButton, styles.superLikeButton]}
                   onPress={() => {
                     if (onSuperLike) {
@@ -363,7 +336,7 @@ export default function EnhancedSwipeCard({
                 >
                   <Ionicons name="star" size={28} color={theme.colors.superLike} />
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.actionButton, styles.likeButton]}
                   onPress={() => {
                     triggerHaptic();
@@ -382,140 +355,161 @@ export default function EnhancedSwipeCard({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: screenWidth - 32,
-    height: screenHeight * 0.75,
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.xl,
-    ...theme.shadows.xl,
-    overflow: 'hidden',
-    position: 'absolute',
-  },
-  photoContainer: {
-    flex: 1,
-    position: 'relative',
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-  },
-  gradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: '50%',
-  },
-  photoIndicators: {
-    position: 'absolute',
-    top: theme.spacing.md,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
+  actionButton: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: theme.borderRadius.full,
+    borderWidth: 2,
+    height: 56,
     justifyContent: 'center',
-    gap: theme.spacing.xs,
+    width: 56,
   },
-  indicator: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.4)',
+  actionButtons: {
+    flexDirection: 'row',
+    gap: theme.spacing.xl,
+    justifyContent: 'center',
+    marginTop: theme.spacing.sm,
   },
   activeIndicator: {
     backgroundColor: 'white',
   },
-  infoOverlay: {
+  age: {
+    color: theme.colors.text.inverse,
+    fontSize: theme.typography.fontSize['2xl'],
+    opacity: 0.9,
+  },
+  bio: {
+    color: theme.colors.text.inverse,
+    fontSize: theme.typography.fontSize.base,
+    lineHeight: theme.typography.fontSize.base * 1.4,
+    opacity: 0.9,
+  },
+  container: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.xl,
+    height: screenHeight * 0.75,
+    width: screenWidth - 32,
+    ...theme.shadows.xl,
+    overflow: 'hidden',
     position: 'absolute',
+  },
+  gradient: {
     bottom: 0,
+    height: '50%',
     left: 0,
+    position: 'absolute',
     right: 0,
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xl,
+  },
+  headerRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  indicator: {
+    backgroundColor: 'rgba(255,255,255,0.4)',
+    borderRadius: 2,
+    height: 4,
+    width: 40,
   },
   infoContent: {
     gap: theme.spacing.md,
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  infoOverlay: {
+    bottom: 0,
+    left: 0,
+    padding: theme.spacing.lg,
+    paddingBottom: theme.spacing.xl,
+    position: 'absolute',
+    right: 0,
   },
-  nameContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: theme.spacing.sm,
+  likeButton: {
+    borderColor: theme.colors.like,
   },
-  name: {
-    fontSize: theme.typography.fontSize['3xl'],
+  likeLabel: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderColor: theme.colors.like,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 4,
+    left: 20,
+    padding: theme.spacing.sm,
+    position: 'absolute',
+    top: 60,
+    transform: [{ rotate: '-20deg' }],
+  },
+  likeText: {
+    color: theme.colors.like,
+    fontSize: 36,
     fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.inverse,
   },
-  age: {
-    fontSize: theme.typography.fontSize['2xl'],
-    color: theme.colors.text.inverse,
-    opacity: 0.9,
+  metricContainer: {
+    alignItems: 'center',
+    position: 'relative',
   },
-  verifiedBadge: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: theme.borderRadius.full,
-    padding: theme.spacing.xs,
+  metricContent: {
+    alignItems: 'center',
+    height: 70,
+    justifyContent: 'center',
+  },
+  metricLabel: {
+    color: theme.colors.text.inverse,
+    fontSize: theme.typography.fontSize.xs,
+    opacity: 0.8,
+  },
+  metricPercentage: {
+    color: theme.colors.text.inverse,
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+  },
+  metricSvg: {
+    position: 'absolute',
   },
   metricsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: theme.spacing.sm,
   },
-  metricContainer: {
-    alignItems: 'center',
+  name: {
+    color: theme.colors.text.inverse,
+    fontSize: theme.typography.fontSize['3xl'],
+    fontWeight: theme.typography.fontWeight.bold,
+  },
+  nameContainer: {
+    alignItems: 'baseline',
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+  },
+  nopeLabel: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderColor: theme.colors.nope,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 4,
+    padding: theme.spacing.sm,
+    position: 'absolute',
+    right: 20,
+    top: 60,
+    transform: [{ rotate: '20deg' }],
+  },
+  nopeText: {
+    color: theme.colors.nope,
+    fontSize: 36,
+    fontWeight: theme.typography.fontWeight.bold,
+  },
+  photo: {
+    height: '100%',
+    width: '100%',
+  },
+  photoContainer: {
+    flex: 1,
     position: 'relative',
   },
-  metricSvg: {
-    position: 'absolute',
-  },
-  metricContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 70,
-  },
-  metricPercentage: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.inverse,
-  },
-  metricLabel: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.text.inverse,
-    opacity: 0.8,
-  },
-  tagsContainer: {
+  photoIndicators: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: theme.spacing.xs,
-  },
-  tag: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  bio: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.text.inverse,
-    opacity: 0.9,
-    lineHeight: theme.typography.fontSize.base * 1.4,
-  },
-  actionButtons: {
-    flexDirection: 'row',
     justifyContent: 'center',
-    gap: theme.spacing.xl,
-    marginTop: theme.spacing.sm,
-  },
-  actionButton: {
-    width: 56,
-    height: 56,
-    borderRadius: theme.borderRadius.full,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: theme.spacing.md,
   },
   rejectButton: {
     borderColor: theme.colors.nope,
@@ -523,54 +517,33 @@ const styles = StyleSheet.create({
   superLikeButton: {
     borderColor: theme.colors.superLike,
   },
-  likeButton: {
-    borderColor: theme.colors.like,
-  },
-  likeLabel: {
-    position: 'absolute',
-    top: 60,
-    left: 20,
-    padding: theme.spacing.sm,
-    borderWidth: 4,
-    borderColor: theme.colors.like,
-    borderRadius: theme.borderRadius.md,
-    transform: [{ rotate: '-20deg' }],
-    backgroundColor: 'rgba(255,255,255,0.9)',
-  },
-  likeText: {
-    fontSize: 36,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.like,
-  },
-  nopeLabel: {
-    position: 'absolute',
-    top: 60,
-    right: 20,
-    padding: theme.spacing.sm,
-    borderWidth: 4,
-    borderColor: theme.colors.nope,
-    borderRadius: theme.borderRadius.md,
-    transform: [{ rotate: '20deg' }],
-    backgroundColor: 'rgba(255,255,255,0.9)',
-  },
-  nopeText: {
-    fontSize: 36,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.nope,
-  },
   superLikeLabel: {
-    position: 'absolute',
+    alignItems: 'center',
     bottom: 100,
     left: 0,
+    position: 'absolute',
     right: 0,
-    alignItems: 'center',
   },
   superLikeText: {
+    color: theme.colors.superLike,
     fontSize: 36,
     fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.superLike,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
+  },
+  tag: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.xs,
+  },
+  verifiedBadge: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: theme.borderRadius.full,
+    padding: theme.spacing.xs,
   },
 });

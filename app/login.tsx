@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Alert,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -66,8 +75,8 @@ export default function LoginScreen() {
         [
           {
             text: 'Continue',
-            onPress: () => router.push('/onboarding')
-          }
+            onPress: () => router.push('/onboarding'),
+          },
         ]
       );
     }
@@ -76,7 +85,7 @@ export default function LoginScreen() {
   // For development/demo purposes only - TEST MODE
   const handleTestMode = async () => {
     setLoading(true);
-    
+
     // Create a mock user for testing without Supabase
     const mockUser: DemoUser = {
       email: 'testuser@harvest.com',
@@ -88,21 +97,21 @@ export default function LoginScreen() {
       bio: 'Testing the app without email auth',
       location: 'Test City',
       photos: [],
-      onboardingCompleted: false
+      onboardingCompleted: false,
     };
-    
+
     try {
       // Store in AsyncStorage first
       await AsyncStorage.setItem('harvest-test-mode', 'true');
       await AsyncStorage.setItem('harvest-test-user', JSON.stringify(mockUser));
-      
+
       // Update auth store to mark as authenticated in test mode
       setTestMode(true);
       setAuthenticated(true);
-      
+
       // Set the mock user in the user store
       setCurrentUser(mockUser);
-      
+
       // Small delay to ensure state updates propagate
       setTimeout(() => {
         setLoading(false);
@@ -117,11 +126,15 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={28} color={theme.colors.text.primary} />
+      </TouchableOpacity>
+
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -142,7 +155,7 @@ export default function LoginScreen() {
           {/* Form Section */}
           <View style={styles.formSection}>
             <Input
-              label={isLogin ? "Email" : "Your Email"}
+              label={isLogin ? 'Email' : 'Your Email'}
               placeholder="Enter your email"
               value={email}
               onChangeText={setEmail}
@@ -152,16 +165,18 @@ export default function LoginScreen() {
             />
 
             <Input
-              label={isLogin ? "Password" : "Create Password"}
-              placeholder={isLogin ? "Enter your password" : "Min. 6 characters"}
+              label={isLogin ? 'Password' : 'Create Password'}
+              placeholder={isLogin ? 'Enter your password' : 'Min. 6 characters'}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
-              leftIcon={<Ionicons name="lock-closed" size={20} color={theme.colors.text.secondary} />}
+              leftIcon={
+                <Ionicons name="lock-closed" size={20} color={theme.colors.text.secondary} />
+              }
               rightIcon={
                 <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
+                  name={showPassword ? 'eye-off' : 'eye'}
                   size={20}
                   color={theme.colors.text.secondary}
                 />
@@ -177,7 +192,9 @@ export default function LoginScreen() {
             />
 
             <Button
-              title={isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+              title={
+                isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'
+              }
               onPress={() => setIsLogin(!isLogin)}
               variant="ghost"
               style={styles.switchButton}
@@ -193,7 +210,7 @@ export default function LoginScreen() {
                   </Text>
                   <View style={styles.dividerLine} />
                 </View>
-                
+
                 <Button
                   title="Enter Test Mode (No Email Required)"
                   onPress={handleTestMode}
@@ -213,8 +230,8 @@ export default function LoginScreen() {
                 Development Mode
               </Text>
               <Text variant="caption" color="secondary" style={styles.infoText}>
-                Use "Test Mode" button above to bypass email authentication.
-                This creates a local test user for development.
+                Use "Test Mode" button above to bypass email authentication. This creates a local
+                test user for development.
               </Text>
             </Card>
           )}
@@ -225,45 +242,32 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    left: 20,
+    padding: 8,
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 20,
+    zIndex: 1,
+  },
   container: {
-    flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  keyboardView: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.xl,
-    justifyContent: 'center',
-  },
-  logoSection: {
+  divider: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xxl,
+    flexDirection: 'row',
+    marginVertical: theme.spacing.lg,
   },
-  logo: {
-    width: 100,
-    height: 100,
-    borderRadius: theme.borderRadius.full,
-    backgroundColor: theme.colors.secondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.lg,
+  dividerLine: {
+    backgroundColor: theme.colors.border,
+    flex: 1,
+    height: 1,
   },
-  subtitle: {
-    marginTop: theme.spacing.sm,
+  dividerText: {
+    marginHorizontal: theme.spacing.md,
   },
   formSection: {
     marginBottom: theme.spacing.xl,
-  },
-  mainButton: {
-    marginTop: theme.spacing.sm,
-    marginBottom: theme.spacing.lg,
-  },
-  switchButton: {
-    marginBottom: theme.spacing.md,
   },
   infoCard: {
     marginTop: theme.spacing.lg,
@@ -271,20 +275,40 @@ const styles = StyleSheet.create({
   infoText: {
     marginTop: theme.spacing.xs,
   },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: theme.spacing.lg,
-  },
-  dividerLine: {
+  keyboardView: {
     flex: 1,
-    height: 1,
-    backgroundColor: theme.colors.border,
   },
-  dividerText: {
-    marginHorizontal: theme.spacing.md,
+  logo: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.secondary,
+    borderRadius: theme.borderRadius.full,
+    height: 100,
+    justifyContent: 'center',
+    marginBottom: theme.spacing.lg,
+    width: 100,
+    ...theme.shadows.lg,
+  },
+  logoSection: {
+    alignItems: 'center',
+    marginBottom: theme.spacing.xxl,
+  },
+  mainButton: {
+    marginBottom: theme.spacing.lg,
+    marginTop: theme.spacing.sm,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.xl,
+  },
+  subtitle: {
+    marginTop: theme.spacing.sm,
+  },
+  switchButton: {
+    marginBottom: theme.spacing.md,
   },
   testButton: {
     marginBottom: theme.spacing.md,
   },
-}); 
+});

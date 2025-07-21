@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  Text as RNText,
-  TextProps as RNTextProps,
-  StyleSheet,
-  TextStyle,
-} from 'react-native';
+import { Text as RNText, TextProps as RNTextProps, StyleSheet, TextStyle } from 'react-native';
 import { theme } from '../../constants/theme';
 
 interface TextProps extends RNTextProps {
@@ -48,21 +43,21 @@ const styles = StyleSheet.create({
 });
 
 const variantStyles = StyleSheet.create({
-  h1: theme.typography.headers.h1,
-  h2: theme.typography.headers.h2,
-  h3: theme.typography.headers.h3,
-  h4: theme.typography.headers.h4,
   body: theme.typography.body.regular,
   bodyLarge: theme.typography.body.large,
   bodySmall: theme.typography.body.small,
   caption: theme.typography.body.caption,
+  h1: theme.typography.headers.h1,
+  h2: theme.typography.headers.h2,
+  h3: theme.typography.headers.h3,
+  h4: theme.typography.headers.h4,
 });
 
 const colorStyles = StyleSheet.create({
+  error: { color: theme.colors.error },
+  inverse: { color: theme.colors.text.inverse },
   primary: { color: theme.colors.text.primary },
   secondary: { color: theme.colors.text.secondary },
-  tertiary: { color: theme.colors.text.tertiary },
-  inverse: { color: theme.colors.text.inverse },
-  error: { color: theme.colors.error },
   success: { color: theme.colors.success },
+  tertiary: { color: theme.colors.text.tertiary },
 });

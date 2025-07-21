@@ -9,7 +9,7 @@ interface LiquidGlassViewProps {
   tint?: 'light' | 'dark' | 'default';
   style?: ViewStyle;
   glassTint?: string;
-  gradientColors?: string[];
+  gradientColors?: readonly [string, string, ...string[]];
   borderRadius?: number;
 }
 
@@ -22,34 +22,22 @@ export const LiquidGlassView: React.FC<LiquidGlassViewProps> = ({
   gradientColors,
   borderRadius = 16,
 }) => {
-  const defaultGradient = tint === 'dark' 
-    ? ['rgba(0, 0, 0, 0.1)', 'rgba(0, 0, 0, 0.05)']
-    : ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)'];
+  const defaultGradient: readonly [string, string] =
+    tint === 'dark'
+      ? ['rgba(0, 0, 0, 0.1)', 'rgba(0, 0, 0, 0.05)']
+      : ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)'];
 
   const colors = gradientColors || defaultGradient;
 
   if (Platform.OS === 'web') {
-    return (
-      <View style={[styles.webGlass, { borderRadius }, style]}>
-        {children}
-      </View>
-    );
+    return <View style={[styles.webGlass, { borderRadius }, style]}>{children}</View>;
   }
 
   return (
     <View style={[{ borderRadius, overflow: 'hidden' }, style]}>
-      <BlurView 
-        intensity={intensity} 
-        tint={tint}
-        style={StyleSheet.absoluteFillObject}
-      />
+      <BlurView intensity={intensity} tint={tint} style={StyleSheet.absoluteFillObject} />
       {glassTint && (
-        <View 
-          style={[
-            StyleSheet.absoluteFillObject, 
-            { backgroundColor: glassTint }
-          ]} 
-        />
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: glassTint }]} />
       )}
       <LinearGradient
         colors={colors}
@@ -57,9 +45,7 @@ export const LiquidGlassView: React.FC<LiquidGlassViewProps> = ({
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
-      <View style={styles.content}>
-        {children}
-      </View>
+      <View style={styles.content}>{children}</View>
     </View>
   );
 };
@@ -70,7 +56,5 @@ const styles = StyleSheet.create({
   },
   webGlass: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-  },
+  } as ViewStyle,
 });

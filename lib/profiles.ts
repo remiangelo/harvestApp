@@ -47,11 +47,7 @@ export const createProfile = async (userId: string, email: string) => {
 // Get user profile
 export const getProfile = async (userId: string) => {
   try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
 
     if (error) throw error;
     return { data, error: null };
@@ -68,7 +64,7 @@ export const updateProfile = async (userId: string, updates: Partial<UserProfile
     const dbUpdates: any = {
       updated_at: new Date().toISOString(),
     };
-    
+
     // Map fields to database columns (matching migration 003)
     if (updates.nickname) dbUpdates.nickname = updates.nickname;
     if (updates.age !== undefined) dbUpdates.age = updates.age;
@@ -77,10 +73,11 @@ export const updateProfile = async (userId: string, updates: Partial<UserProfile
     if (updates.gender) dbUpdates.gender = updates.gender;
     if (updates.photos) dbUpdates.photos = updates.photos;
     if (updates.hobbies) dbUpdates.hobbies = updates.hobbies;
-    if (updates.distance_preference !== undefined) dbUpdates.distance_preference = updates.distance_preference;
+    if (updates.distance_preference !== undefined)
+      dbUpdates.distance_preference = updates.distance_preference;
     if (updates.preferences) dbUpdates.preferences = updates.preferences;
     if (updates.goals) dbUpdates.goals = updates.goals;
-    
+
     const { data, error } = await supabase
       .from('users')
       .update(dbUpdates)
@@ -106,10 +103,10 @@ export const checkOnboardingStatus = async (userId: string) => {
       .single();
 
     if (error) throw error;
-    
+
     // Consider onboarding complete if basic profile fields are filled
     const completed = !!(data?.bio && data?.age && data?.gender && data?.photos?.length > 0);
-    
+
     return { completed, error: null };
   } catch (error) {
     console.error('Error checking onboarding status:', error);
@@ -123,24 +120,22 @@ export const uploadPhoto = async (userId: string, photoUri: string, photoIndex: 
     // Convert URI to blob
     const response = await fetch(photoUri);
     const blob = await response.blob();
-    
+
     // Create file name
     const fileName = `${userId}/photo_${photoIndex}_${Date.now()}.jpg`;
-    
+
     // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('profile-photos')
-      .upload(fileName, blob, {
-        contentType: 'image/jpeg',
-        upsert: true,
-      });
+    const { data, error } = await supabase.storage.from('profile-photos').upload(fileName, blob, {
+      contentType: 'image/jpeg',
+      upsert: true,
+    });
 
     if (error) throw error;
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('profile-photos')
-      .getPublicUrl(fileName);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('profile-photos').getPublicUrl(fileName);
 
     return { url: publicUrl, error: null };
   } catch (error) {
@@ -155,16 +150,14 @@ export const deletePhoto = async (photoUrl: string) => {
     // Extract file path from URL more safely
     const url = new URL(photoUrl);
     const pathParts = url.pathname.split('/storage/v1/object/public/profile-photos/');
-    
+
     if (pathParts.length !== 2) {
       throw new Error('Invalid photo URL format');
     }
-    
+
     const fileName = pathParts[1];
-    
-    const { error } = await supabase.storage
-      .from('profile-photos')
-      .remove([fileName]);
+
+    const { error } = await supabase.storage.from('profile-photos').remove([fileName]);
 
     if (error) throw error;
     return { error: null };

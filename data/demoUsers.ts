@@ -31,13 +31,13 @@ export const demoUsers: DemoUser[] = [
     photos: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
       'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Hiking', 'Photography', 'Coffee', 'Travel', 'Cooking'],
     distance: 25,
     goals: 'Relationship',
     gender: 'Straight',
-    location: 'San Francisco, CA'
+    location: 'San Francisco, CA',
   },
   {
     email: 'admin@harvest.com',
@@ -51,13 +51,13 @@ export const demoUsers: DemoUser[] = [
     nickname: 'Admin',
     photos: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Technology', 'Fitness', 'Reading', 'Travel', 'Cooking'],
     distance: 30,
     goals: 'Relationship',
     gender: 'Straight',
-    location: 'New York, NY'
+    location: 'New York, NY',
   },
   {
     email: 'test@harvest.com',
@@ -71,23 +71,23 @@ export const demoUsers: DemoUser[] = [
     nickname: 'Test',
     photos: [
       'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face'
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face',
     ],
     hobbies: ['Music', 'Art', 'Travel', 'Photography', 'Dancing'],
     distance: 20,
     goals: 'Dating',
     gender: 'Bisexual',
-    location: 'Los Angeles, CA'
-  }
+    location: 'Los Angeles, CA',
+  },
 ];
 
 export const validateLogin = (email: string, password: string): DemoUser | null => {
   const user = demoUsers.find(
-    user => user.email.toLowerCase() === email.toLowerCase() && user.password === password
+    (user) => user.email.toLowerCase() === email.toLowerCase() && user.password === password
   );
   return user || null;
 };
 
 export const getDemoUserByEmail = (email: string): DemoUser | null => {
-  return demoUsers.find(user => user.email.toLowerCase() === email.toLowerCase()) || null;
-}; 
+  return demoUsers.find((user) => user.email.toLowerCase() === email.toLowerCase()) || null;
+};

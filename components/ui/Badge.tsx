@@ -65,14 +65,7 @@ export const Badge: React.FC<BadgeProps> = ({
       ]}
     >
       {!dot && (
-        <Text
-          style={[
-            styles.text,
-            { fontSize: sizeStyle.fontSize },
-            textStyle,
-          ]}
-          numberOfLines={1}
-        >
+        <Text style={[styles.text, { fontSize: sizeStyle.fontSize }, textStyle]} numberOfLines={1}>
           {value}
         </Text>
       )}
@@ -82,8 +75,8 @@ export const Badge: React.FC<BadgeProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     ...theme.shadows.sm,
   },
   text: {

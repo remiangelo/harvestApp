@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -44,17 +44,26 @@ export default function ProfileScreen() {
     if (currentUser) {
       // Handle age properly - it could be a number, string, or Date
       let age = 25; // default
-      if (currentUser.age) {
-        if (typeof currentUser.age === 'number') {
-          age = currentUser.age;
-        } else if (currentUser.age instanceof Date) {
-          age = new Date().getFullYear() - currentUser.age.getFullYear();
-        } else if (typeof currentUser.age === 'string') {
-          const birthDate = new Date(currentUser.age);
-          if (!isNaN(birthDate.getTime())) {
-            age = new Date().getFullYear() - birthDate.getFullYear();
+      try {
+        if (currentUser.age) {
+          if (typeof currentUser.age === 'number') {
+            age = currentUser.age;
+          } else if (currentUser.age instanceof Date) {
+            age = new Date().getFullYear() - currentUser.age.getFullYear();
+          } else if (typeof currentUser.age === 'string') {
+            // Try to parse as date string
+            const birthDate = new Date(currentUser.age);
+            if (!isNaN(birthDate.getTime())) {
+              age = new Date().getFullYear() - birthDate.getFullYear();
+            } else if (/^\d+$/.test(currentUser.age)) {
+              // If it's just a number as string
+              age = parseInt(currentUser.age, 10);
+            }
           }
         }
+      } catch (error) {
+        console.warn('Failed to parse age:', error);
+        // Keep default age of 25
       }
 
       setProfile({
@@ -109,6 +118,11 @@ export default function ProfileScreen() {
   };
 
   const firstPhoto = profile.photos.find(photo => photo) || null;
+  
+  // Memoize the additional photos array to prevent re-renders
+  const additionalPhotos = useMemo(() => {
+    return profile.photos.slice(1);
+  }, [profile.photos]);
 
   return (
     <View style={styles.container}>
@@ -202,7 +216,7 @@ export default function ProfileScreen() {
         >
           <Text style={styles.sectionTitle}>My Photos</Text>
           <View style={styles.photosGrid}>
-            {profile.photos.slice(1).map((photo, index) => (
+            {additionalPhotos.map((photo, index) => (
               <TouchableOpacity
                 key={index + 1}
                 style={[styles.photoSlot, photo && styles.filledSlot]}

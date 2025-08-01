@@ -64,14 +64,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const getOptimizedSource = (): ImageSourcePropType => {
     if (typeof imageSource === 'object' && 'uri' in imageSource) {
-      const uri = (imageSource as ImageURISource).uri;
-
-      // Add cache control headers for better performance
-      return {
-        ...imageSource,
-        uri,
-        cache: 'force-cache',
-      } as ImageURISource;
+      // Return the image source as-is without cache header
+      // as 'cache' is not a valid prop for ImageURISource in React Native
+      return imageSource;
     }
 
     return imageSource;

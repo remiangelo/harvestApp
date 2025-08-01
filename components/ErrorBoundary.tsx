@@ -1,6 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../constants/theme';
 
 interface Props {
@@ -16,37 +15,50 @@ interface State {
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = {
+      hasError: false,
+      error: null,
+    };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return {
+      hasError: true,
+      error,
+    };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({
+      hasError: false,
+      error: null,
+    });
   };
 
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        return this.props.fallback;
+        return <>{this.props.fallback}</>;
       }
 
       return (
         <View style={styles.container}>
-          <Ionicons name="alert-circle" size={64} color={theme.colors.error} />
           <Text style={styles.title}>Oops! Something went wrong</Text>
-          <Text style={styles.message}>
-            {this.state.error?.message || 'An unexpected error occurred'}
+          <Text style={styles.subtitle}>
+            We're sorry for the inconvenience. Please try again.
           </Text>
           <TouchableOpacity style={styles.button} onPress={this.handleReset}>
             <Text style={styles.buttonText}>Try Again</Text>
           </TouchableOpacity>
+          {__DEV__ && (
+            <View style={styles.errorDetails}>
+              <Text style={styles.errorText}>{this.state.error?.message}</Text>
+            </View>
+          )}
         </View>
       );
     }
@@ -56,35 +68,47 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  button: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.xl,
-    paddingVertical: theme.spacing.md,
-  },
-  buttonText: {
-    color: theme.colors.text.inverse,
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
-  },
   container: {
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
     flex: 1,
     justifyContent: 'center',
-    padding: theme.spacing.xl,
-  },
-  message: {
-    color: theme.colors.text.secondary,
-    fontSize: theme.typography.fontSize.base,
-    marginBottom: theme.spacing.xl,
-    textAlign: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: theme.colors.background,
   },
   title: {
+    fontSize: 24,
+    fontWeight: 'bold',
     color: theme.colors.text.primary,
-    fontSize: theme.typography.fontSize['2xl'],
-    fontWeight: theme.typography.fontWeight.bold,
-    marginBottom: theme.spacing.sm,
-    marginTop: theme.spacing.lg,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+    marginBottom: 30,
+    textAlign: 'center',
+  },
+  button: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 25,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  errorDetails: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+    borderRadius: 10,
+    maxWidth: '90%',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    fontFamily: 'monospace',
   },
 });

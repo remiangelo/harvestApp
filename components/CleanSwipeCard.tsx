@@ -14,9 +14,11 @@ import Animated, {
   interpolate,
   Extrapolation,
   withTiming,
+  cancelAnimation,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { OptimizedImage } from './OptimizedImage';
+import { LiquidGlassBadge } from './liquid/LiquidGlassBadge';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -41,6 +43,16 @@ export default function CleanSwipeCard({
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
+  // Cleanup animations on unmount
+  React.useEffect(() => {
+    return () => {
+      cancelAnimation(translateX);
+      cancelAnimation(translateY);
+      cancelAnimation(scale);
+      cancelAnimation(opacity);
+    };
+  }, []);
+
   // Safety check
   if (!profile || !profile.photos || profile.photos.length === 0) {
     return null;
@@ -59,33 +71,23 @@ export default function CleanSwipeCard({
     scale.value = withSpring(1);
   };
 
-  const handleSwipeComplete = (direction: 'left' | 'right' | 'up') => {
+  const handleSwipeComplete = React.useCallback((direction: 'left' | 'right' | 'up') => {
     'worklet';
-    runOnJS(() => {
-      try {
-        triggerHaptic();
-
-        // Reset animation values immediately
-        translateX.value = 0;
-        translateY.value = 0;
-        scale.value = 1;
-        opacity.value = 1;
-
-        // Call the appropriate handler after a small delay
-        setTimeout(() => {
-          if (direction === 'left') {
-            onDislike();
-          } else if (direction === 'right') {
-            onLike();
-          } else if (direction === 'up' && onSuperLike) {
-            onSuperLike();
-          }
-        }, 50);
-      } catch (error) {
-        console.error('Error in handleSwipeComplete:', error);
+    try {
+      runOnJS(triggerHaptic)();
+      
+      // Call the appropriate handler
+      if (direction === 'left') {
+        runOnJS(onDislike)();
+      } else if (direction === 'right') {
+        runOnJS(onLike)();
+      } else if (direction === 'up' && onSuperLike) {
+        runOnJS(onSuperLike)();
       }
-    })();
-  };
+    } catch (error) {
+      console.error('Error in handleSwipeComplete:', error);
+    }
+  }, [onDislike, onLike, onSuperLike]);
 
   const panGesture = Gesture.Pan()
     .onUpdate((event) => {
@@ -100,20 +102,29 @@ export default function CleanSwipeCard({
       if (shouldSwipeLeft) {
         translateX.value = withTiming(-screenWidth * 1.5, { duration: 300 });
         opacity.value = withTiming(0, { duration: 300 });
+        // Use runOnJS with setTimeout to ensure animation completes
         runOnJS(() => {
-          setTimeout(() => handleSwipeComplete('left'), 300);
+          setTimeout(() => {
+            handleSwipeComplete('left');
+          }, 300);
         })();
       } else if (shouldSwipeRight) {
         translateX.value = withTiming(screenWidth * 1.5, { duration: 300 });
         opacity.value = withTiming(0, { duration: 300 });
+        // Use runOnJS with setTimeout to ensure animation completes
         runOnJS(() => {
-          setTimeout(() => handleSwipeComplete('right'), 300);
+          setTimeout(() => {
+            handleSwipeComplete('right');
+          }, 300);
         })();
       } else if (shouldSwipeUp && onSuperLike) {
         translateY.value = withTiming(-screenHeight, { duration: 300 });
         opacity.value = withTiming(0, { duration: 300 });
+        // Use runOnJS with setTimeout to ensure animation completes
         runOnJS(() => {
-          setTimeout(() => handleSwipeComplete('up'), 300);
+          setTimeout(() => {
+            handleSwipeComplete('up');
+          }, 300);
         })();
       } else {
         resetPosition();
@@ -201,26 +212,24 @@ export default function CleanSwipeCard({
 
                 {/* Compatibility metrics */}
                 <View style={styles.metricsRow}>
-                  <View style={styles.metric}>
-                    <View style={[styles.metricCircle, { borderColor: '#FF6B6B' }]}>
-                      <Text style={styles.metricText}>95%</Text>
-                    </View>
-                    <Text style={styles.metricLabel}>Interests</Text>
-                  </View>
-
-                  <View style={styles.metric}>
-                    <View style={[styles.metricCircle, { borderColor: '#FFB901' }]}>
-                      <Text style={styles.metricText}>98%</Text>
-                    </View>
-                    <Text style={styles.metricLabel}>Personality</Text>
-                  </View>
-
-                  <View style={styles.metric}>
-                    <View style={[styles.metricCircle, { borderColor: '#4ECDC4' }]}>
-                      <Text style={styles.metricText}>96%</Text>
-                    </View>
-                    <Text style={styles.metricLabel}>Match</Text>
-                  </View>
+                  <LiquidGlassBadge
+                    label="Interests"
+                    value="95%"
+                    color="#FF6B6B"
+                    variant="solid"
+                  />
+                  <LiquidGlassBadge
+                    label="Personality"
+                    value="98%"
+                    color="#FFB901"
+                    variant="solid"
+                  />
+                  <LiquidGlassBadge
+                    label="Match"
+                    value="96%"
+                    color="#4ECDC4"
+                    variant="solid"
+                  />
                 </View>
               </View>
 

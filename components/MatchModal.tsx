@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, Dimensions, Image } fr
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LiquidGlassView } from './liquid/LiquidGlassView';
+import { LiquidGlassView, LiquidGlassButton, LiquidGlassBadge } from './liquid';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -67,57 +67,42 @@ export const MatchModal: React.FC<MatchModalProps> = ({
 
           {/* Compatibility Metrics with Liquid Glass */}
           <View style={styles.metricsContainer}>
-            <LiquidGlassView
-              intensity={60}
-              tint="light"
-              style={styles.metricGlass}
-              borderRadius={20}
-            >
-              <View style={styles.metric}>
-                <View style={[styles.metricCircle, { borderColor: '#FF6B6B' }]}>
-                  <Text style={styles.metricText}>{compatibility.interests}%</Text>
-                </View>
-                <Text style={styles.metricLabel}>Interests</Text>
-              </View>
-            </LiquidGlassView>
-
-            <LiquidGlassView
-              intensity={60}
-              tint="light"
-              style={styles.metricGlass}
-              borderRadius={20}
-            >
-              <View style={styles.metric}>
-                <View style={[styles.metricCircle, { borderColor: '#FFB901' }]}>
-                  <Text style={styles.metricText}>{compatibility.personality}%</Text>
-                </View>
-                <Text style={styles.metricLabel}>Personality</Text>
-              </View>
-            </LiquidGlassView>
-
-            <LiquidGlassView
-              intensity={60}
-              tint="light"
-              style={styles.metricGlass}
-              borderRadius={20}
-            >
-              <View style={styles.metric}>
-                <View style={[styles.metricCircle, { borderColor: '#4ECDC4' }]}>
-                  <Text style={styles.metricText}>{compatibility.overall}%</Text>
-                </View>
-                <Text style={styles.metricLabel}>Match</Text>
-              </View>
-            </LiquidGlassView>
+            <LiquidGlassBadge
+              label="Interests"
+              value={`${compatibility.interests}%`}
+              color="#FF6B6B"
+              size="large"
+            />
+            <LiquidGlassBadge
+              label="Personality"
+              value={`${compatibility.personality}%`}
+              color="#FFB901"
+              size="large"
+            />
+            <LiquidGlassBadge
+              label="Match"
+              value={`${compatibility.overall}%`}
+              color="#4ECDC4"
+              size="large"
+            />
           </View>
 
           {/* Action Buttons */}
-          <TouchableOpacity style={styles.primaryButton} onPress={onClose}>
-            <Text style={styles.primaryButtonText}>Say hello</Text>
-          </TouchableOpacity>
+          <LiquidGlassButton
+            title="Say hello"
+            variant="primary"
+            size="large"
+            onPress={onClose}
+            style={styles.primaryButton}
+          />
 
-          <TouchableOpacity style={styles.secondaryButton} onPress={onClose}>
-            <Text style={styles.secondaryButtonText}>Keep searching</Text>
-          </TouchableOpacity>
+          <LiquidGlassButton
+            title="Keep searching"
+            variant="secondary"
+            size="large"
+            onPress={onClose}
+            style={styles.secondaryButton}
+          />
         </View>
       </BlurView>
     </Modal>

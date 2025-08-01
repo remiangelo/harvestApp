@@ -11,6 +11,7 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { useAuthStore } from '../stores/useAuthStore';
 import { supabase, onAuthStateChange } from '../lib/supabase';
 import { AuthGuard } from '../components/AuthGuard';
+import { ErrorBoundary as CustomErrorBoundary } from '../components/ErrorBoundary';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -72,21 +73,23 @@ function RootLayoutNav() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthGuard>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="auth" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ headerShown: false }} />
-            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-            <Stack.Screen name="_tabs" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="settings" options={{ headerShown: false }} />
-            <Stack.Screen name="profile-edit" options={{ headerShown: false }} />
-            <Stack.Screen name="filters" options={{ headerShown: false }} />
-          </Stack>
-        </ThemeProvider>
-      </AuthGuard>
+      <CustomErrorBoundary>
+        <AuthGuard>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="auth" options={{ headerShown: false }} />
+              <Stack.Screen name="login" options={{ headerShown: false }} />
+              <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+              <Stack.Screen name="_tabs" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="settings" options={{ headerShown: false }} />
+              <Stack.Screen name="profile-edit" options={{ headerShown: false }} />
+              <Stack.Screen name="filters" options={{ headerShown: false }} />
+            </Stack>
+          </ThemeProvider>
+        </AuthGuard>
+      </CustomErrorBoundary>
     </GestureHandlerRootView>
   );
 }

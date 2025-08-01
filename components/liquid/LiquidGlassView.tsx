@@ -15,7 +15,7 @@ interface LiquidGlassViewProps {
 
 export const LiquidGlassView: React.FC<LiquidGlassViewProps> = ({
   children,
-  intensity = 80,
+  intensity = 65,
   tint = 'light',
   style,
   glassTint,

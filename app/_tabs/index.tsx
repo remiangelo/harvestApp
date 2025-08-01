@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import CleanSwipeCard from '../../components/CleanSwipeCard';
+// // import CleanSwipeCard from '../../components/CleanSwipeCard';
+import SafeSwipeCard from '../../components/SafeSwipeCard';
 import { betterDemoProfiles as demoProfiles } from '../../data/betterDemoProfiles';
 import { DemoProfile } from '../../data/demoProfiles';
 import { theme } from '../../constants/theme';
@@ -43,102 +44,8 @@ export default function SwipingScreen() {
   const safeIndex = Math.max(0, Math.min(currentProfileIndex, validProfiles.length - 1));
   const currentProfile = validProfiles.length > 0 ? validProfiles[safeIndex] : null;
 
-  const handleLike = async () => {
-    try {
-      if (!currentProfile) return;
-
-      if (currentProfile && user && !isTestMode) {
-        setLikedProfiles((prev) => [...prev, currentProfile.id]);
-
-        // Save swipe to database
-        const result = await saveSwipe(user.id, currentProfile.id, 'like');
-
-        if (result.success && result.isMatch) {
-          setMatchedProfile(currentProfile);
-          setShowMatchModal(true);
-        } else if (!result.success) {
-          console.error('Failed to save swipe:', result.error);
-        }
-
-        nextProfile();
-      } else if (currentProfile) {
-        // Test mode or no user - just simulate
-        setLikedProfiles((prev) => [...prev, currentProfile.id]);
-        const isMatch = Math.random() > 0.3; // 70% match rate for demo
-        if (isMatch) {
-          setMatchedProfile(currentProfile);
-          setShowMatchModal(true);
-        }
-        nextProfile();
-      }
-    } catch (error) {
-      console.error('Error in handleLike:', error);
-      nextProfile();
-    }
-  };
-
-  const handleDislike = async () => {
-    try {
-      if (!currentProfile) return;
-
-      if (currentProfile && user && !isTestMode) {
-        setDislikedProfiles((prev) => [...prev, currentProfile.id]);
-
-        // Save swipe to database
-        const result = await saveSwipe(user.id, currentProfile.id, 'nope');
-
-        if (!result.success) {
-          console.error('Failed to save swipe:', result.error);
-        }
-
-        nextProfile();
-      } else if (currentProfile) {
-        // Test mode or no user - just track locally
-        setDislikedProfiles((prev) => [...prev, currentProfile.id]);
-        nextProfile();
-      }
-    } catch (error) {
-      console.error('Error in handleDislike:', error);
-      nextProfile();
-    }
-  };
-
-  const handleSuperLike = async () => {
-    try {
-      if (!currentProfile) return;
-
-      if (currentProfile && user && !isTestMode) {
-        setLikedProfiles((prev) => [...prev, currentProfile.id]);
-
-        // Save swipe to database
-        const result = await saveSwipe(user.id, currentProfile.id, 'super_like');
-
-        if (result.success && result.isMatch) {
-          setMatchedProfile(currentProfile);
-          setShowMatchModal(true);
-        } else if (!result.success) {
-          console.error('Failed to save swipe:', result.error);
-        }
-
-        nextProfile();
-      } else if (currentProfile) {
-        // Test mode or no user - just simulate
-        setLikedProfiles((prev) => [...prev, currentProfile.id]);
-        // Super likes have higher match rate
-        const isMatch = Math.random() > 0.1; // 90% match rate for super likes
-        if (isMatch) {
-          setMatchedProfile(currentProfile);
-          setShowMatchModal(true);
-        }
-        nextProfile();
-      }
-    } catch (error) {
-      console.error('Error in handleSuperLike:', error);
-      nextProfile();
-    }
-  };
-
-  const nextProfile = () => {
+  const nextProfile = React.useCallback(() => {
+    console.log('nextProfile called');
     setTimeout(() => {
       if (currentProfileIndex < validProfiles.length - 1) {
         setCurrentProfileIndex((prev) => prev + 1);
@@ -152,7 +59,126 @@ export default function SwipingScreen() {
         ]);
       }
     }, 350); // Wait for animation to complete
-  };
+  }, [currentProfileIndex, validProfiles.length]);
+
+  const handleLike = React.useCallback(async () => {
+    try {
+      console.log('handleLike called');
+      if (!currentProfile) {
+        console.log('No current profile');
+        return;
+      }
+
+      console.log('Current profile:', currentProfile.id);
+
+      if (user && !isTestMode) {
+        setLikedProfiles((prev) => [...prev, currentProfile.id]);
+
+        // Save swipe to database
+        const result = await saveSwipe(user.id, currentProfile.id, 'like');
+
+        if (result.success && result.isMatch) {
+          setMatchedProfile(currentProfile);
+          setShowMatchModal(true);
+        } else if (!result.success) {
+          console.error('Failed to save swipe:', result.error);
+        }
+
+        nextProfile();
+      } else {
+        // Test mode or no user - just simulate
+        console.log('Test mode - simulating like');
+        setLikedProfiles((prev) => [...prev, currentProfile.id]);
+        const isMatch = Math.random() > 0.3; // 70% match rate for demo
+        if (isMatch) {
+          setMatchedProfile(currentProfile);
+          setShowMatchModal(true);
+        }
+        nextProfile();
+      }
+    } catch (error) {
+      console.error('Error in handleLike:', error);
+      Alert.alert('Error', 'Failed to process like. Please try again.');
+      nextProfile();
+    }
+  }, [currentProfile, user, isTestMode, nextProfile]);
+
+  const handleDislike = React.useCallback(async () => {
+    try {
+      console.log('handleDislike called');
+      if (!currentProfile) {
+        console.log('No current profile');
+        return;
+      }
+
+      console.log('Current profile:', currentProfile.id);
+
+      if (user && !isTestMode) {
+        setDislikedProfiles((prev) => [...prev, currentProfile.id]);
+
+        // Save swipe to database
+        const result = await saveSwipe(user.id, currentProfile.id, 'nope');
+
+        if (!result.success) {
+          console.error('Failed to save swipe:', result.error);
+        }
+
+        nextProfile();
+      } else {
+        // Test mode or no user - just track locally
+        console.log('Test mode - simulating dislike');
+        setDislikedProfiles((prev) => [...prev, currentProfile.id]);
+        nextProfile();
+      }
+    } catch (error) {
+      console.error('Error in handleDislike:', error);
+      Alert.alert('Error', 'Failed to process dislike. Please try again.');
+      nextProfile();
+    }
+  }, [currentProfile, user, isTestMode, nextProfile]);
+
+  const handleSuperLike = React.useCallback(async () => {
+    try {
+      console.log('handleSuperLike called');
+      if (!currentProfile) {
+        console.log('No current profile');
+        return;
+      }
+
+      console.log('Current profile:', currentProfile.id);
+
+      if (user && !isTestMode) {
+        setLikedProfiles((prev) => [...prev, currentProfile.id]);
+
+        // Save swipe to database
+        const result = await saveSwipe(user.id, currentProfile.id, 'super_like');
+
+        if (result.success && result.isMatch) {
+          setMatchedProfile(currentProfile);
+          setShowMatchModal(true);
+        } else if (!result.success) {
+          console.error('Failed to save swipe:', result.error);
+        }
+
+        nextProfile();
+      } else {
+        // Test mode or no user - just simulate
+        console.log('Test mode - simulating super like');
+        setLikedProfiles((prev) => [...prev, currentProfile.id]);
+        // Super likes have higher match rate
+        const isMatch = Math.random() > 0.1; // 90% match rate for super likes
+        if (isMatch) {
+          setMatchedProfile(currentProfile);
+          setShowMatchModal(true);
+        }
+        nextProfile();
+      }
+    } catch (error) {
+      console.error('Error in handleSuperLike:', error);
+      Alert.alert('Error', 'Failed to process super like. Please try again.');
+      nextProfile();
+    }
+  }, [currentProfile, user, isTestMode, nextProfile]);
 
   const resetProfiles = () => {
     setCurrentProfileIndex(0);
@@ -203,7 +229,7 @@ export default function SwipingScreen() {
   return (
     <ErrorBoundary>
       <View style={styles.container}>
-        <CleanSwipeCard
+        <SafeSwipeCard
           profile={currentProfile}
           onLike={handleLike}
           onDislike={handleDislike}

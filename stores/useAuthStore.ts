@@ -77,7 +77,7 @@ export const useAuthStore = create<AuthState>()(
 
             // Sync with user store
             if (profile) {
-              useUserStore.getState().setCurrentUser(profile as any);
+              useUserStore.getState().setCurrentUser(profile);
             }
           } else {
             set({
@@ -118,7 +118,7 @@ export const useAuthStore = create<AuthState>()(
 
             // Sync with user store
             if (profile) {
-              useUserStore.getState().setCurrentUser(profile as any);
+              useUserStore.getState().setCurrentUser(profile);
             }
           }
 
@@ -159,7 +159,7 @@ export const useAuthStore = create<AuthState>()(
 
             // Sync with user store
             if (profile) {
-              useUserStore.getState().setCurrentUser(profile as any);
+              useUserStore.getState().setCurrentUser(profile);
             }
           } else {
             set({ isLoading: false });
@@ -215,7 +215,7 @@ export const useAuthStore = create<AuthState>()(
           const { data: profile } = await getProfile(userId);
           if (profile) {
             set({ profile });
-            useUserStore.getState().setCurrentUser(profile as any);
+            useUserStore.getState().setCurrentUser(profile);
           }
         } catch (error) {
           console.error('Error loading profile:', error);

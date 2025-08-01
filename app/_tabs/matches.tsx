@@ -13,55 +13,31 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { router } from 'expo-router';
-
-interface Match {
-  id: string;
-  name: string;
-  photo: string;
-  online: boolean;
-}
+import { demoChats, getUnreadChatCount } from '../../data/demoChats';
+import { format } from 'date-fns';
 
 const recentMatches = [
-  { id: '1', name: 'Sarah', photo: 'https://i.pravatar.cc/150?img=1', likes: 32 },
-  { id: '2', name: 'John', photo: 'https://i.pravatar.cc/150?img=2', likes: 0 },
-  { id: '3', name: 'Emma', photo: 'https://i.pravatar.cc/150?img=3', likes: 0 },
-  { id: '4', name: 'Alex', photo: 'https://i.pravatar.cc/150?img=4', likes: 0 },
-];
-
-const conversations: Match[] = [
-  {
-    id: '1',
-    name: 'Alfredo Calzoni',
-    photo: 'https://i.pravatar.cc/150?img=5',
-    online: true,
-  },
-  {
-    id: '2',
-    name: 'Clara Hazel',
-    photo: 'https://i.pravatar.cc/150?img=6',
-    online: false,
-  },
-  {
-    id: '3',
-    name: 'Brandon Aminoff',
-    photo: 'https://i.pravatar.cc/150?img=7',
-    online: false,
-  },
-  {
-    id: '4',
-    name: 'Amina Mina',
-    photo: 'https://i.pravatar.cc/150?img=8',
-    online: false,
-  },
-  {
-    id: '5',
-    name: 'Savanna Hall',
-    photo: 'https://i.pravatar.cc/150?img=9',
-    online: false,
-  },
+  { id: '1', name: 'Maya', photo: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=400&h=400&fit=crop&crop=face', likes: 32 },
+  { id: '2', name: 'Sophie', photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face', likes: 0 },
+  { id: '3', name: 'Elena', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face', likes: 0 },
+  { id: '4', name: 'Aria', photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face', likes: 0 },
 ];
 
 export default function MatchesScreen() {
+  const formatMessageTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return format(date, 'h:mm a');
+    } else {
+      return format(date, 'MMM d');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -74,7 +50,13 @@ export default function MatchesScreen() {
               <Ionicons name="chevron-back" size={28} color="white" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Matches</Text>
-            <View style={{ width: 28 }} />
+            <View style={styles.headerRight}>
+              {getUnreadChatCount() > 0 && (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadBadgeText}>{getUnreadChatCount()}</Text>
+                </View>
+              )}
+            </View>
           </View>
         </SafeAreaView>
 
@@ -97,6 +79,7 @@ export default function MatchesScreen() {
                     </View>
                   )}
                 </View>
+                <Text style={styles.matchName}>{match.name}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -112,25 +95,37 @@ export default function MatchesScreen() {
         glassTint="rgba(255, 255, 255, 0.95)"
       >
         <ScrollView showsVerticalScrollIndicator={false}>
-          {conversations.map((match, index) => (
+          {demoChats.map((chat, index) => (
             <TouchableOpacity
-              key={match.id}
+              key={chat.id}
               style={[
                 styles.conversationItem,
-                index === conversations.length - 1 && styles.lastItem,
+                index === demoChats.length - 1 && styles.lastItem,
               ]}
+              onPress={() => router.push(`/chat?id=${chat.id}` as any)}
             >
               <View style={styles.avatarContainer}>
-                <Image source={{ uri: match.photo }} style={styles.avatar} />
-                {match.online && <View style={styles.onlineDot} />}
+                <Image source={{ uri: chat.profileImage }} style={styles.avatar} />
+                {chat.isOnline && <View style={styles.onlineDot} />}
               </View>
 
               <View style={styles.conversationContent}>
-                <Text style={styles.conversationName}>{match.name}</Text>
+                <View style={styles.conversationHeader}>
+                  <Text style={styles.conversationName}>{chat.name}</Text>
+                  <Text style={styles.timestamp}>{formatMessageTime(chat.lastMessageTime)}</Text>
+                </View>
+                <Text style={styles.lastMessage} numberOfLines={1}>
+                  {chat.lastMessage}
+                </Text>
               </View>
 
               <View style={styles.conversationMeta}>
-                <Ionicons name="chevron-forward" size={20} color="#999" />
+                {chat.unreadCount > 0 && (
+                  <View style={styles.unreadCountBadge}>
+                    <Text style={styles.unreadCountText}>{chat.unreadCount}</Text>
+                  </View>
+                )}
+                <Ionicons name="chevron-forward" size={20} color="#999" style={{ marginLeft: 8 }} />
               </View>
             </TouchableOpacity>
           ))}
@@ -157,6 +152,12 @@ const styles = StyleSheet.create({
   conversationContent: {
     flex: 1,
   },
+  conversationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   conversationItem: {
     alignItems: 'center',
     borderBottomColor: 'rgba(0, 0, 0, 0.05)',
@@ -165,13 +166,13 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   conversationMeta: {
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   conversationName: {
     color: '#1a1a1a',
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 4,
   },
   conversationsContainer: {
     borderTopLeftRadius: 24,
@@ -191,6 +192,10 @@ const styles = StyleSheet.create({
   },
   headerGradient: {
     paddingBottom: 20,
+  },
+  headerRight: {
+    width: 28,
+    alignItems: 'center',
   },
   headerTitle: {
     color: 'white',
@@ -233,6 +238,13 @@ const styles = StyleSheet.create({
   },
   matchItem: {
     marginRight: 15,
+    alignItems: 'center',
+  },
+  matchName: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 12,
+    marginTop: 8,
+    fontWeight: '500',
   },
   matchesScroll: {
     paddingRight: 20,
@@ -260,12 +272,31 @@ const styles = StyleSheet.create({
   timestamp: {
     color: '#999',
     fontSize: 12,
-    marginBottom: 8,
   },
-  unreadDot: {
+  unreadBadge: {
+    backgroundColor: '#FF3B5C',
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    minWidth: 20,
+    alignItems: 'center',
+  },
+  unreadBadgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  unreadCountBadge: {
     backgroundColor: '#A0354E',
-    borderRadius: 4,
-    height: 8,
-    width: 8,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    minWidth: 20,
+    alignItems: 'center',
+  },
+  unreadCountText: {
+    color: 'white',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
 });

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-// // import CleanSwipeCard from '../../components/CleanSwipeCard';
-import SafeSwipeCard from '../../components/SafeSwipeCard';
+import HarvestSwipeCard from '../../components/HarvestSwipeCard';
 import { betterDemoProfiles as demoProfiles } from '../../data/betterDemoProfiles';
 import { DemoProfile } from '../../data/demoProfiles';
 import { theme } from '../../constants/theme';
@@ -229,7 +228,18 @@ export default function SwipingScreen() {
   return (
     <ErrorBoundary>
       <View style={styles.container}>
-        <SafeSwipeCard
+        {/* Header */}
+        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
+          <Text style={styles.logo}>Harvest</Text>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => router.push('/filters' as any)}
+          >
+            <Ionicons name="options-outline" size={24} color={theme.colors.text.primary} />
+          </TouchableOpacity>
+        </View>
+
+        <HarvestSwipeCard
           profile={currentProfile}
           onLike={handleLike}
           onDislike={handleDislike}
@@ -281,7 +291,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     left: 0,
@@ -291,6 +301,8 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     zIndex: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
   },
   loadingContainer: {
     alignItems: 'center',

@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import { decode } from 'base64-arraybuffer';
 
 export const uploadProfilePhoto = async (userId: string, photoUri: string, photoIndex: number) => {
   try {
@@ -7,41 +6,26 @@ export const uploadProfilePhoto = async (userId: string, photoUri: string, photo
     const fileExt = photoUri.split('.').pop();
     const fileName = `${userId}/${Date.now()}_${photoIndex}.${fileExt}`;
 
-    // Convert image to base64
+    // Convert image to blob
     const response = await fetch(photoUri);
     const blob = await response.blob();
 
-    // Create a FileReader to convert blob to base64
-    const reader = new FileReader();
-    reader.readAsDataURL(blob);
+    // Upload blob directly to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('profile-photos')
+      .upload(fileName, blob, {
+        contentType: `image/${fileExt}`,
+        upsert: false,
+      });
 
-    return new Promise((resolve, reject) => {
-      reader.onloadend = async () => {
-        try {
-          const base64 = reader.result as string;
-          const base64Data = base64.split(',')[1];
+    if (error) throw error;
 
-          // Upload to Supabase Storage
-          const { data, error } = await supabase.storage
-            .from('profile-photos')
-            .upload(fileName, decode(base64Data), {
-              contentType: `image/${fileExt}`,
-              upsert: false,
-            });
+    // Get public URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('profile-photos').getPublicUrl(fileName);
 
-          if (error) throw error;
-
-          // Get public URL
-          const {
-            data: { publicUrl },
-          } = supabase.storage.from('profile-photos').getPublicUrl(fileName);
-
-          resolve({ url: publicUrl, path: data.path });
-        } catch (error) {
-          reject(error);
-        }
-      };
-    });
+    return { url: publicUrl, path: data.path };
   } catch (error) {
     console.error('Error uploading photo:', error);
     throw error;

@@ -43,7 +43,6 @@ export default function SwipingScreen() {
   const currentProfile = validProfiles.length > 0 ? validProfiles[safeIndex] : null;
 
   const nextProfile = React.useCallback(() => {
-    console.log('nextProfile called');
     setTimeout(() => {
       if (currentProfileIndex < validProfiles.length - 1) {
         setCurrentProfileIndex((prev) => prev + 1);
@@ -69,13 +68,9 @@ export default function SwipingScreen() {
 
   const handleLike = React.useCallback(async () => {
     try {
-      console.log('handleLike called');
       if (!currentProfile) {
-        console.log('No current profile');
         return;
       }
-
-      console.log('Current profile:', currentProfile.id);
 
       if (user && !isTestMode) {
         // Save swipe to database
@@ -108,13 +103,9 @@ export default function SwipingScreen() {
 
   const handleDislike = React.useCallback(async () => {
     try {
-      console.log('handleDislike called');
       if (!currentProfile) {
-        console.log('No current profile');
         return;
       }
-
-      console.log('Current profile:', currentProfile.id);
 
       if (user && !isTestMode) {
         // Save swipe to database
@@ -139,13 +130,9 @@ export default function SwipingScreen() {
 
   const handleSuperLike = React.useCallback(async () => {
     try {
-      console.log('handleSuperLike called');
       if (!currentProfile) {
-        console.log('No current profile');
         return;
       }
-
-      console.log('Current profile:', currentProfile.id);
 
       if (user && !isTestMode) {
         // Save swipe to database

@@ -49,7 +49,7 @@ export default function OnboardingAge() {
         <View style={styles.progressBarContainer}>
           <View style={styles.progressBar} />
         </View>
-        <Text style={styles.title}>Let's Start with Your Age</Text>
+        <Text style={styles.title}>Let&apos;s Start with Your Age</Text>
         <Text style={styles.subtitle}>Input your birth date so people know how old you are</Text>
         <TouchableOpacity
           style={styles.input}

@@ -245,8 +245,8 @@ export default function LoginScreen() {
                     ? 'Signing In...'
                     : 'Creating Account...'
                   : isLogin
-                  ? 'Sign In'
-                  : 'Create Account'
+                    ? 'Sign In'
+                    : 'Create Account'
               }
               onPress={isLogin ? handleLogin : handleSignup}
               loading={loading}
@@ -274,11 +274,7 @@ export default function LoginScreen() {
                 </View>
 
                 <Button
-                  title={
-                    loading
-                      ? 'Entering Test Mode...'
-                      : 'Enter Test Mode (No Email Required)'
-                  }
+                  title={loading ? 'Entering Test Mode...' : 'Enter Test Mode (No Email Required)'}
                   onPress={handleTestMode}
                   variant="outline"
                   loading={loading}

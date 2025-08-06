@@ -43,7 +43,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
     if (visible) {
       // Haptic feedback
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      
+
       // Start confetti
       if (confettiRef.current) {
         confettiRef.current.start();

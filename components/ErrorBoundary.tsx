@@ -48,7 +48,9 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <Text style={styles.title}>Oops! Something went wrong</Text>
-          <Text style={styles.subtitle}>We're sorry for the inconvenience. Please try again.</Text>
+          <Text style={styles.subtitle}>
+            We&apos;re sorry for the inconvenience. Please try again.
+          </Text>
           <TouchableOpacity style={styles.button} onPress={this.handleReset}>
             <Text style={styles.buttonText}>Try Again</Text>
           </TouchableOpacity>

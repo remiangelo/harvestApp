@@ -251,7 +251,7 @@ export default function HarvestSwipeCard({
               <View style={styles.skeletonImage} />
             </View>
           )}
-          
+
           <Image
             source={{ uri: currentPhoto }}
             style={styles.photo}
@@ -660,6 +660,16 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
   },
+  skeletonImage: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#444',
+  },
+  skeletonLoader: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#333',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
   superLikeButton: {
     borderRadius: 25,
     height: 50,
@@ -679,15 +689,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     padding: 10,
     paddingHorizontal: 20,
-  },
-  skeletonLoader: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#333',
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  skeletonImage: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#444',
   },
 });

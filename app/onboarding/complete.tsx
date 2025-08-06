@@ -19,10 +19,10 @@ export default function OnboardingComplete() {
           <Ionicons name="checkmark-circle" size={120} color={theme.colors.success} />
         </View>
 
-        <Text style={styles.title}>You're All Set! 🎉</Text>
+        <Text style={styles.title}>You&apos;re All Set! 🎉</Text>
 
         <Text style={styles.subtitle}>
-          Your profile is complete and you're ready to start your mindful dating journey.
+          Your profile is complete and you&apos;re ready to start your mindful dating journey.
         </Text>
 
         <Card variant="filled" style={styles.infoCard}>

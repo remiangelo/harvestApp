@@ -80,7 +80,7 @@ export default function SettingsScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
       >

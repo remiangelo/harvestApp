@@ -74,10 +74,10 @@ const currentLesson = {
 
 export default function GardenerScreen() {
   const insets = useSafeAreaInsets();
-  
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
       >

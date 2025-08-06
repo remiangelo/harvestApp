@@ -17,10 +17,34 @@ import { demoChats, getUnreadChatCount } from '../../data/demoChats';
 import { format } from 'date-fns';
 
 const recentMatches = [
-  { id: '1', name: 'Maya', photo: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=400&h=400&fit=crop&crop=face', likes: 32 },
-  { id: '2', name: 'Sophie', photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face', likes: 0 },
-  { id: '3', name: 'Elena', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face', likes: 0 },
-  { id: '4', name: 'Aria', photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face', likes: 0 },
+  {
+    id: '1',
+    name: 'Maya',
+    photo:
+      'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=400&h=400&fit=crop&crop=face',
+    likes: 32,
+  },
+  {
+    id: '2',
+    name: 'Sophie',
+    photo:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
+    likes: 0,
+  },
+  {
+    id: '3',
+    name: 'Elena',
+    photo:
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face',
+    likes: 0,
+  },
+  {
+    id: '4',
+    name: 'Aria',
+    photo:
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face',
+    likes: 0,
+  },
 ];
 
 export default function MatchesScreen() {
@@ -28,7 +52,7 @@ export default function MatchesScreen() {
     const date = new Date(timestamp);
     const now = new Date();
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-    
+
     if (diffInHours < 1) {
       return 'Just now';
     } else if (diffInHours < 24) {
@@ -98,10 +122,7 @@ export default function MatchesScreen() {
           {demoChats.map((chat, index) => (
             <TouchableOpacity
               key={chat.id}
-              style={[
-                styles.conversationItem,
-                index === demoChats.length - 1 && styles.lastItem,
-              ]}
+              style={[styles.conversationItem, index === demoChats.length - 1 && styles.lastItem]}
               onPress={() => router.push(`/chat?id=${chat.id}` as any)}
             >
               <View style={styles.avatarContainer}>
@@ -153,9 +174,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   conversationHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 4,
   },
   conversationItem: {
@@ -166,8 +187,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   conversationMeta: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   conversationName: {
     color: '#1a1a1a',
@@ -194,8 +215,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headerRight: {
-    width: 28,
     alignItems: 'center',
+    width: 28,
   },
   headerTitle: {
     color: 'white',
@@ -237,14 +258,14 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   matchItem: {
-    marginRight: 15,
     alignItems: 'center',
+    marginRight: 15,
   },
   matchName: {
     color: 'rgba(255, 255, 255, 0.9)',
     fontSize: 12,
-    marginTop: 8,
     fontWeight: '500',
+    marginTop: 8,
   },
   matchesScroll: {
     paddingRight: 20,
@@ -274,12 +295,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   unreadBadge: {
+    alignItems: 'center',
     backgroundColor: '#FF3B5C',
     borderRadius: 10,
+    minWidth: 20,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    minWidth: 20,
-    alignItems: 'center',
   },
   unreadBadgeText: {
     color: 'white',
@@ -287,12 +308,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   unreadCountBadge: {
+    alignItems: 'center',
     backgroundColor: '#A0354E',
     borderRadius: 10,
+    minWidth: 20,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    minWidth: 20,
-    alignItems: 'center',
   },
   unreadCountText: {
     color: 'white',

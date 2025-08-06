@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   Animated,
   PanResponder,
-  Image,
   ActivityIndicator,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +25,7 @@ const ROTATION_MULTIPLIER = 0.03;
 
 interface HarvestSwipeCardProps {
   profile: DemoProfile;
+  nextProfiles?: DemoProfile[];
   onLike: () => void;
   onDislike: () => void;
   onSuperLike?: () => void;
@@ -32,6 +33,7 @@ interface HarvestSwipeCardProps {
 
 export default function HarvestSwipeCard({
   profile,
+  nextProfiles = [],
   onLike,
   onDislike,
   onSuperLike,
@@ -40,18 +42,18 @@ export default function HarvestSwipeCard({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  
+
   // Animation values
   const position = useRef(new Animated.ValueXY()).current;
   const likeOpacity = useRef(new Animated.Value(0)).current;
   const nopeOpacity = useRef(new Animated.Value(0)).current;
   const superLikeOpacity = useRef(new Animated.Value(0)).current;
   const cardScale = useRef(new Animated.Value(1)).current;
-  
+
   // Track animation state
   const isAnimating = useRef(false);
   const isMounted = useRef(true);
-  
+
   React.useEffect(() => {
     return () => {
       isMounted.current = false;
@@ -66,7 +68,9 @@ export default function HarvestSwipeCard({
   const triggerHaptic = useCallback(() => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } catch {}
+    } catch (error) {
+      console.log('Haptic feedback failed:', error);
+    }
   }, []);
 
   const resetPosition = useCallback(() => {
@@ -99,45 +103,52 @@ export default function HarvestSwipeCard({
     ]).start();
   }, [position, cardScale, likeOpacity, nopeOpacity, superLikeOpacity]);
 
-  const swipeComplete = useCallback((direction: 'left' | 'right' | 'up') => {
-    if (isAnimating.current || !isMounted.current) return;
-    isAnimating.current = true;
-    
-    triggerHaptic();
-    
-    setTimeout(() => {
-      if (!isMounted.current) return;
-      
-      if (direction === 'left') {
-        onDislike();
-      } else if (direction === 'right') {
-        onLike();
-      } else if (direction === 'up' && onSuperLike) {
-        onSuperLike();
-      }
-      
-      // Reset card position after callback
-      position.setValue({ x: 0, y: 0 });
-      likeOpacity.setValue(0);
-      nopeOpacity.setValue(0);
-      superLikeOpacity.setValue(0);
-      cardScale.setValue(1);
-      isAnimating.current = false;
-    }, SWIPE_OUT_DURATION);
-  }, [onDislike, onLike, onSuperLike, triggerHaptic]);
+  const swipeComplete = useCallback(
+    (direction: 'left' | 'right' | 'up') => {
+      if (isAnimating.current || !isMounted.current) return;
+      isAnimating.current = true;
 
-  const forceSwipe = useCallback((direction: 'right' | 'left' | 'up') => {
-    if (isAnimating.current) return;
-    
-    const x = direction === 'right' ? screenWidth + 100 : direction === 'left' ? -screenWidth - 100 : 0;
-    const y = direction === 'up' ? -screenHeight - 100 : 0;
-    
-    Animated.timing(position, {
-      toValue: { x, y },
-      duration: SWIPE_OUT_DURATION,
-      useNativeDriver: false,
-    }).start(() => swipeComplete(direction));
-  }, [position, swipeComplete]);
+      triggerHaptic();
+
+      setTimeout(() => {
+        if (!isMounted.current) return;
+
+        if (direction === 'left') {
+          onDislike();
+        } else if (direction === 'right') {
+          onLike();
+        } else if (direction === 'up' && onSuperLike) {
+          onSuperLike();
+        }
+
+        // Reset card position after callback
+        position.setValue({ x: 0, y: 0 });
+        likeOpacity.setValue(0);
+        nopeOpacity.setValue(0);
+        superLikeOpacity.setValue(0);
+        cardScale.setValue(1);
+        isAnimating.current = false;
+      }, SWIPE_OUT_DURATION);
+    },
+    [onDislike, onLike, onSuperLike, triggerHaptic]
+  );
+
+  const forceSwipe = useCallback(
+    (direction: 'right' | 'left' | 'up') => {
+      if (isAnimating.current) return;
+
+      const x =
+        direction === 'right' ? screenWidth + 100 : direction === 'left' ? -screenWidth - 100 : 0;
+      const y = direction === 'up' ? -screenHeight - 100 : 0;
+
+      Animated.timing(position, {
+        toValue: { x, y },
+        duration: SWIPE_OUT_DURATION,
+        useNativeDriver: false,
+      }).start(() => swipeComplete(direction));
+    },
+    [position, swipeComplete]
+  );
 
   const panResponder = useMemo(
     () =>
@@ -149,7 +160,7 @@ export default function HarvestSwipeCard({
             y: (position.y as any)._value,
           });
           position.setValue({ x: 0, y: 0 });
-          
+
           Animated.timing(cardScale, {
             toValue: 0.95,
             duration: 100,
@@ -158,16 +169,18 @@ export default function HarvestSwipeCard({
         },
         onPanResponderMove: (_, gesture) => {
           position.setValue({ x: gesture.dx, y: gesture.dy });
-          
+
           // Update label opacities
           const likeValue = gesture.dx > 0 ? Math.min(gesture.dx / SWIPE_THRESHOLD, 1) : 0;
-          const nopeValue = gesture.dx < 0 ? Math.min(Math.abs(gesture.dx) / SWIPE_THRESHOLD, 1) : 0;
-          const superValue = gesture.dy < -50 ? Math.min(Math.abs(gesture.dy) / SWIPE_THRESHOLD, 1) : 0;
-          
+          const nopeValue =
+            gesture.dx < 0 ? Math.min(Math.abs(gesture.dx) / SWIPE_THRESHOLD, 1) : 0;
+          const superValue =
+            gesture.dy < -50 ? Math.min(Math.abs(gesture.dy) / SWIPE_THRESHOLD, 1) : 0;
+
           likeOpacity.setValue(likeValue);
           nopeOpacity.setValue(nopeValue);
           superLikeOpacity.setValue(superValue);
-          
+
           // Haptic feedback at threshold
           if ((likeValue === 1 || nopeValue === 1 || superValue === 1) && !isAnimating.current) {
             triggerHaptic();
@@ -175,7 +188,7 @@ export default function HarvestSwipeCard({
         },
         onPanResponderRelease: (_, gesture) => {
           position.flattenOffset();
-          
+
           if (gesture.dy < -SWIPE_THRESHOLD && onSuperLike) {
             forceSwipe('up');
           } else if (gesture.dx > SWIPE_THRESHOLD) {
@@ -187,7 +200,17 @@ export default function HarvestSwipeCard({
           }
         },
       }),
-    [position, cardScale, likeOpacity, nopeOpacity, superLikeOpacity, forceSwipe, resetPosition, triggerHaptic, onSuperLike]
+    [
+      position,
+      cardScale,
+      likeOpacity,
+      nopeOpacity,
+      superLikeOpacity,
+      forceSwipe,
+      resetPosition,
+      triggerHaptic,
+      onSuperLike,
+    ]
   );
 
   const getCardStyle = useCallback(() => {
@@ -199,10 +222,7 @@ export default function HarvestSwipeCard({
 
     return {
       ...position.getLayout(),
-      transform: [
-        { rotate },
-        { scale: cardScale },
-      ],
+      transform: [{ rotate }, { scale: cardScale }],
     };
   }, [position, cardScale]);
 
@@ -222,30 +242,34 @@ export default function HarvestSwipeCard({
 
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={[styles.card, getCardStyle()]}
-        {...panResponder.panHandlers}
-      >
+      <Animated.View style={[styles.card, getCardStyle()]} {...panResponder.panHandlers}>
         {/* Main photo container */}
         <View style={styles.photoContainer}>
+          {/* Skeleton loader */}
+          {imageLoading && (
+            <View style={styles.skeletonLoader}>
+              <View style={styles.skeletonImage} />
+            </View>
+          )}
+          
           <Image
             source={{ uri: currentPhoto }}
             style={styles.photo}
-            resizeMode="cover"
+            contentFit="cover"
             onLoadStart={() => setImageLoading(true)}
-            onLoadEnd={() => setImageLoading(false)}
+            onLoad={() => setImageLoading(false)}
             onError={() => {
               setImageError(true);
               setImageLoading(false);
             }}
           />
-          
+
           {imageLoading && (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#fff" />
             </View>
           )}
-          
+
           {imageError && !imageLoading && (
             <View style={styles.errorContainer}>
               <Ionicons name="image-outline" size={48} color="#ccc" />
@@ -254,13 +278,13 @@ export default function HarvestSwipeCard({
           )}
 
           {/* Photo navigation */}
-          <TouchableOpacity 
-            style={[styles.photoNav, styles.photoNavLeft]} 
+          <TouchableOpacity
+            style={[styles.photoNav, styles.photoNavLeft]}
             onPress={prevPhoto}
             activeOpacity={0.001}
           />
-          <TouchableOpacity 
-            style={[styles.photoNav, styles.photoNavRight]} 
+          <TouchableOpacity
+            style={[styles.photoNav, styles.photoNavRight]}
             onPress={nextPhoto}
             activeOpacity={0.001}
           />
@@ -270,10 +294,7 @@ export default function HarvestSwipeCard({
             {profile.photos.map((_, index) => (
               <View
                 key={index}
-                style={[
-                  styles.dot,
-                  index === currentPhotoIndex && styles.activeDot
-                ]}
+                style={[styles.dot, index === currentPhotoIndex && styles.activeDot]}
               />
             ))}
           </View>
@@ -322,30 +343,21 @@ export default function HarvestSwipeCard({
             {/* Compatibility badges */}
             <View style={styles.compatibilityRow}>
               <View style={styles.compatibilityBadge}>
-                <LinearGradient
-                  colors={['#FF6B6B', '#FF5252']}
-                  style={styles.badgeGradient}
-                >
+                <LinearGradient colors={['#FF6B6B', '#FF5252']} style={styles.badgeGradient}>
                   <Text style={styles.badgeLabel}>Interests</Text>
                   <Text style={styles.badgeValue}>95%</Text>
                 </LinearGradient>
               </View>
-              
+
               <View style={styles.compatibilityBadge}>
-                <LinearGradient
-                  colors={['#FFB901', '#FFA500']}
-                  style={styles.badgeGradient}
-                >
+                <LinearGradient colors={['#FFB901', '#FFA500']} style={styles.badgeGradient}>
                   <Text style={styles.badgeLabel}>Personality</Text>
                   <Text style={styles.badgeValue}>98%</Text>
                 </LinearGradient>
               </View>
-              
+
               <View style={styles.compatibilityBadge}>
-                <LinearGradient
-                  colors={['#4ECDC4', '#44A39A']}
-                  style={styles.badgeGradient}
-                >
+                <LinearGradient colors={['#4ECDC4', '#44A39A']} style={styles.badgeGradient}>
                   <Text style={styles.badgeLabel}>Overall</Text>
                   <Text style={styles.badgeValue}>96%</Text>
                 </LinearGradient>
@@ -375,22 +387,22 @@ export default function HarvestSwipeCard({
           <Ionicons name="refresh" size={28} color="#FDB901" />
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.dislikeButton]} 
+        <TouchableOpacity
+          style={[styles.actionButton, styles.dislikeButton]}
           onPress={() => forceSwipe('left')}
         >
           <Ionicons name="close" size={40} color="#FF3B30" />
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.superLikeButton]} 
+        <TouchableOpacity
+          style={[styles.actionButton, styles.superLikeButton]}
           onPress={() => onSuperLike && forceSwipe('up')}
         >
           <Ionicons name="star" size={28} color="#00C9FF" />
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.likeButton]} 
+        <TouchableOpacity
+          style={[styles.actionButton, styles.likeButton]}
           onPress={() => forceSwipe('right')}
         >
           <Ionicons name="heart" size={35} color="#4FC3A1" />
@@ -405,73 +417,236 @@ export default function HarvestSwipeCard({
 }
 
 const styles = StyleSheet.create({
-  labelContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 30,
+  actionBar: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    left: 0,
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderWidth: 3,
+    position: 'absolute',
+    right: 0,
+  },
+  actionButton: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 30,
+    borderWidth: 1,
+    height: 60,
+    justifyContent: 'center',
+    width: 60,
   },
-  nopeLabelContainer: {
-    backgroundColor: 'rgba(255, 60, 60, 0.9)',
+  activeDot: {
+    backgroundColor: '#fff',
   },
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
+  badgeGradient: {
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  badgeLabel: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  badgeValue: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 2,
+  },
+  bio: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  boostButton: {
+    borderRadius: 25,
+    height: 50,
+    width: 50,
   },
   card: {
-    position: 'absolute',
-    width: screenWidth - 20,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 20,
+    elevation: 10,
     height: screenHeight * 0.78,
     left: 10,
-    top: screenHeight * 0.1,
-    borderRadius: 20,
+    position: 'absolute',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
-    elevation: 10,
-    backgroundColor: '#1a1a1a',
+    top: screenHeight * 0.1,
+    width: screenWidth - 20,
   },
-  photoContainer: {
+  compatibilityBadge: {
+    borderRadius: 12,
     flex: 1,
-    borderRadius: 20,
     overflow: 'hidden',
   },
-  photo: {
-    width: '100%',
-    height: '100%',
+  compatibilityRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
   },
-  loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  container: {
+    backgroundColor: '#000',
+    flex: 1,
+  },
+  dislikeButton: {
+    borderRadius: 35,
+    height: 70,
+    width: 70,
+  },
+  dot: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 2,
+    height: 3,
+    marginHorizontal: 3,
+    width: 30,
   },
   errorContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#1a1a1a',
-    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   errorText: {
     color: '#666',
-    marginTop: 10,
     fontSize: 14,
+    marginTop: 10,
+  },
+  header: {
+    marginBottom: 12,
+  },
+  hobbiesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  hobbyTag: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  hobbyText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  infoContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    bottom: 0,
+    left: 0,
+    minHeight: 180,
+    overflow: 'hidden',
+    position: 'absolute',
+    right: 0,
+  },
+  infoContent: {
+    padding: 20,
+  },
+  labelContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 30,
+    borderWidth: 3,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  likeButton: {
+    borderRadius: 35,
+    height: 70,
+    width: 70,
+  },
+  likeLabel: {
+    left: 20,
+    position: 'absolute',
+    top: 80,
+    transform: [{ rotate: '-30deg' }],
+    zIndex: 20,
+  },
+  likeText: {
+    color: '#4FC3A1',
+    fontSize: 32,
+    fontWeight: 'bold',
+    padding: 10,
+    paddingHorizontal: 20,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  location: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 16,
+    marginLeft: 4,
+  },
+  locationRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  name: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  nopeLabel: {
+    position: 'absolute',
+    right: 20,
+    top: 80,
+    transform: [{ rotate: '30deg' }],
+    zIndex: 20,
+  },
+  nopeLabelContainer: {
+    backgroundColor: 'rgba(255, 60, 60, 0.9)',
+  },
+  nopeText: {
+    color: '#FF3B30',
+    fontSize: 32,
+    fontWeight: 'bold',
+    padding: 10,
+    paddingHorizontal: 20,
+  },
+  photo: {
+    height: '100%',
+    width: '100%',
+  },
+  photoContainer: {
+    borderRadius: 20,
+    flex: 1,
+    overflow: 'hidden',
+  },
+  photoIndicator: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    left: 0,
+    paddingHorizontal: 20,
+    position: 'absolute',
+    right: 0,
+    zIndex: 10,
   },
   photoNav: {
+    bottom: 0,
     position: 'absolute',
     top: 0,
-    bottom: 0,
     width: '30%',
   },
   photoNavLeft: {
@@ -480,192 +655,39 @@ const styles = StyleSheet.create({
   photoNavRight: {
     right: 0,
   },
-  photoIndicator: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    zIndex: 10,
+  rewindButton: {
+    borderRadius: 25,
+    height: 50,
+    width: 50,
   },
-  dot: {
-    width: 30,
-    height: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    marginHorizontal: 3,
-    borderRadius: 2,
-  },
-  activeDot: {
-    backgroundColor: '#fff',
-  },
-  likeLabel: {
-    position: 'absolute',
-    top: 80,
-    left: 20,
-    zIndex: 20,
-    transform: [{ rotate: '-30deg' }],
-  },
-  likeText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#4FC3A1',
-    padding: 10,
-    paddingHorizontal: 20,
-  },
-  nopeLabel: {
-    position: 'absolute',
-    top: 80,
-    right: 20,
-    zIndex: 20,
-    transform: [{ rotate: '30deg' }],
-  },
-  nopeText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FF3B30',
-    padding: 10,
-    paddingHorizontal: 20,
+  superLikeButton: {
+    borderRadius: 25,
+    height: 50,
+    width: 50,
   },
   superLikeLabel: {
-    position: 'absolute',
+    alignItems: 'center',
     bottom: 160,
     left: 0,
+    position: 'absolute',
     right: 0,
-    alignItems: 'center',
     zIndex: 20,
   },
   superLikeText: {
+    color: '#00C9FF',
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#00C9FF',
     padding: 10,
     paddingHorizontal: 20,
   },
-  infoContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    minHeight: 180,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  infoContent: {
-    padding: 20,
-  },
-  header: {
-    marginBottom: 12,
-  },
-  name: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  location: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.8)',
-    marginLeft: 4,
-  },
-  compatibilityRow: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    gap: 8,
-  },
-  compatibilityBadge: {
-    flex: 1,
-    borderRadius: 12,
+  skeletonLoader: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#333',
+    borderRadius: 20,
     overflow: 'hidden',
   },
-  badgeGradient: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-  },
-  badgeLabel: {
-    fontSize: 10,
-    color: 'rgba(255,255,255,0.9)',
-    fontWeight: '600',
-  },
-  badgeValue: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginTop: 2,
-  },
-  hobbiesRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 12,
-    gap: 8,
-  },
-  hobbyTag: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  hobbyText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  bio: {
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.9)',
-    lineHeight: 21,
-  },
-  actionBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  actionButton: {
-    width: 60,
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  rewindButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  dislikeButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-  },
-  superLikeButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  likeButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-  },
-  boostButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  skeletonImage: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#444',
   },
 });

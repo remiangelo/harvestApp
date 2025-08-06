@@ -51,7 +51,13 @@ export default function OnboardingAge() {
         </View>
         <Text style={styles.title}>Let's Start with Your Age</Text>
         <Text style={styles.subtitle}>Input your birth date so people know how old you are</Text>
-        <TouchableOpacity style={styles.input} onPress={() => setShow(true)}>
+        <TouchableOpacity
+          style={styles.input}
+          onPress={() => setShow(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Select your birth date"
+          accessibilityHint="Tap to open date picker"
+        >
           <Text style={{ color: date ? '#222' : '#888', fontSize: 18, textAlign: 'center' }}>
             {date ? date.toLocaleDateString() : 'MM/DD/YYYY'}
           </Text>
@@ -63,6 +69,7 @@ export default function OnboardingAge() {
             display="spinner"
             onChange={onChange}
             maximumDate={new Date()}
+            accessibilityLabel="Date picker for selecting birth date"
           />
         )}
         <TouchableOpacity

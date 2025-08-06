@@ -80,12 +80,7 @@ export const LiquidGlassButton: React.FC<LiquidGlassButtonProps> = ({
     <TouchableOpacity
       {...props}
       disabled={disabled}
-      style={[
-        styles.container,
-        getSizeStyles(),
-        disabled && styles.disabled,
-        style,
-      ]}
+      style={[styles.container, getSizeStyles(), disabled && styles.disabled, style]}
     >
       {variant !== 'primary' && (
         <BlurView intensity={blurIntensity} tint="light" style={StyleSheet.absoluteFillObject} />
@@ -103,11 +98,11 @@ export const LiquidGlassButton: React.FC<LiquidGlassButtonProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16,
-    overflow: 'hidden',
     alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 16,
     flexDirection: 'row',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   disabled: {
     opacity: 0.5,

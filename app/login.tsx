@@ -24,13 +24,56 @@ export default function LoginScreen() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const router = useRouter();
   const { login, register, setTestMode, setAuthenticated } = useAuthStore();
   const { setCurrentUser } = useUserStore();
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
+  };
+
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    if (text && !validateEmail(text)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    if (text && !validatePassword(text)) {
+      setPasswordError('Password must be at least 6 characters');
+    } else {
+      setPasswordError('');
+    }
+  };
+
   const handleLogin = async () => {
+    // Validate inputs before submitting
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (!isEmailValid) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    if (!isPasswordValid) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
       return;
     }
 
@@ -52,12 +95,21 @@ export default function LoginScreen() {
   };
 
   const handleSignup = async () => {
+    // Validate inputs before submitting
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-    if (password.length < 6) {
+    if (!isEmailValid) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    if (!isPasswordValid) {
       Alert.alert('Error', 'Password must be at least 6 characters long');
       return;
     }
@@ -158,9 +210,10 @@ export default function LoginScreen() {
               label={isLogin ? 'Email' : 'Your Email'}
               placeholder="Enter your email"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={handleEmailChange}
               keyboardType="email-address"
               autoCapitalize="none"
+              error={emailError}
               leftIcon={<Ionicons name="mail" size={20} color={theme.colors.text.secondary} />}
             />
 
@@ -168,9 +221,10 @@ export default function LoginScreen() {
               label={isLogin ? 'Password' : 'Create Password'}
               placeholder={isLogin ? 'Enter your password' : 'Min. 6 characters'}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={handlePasswordChange}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
+              error={passwordError}
               leftIcon={
                 <Ionicons name="lock-closed" size={20} color={theme.colors.text.secondary} />
               }
@@ -185,7 +239,7 @@ export default function LoginScreen() {
             />
 
             <Button
-              title={isLogin ? 'Sign In' : 'Create Account'}
+              title={loading ? (isLogin ? 'Signing In...' : 'Creating Account...') : (isLogin ? 'Sign In' : 'Create Account')}
               onPress={isLogin ? handleLogin : handleSignup}
               loading={loading}
               style={styles.mainButton}
@@ -212,7 +266,7 @@ export default function LoginScreen() {
                 </View>
 
                 <Button
-                  title="Enter Test Mode (No Email Required)"
+                  title={loading ? "Entering Test Mode..." : "Enter Test Mode (No Email Required)"}
                   onPress={handleTestMode}
                   variant="outline"
                   loading={loading}
@@ -230,8 +284,8 @@ export default function LoginScreen() {
                 Development Mode
               </Text>
               <Text variant="caption" color="secondary" style={styles.infoText}>
-                Use "Test Mode" button above to bypass email authentication. This creates a local
-                test user for development.
+                Use &quot;Test Mode&quot; button above to bypass email authentication. This creates
+                a local test user for development.
               </Text>
             </Card>
           )}
@@ -243,10 +297,10 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   backButton: {
-    left: 20,
-    padding: 8,
+    left: theme.spacing.md,
+    padding: theme.spacing.sm,
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 20,
+    top: Platform.OS === 'ios' ? theme.spacing.xxl : theme.spacing.lg,
     zIndex: 1,
   },
   container: {

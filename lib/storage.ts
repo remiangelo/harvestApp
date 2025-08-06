@@ -11,12 +11,10 @@ export const uploadProfilePhoto = async (userId: string, photoUri: string, photo
     const blob = await response.blob();
 
     // Upload blob directly to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('profile-photos')
-      .upload(fileName, blob, {
-        contentType: `image/${fileExt}`,
-        upsert: false,
-      });
+    const { data, error } = await supabase.storage.from('profile-photos').upload(fileName, blob, {
+      contentType: `image/${fileExt}`,
+      upsert: false,
+    });
 
     if (error) throw error;
 
@@ -59,3 +57,5 @@ export const getProfilePhotos = async (userId: string) => {
     throw error;
   }
 };
+
+// Fuck Me.

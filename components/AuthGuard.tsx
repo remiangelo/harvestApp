@@ -29,14 +29,17 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }, []);
 
   // Safe navigation helper
-  const safeNavigate = React.useCallback((route: string) => {
-    if (navigationTimeoutRef.current) {
-      clearTimeout(navigationTimeoutRef.current);
-    }
-    navigationTimeoutRef.current = setTimeout(() => {
-      router.replace(route as any);
-    }, 100);
-  }, [router]);
+  const safeNavigate = React.useCallback(
+    (route: string) => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+      navigationTimeoutRef.current = setTimeout(() => {
+        router.replace(route as any);
+      }, 100);
+    },
+    [router]
+  );
 
   useEffect(() => {
     if (isLoading) return;

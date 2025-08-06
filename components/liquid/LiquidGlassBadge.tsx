@@ -75,23 +75,23 @@ export const LiquidGlassBadge: React.FC<LiquidGlassBadgeProps> = ({
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
-    alignItems: 'center',
-  },
   container: {
+    alignItems: 'center',
+    borderColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
-    alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
     marginBottom: 4,
+    overflow: 'hidden',
+  },
+  label: {
+    color: '#666',
   },
   text: {
     color: '#1a1a1a',
     fontWeight: 'bold',
   },
-  label: {
-    color: '#666',
+  wrapper: {
+    alignItems: 'center',
   },
 });

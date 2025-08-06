@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView, LiquidGlassButton, LiquidGlassBadge } from './liquid';
+import * as Haptics from 'expo-haptics';
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 interface MatchModalProps {
   visible: boolean;
   onClose: () => void;
+  onSendMessage: () => void;
   userProfile: {
     name: string;
     photo: string;
@@ -28,16 +31,48 @@ interface MatchModalProps {
 export const MatchModal: React.FC<MatchModalProps> = ({
   visible,
   onClose,
+  onSendMessage,
   userProfile,
   matchProfile,
   compatibility,
 }) => {
   const insets = useSafeAreaInsets();
-  
+  const confettiRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (visible) {
+      // Haptic feedback
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      
+      // Start confetti
+      if (confettiRef.current) {
+        confettiRef.current.start();
+      }
+    }
+  }, [visible]);
+
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} presentationStyle="overFullScreen">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+    >
+      <ConfettiCannon
+        ref={confettiRef}
+        count={200}
+        origin={{ x: screenWidth / 2, y: 0 }}
+        fallSpeed={3000}
+        autoStart={false}
+      />
       <BlurView intensity={30} tint="dark" style={styles.backdrop}>
-        <View style={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
+        <View
+          style={[
+            styles.container,
+            { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 },
+          ]}
+        >
           {/* Profile Cards */}
           <View style={styles.cardsContainer}>
             <View style={styles.cardWrapper}>
@@ -58,9 +93,9 @@ export const MatchModal: React.FC<MatchModalProps> = ({
           </View>
 
           {/* Match Text */}
-          <Text style={styles.matchTitle}>It's a match, {userProfile.name}!</Text>
+          <Text style={styles.matchTitle}>It&apos;s a match, {userProfile.name}!</Text>
           <Text style={styles.matchSubtitle}>
-            We think you're a great match! Our algorithm{'\n'}
+            We think you&apos;re a great match! Our algorithm{'\n'}
             has given you {compatibility.overall}% compatibility.
           </Text>
           <Text style={styles.matchHint}>Try asking them about their love for travel</Text>
@@ -89,10 +124,13 @@ export const MatchModal: React.FC<MatchModalProps> = ({
 
           {/* Action Buttons */}
           <LiquidGlassButton
-            title="Say hello"
+            title="Send message"
             variant="primary"
             size="large"
-            onPress={onClose}
+            onPress={() => {
+              onSendMessage();
+              onClose();
+            }}
             style={styles.primaryButton}
           />
 
@@ -112,12 +150,12 @@ export const MatchModal: React.FC<MatchModalProps> = ({
 const styles = StyleSheet.create({
   backdrop: {
     alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
     bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   card: {
     backgroundColor: 'white',
@@ -193,35 +231,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'center',
   },
-  metric: {
-    alignItems: 'center',
-  },
-  metricCircle: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 25,
-    borderWidth: 3,
-    height: 50,
-    justifyContent: 'center',
-    marginBottom: 6,
-    width: 50,
-  },
-  metricGlass: {
-    alignItems: 'center',
-    height: 90,
-    justifyContent: 'center',
-    width: 90,
-  },
-  metricLabel: {
-    color: '#333',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  metricText: {
-    color: '#1a1a1a',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   metricsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -240,12 +249,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     width: screenWidth - 80,
   },
-  primaryButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
   rightCard: {
     marginLeft: -40,
     transform: [{ rotate: '10deg' }],
@@ -260,11 +263,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 60,
     paddingVertical: 16,
     width: screenWidth - 80,
-  },
-  secondaryButtonText: {
-    color: '#A0354E',
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 });

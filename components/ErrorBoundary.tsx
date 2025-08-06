@@ -48,9 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <Text style={styles.title}>Oops! Something went wrong</Text>
-          <Text style={styles.subtitle}>
-            We're sorry for the inconvenience. Please try again.
-          </Text>
+          <Text style={styles.subtitle}>We're sorry for the inconvenience. Please try again.</Text>
           <TouchableOpacity style={styles.button} onPress={this.handleReset}>
             <Text style={styles.buttonText}>Try Again</Text>
           </TouchableOpacity>
@@ -68,47 +66,47 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: theme.colors.background,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.text.primary,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-    marginBottom: 30,
-    textAlign: 'center',
-  },
   button: {
     backgroundColor: theme.colors.primary,
+    borderRadius: 25,
     paddingHorizontal: 30,
     paddingVertical: 15,
-    borderRadius: 25,
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
   },
+  container: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
   errorDetails: {
-    marginTop: 20,
-    padding: 15,
     backgroundColor: 'rgba(255, 0, 0, 0.1)',
     borderRadius: 10,
+    marginTop: 20,
     maxWidth: '90%',
+    padding: 15,
   },
   errorText: {
     color: 'red',
-    fontSize: 12,
     fontFamily: 'monospace',
+    fontSize: 12,
+  },
+  subtitle: {
+    color: theme.colors.text.secondary,
+    fontSize: 16,
+    marginBottom: 30,
+    textAlign: 'center',
+  },
+  title: {
+    color: theme.colors.text.primary,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });

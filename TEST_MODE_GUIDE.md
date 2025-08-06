@@ -1,11 +1,13 @@
 # Test Mode Guide - Harvest App
 
 ## Overview
+
 I've implemented a Test Mode that allows you to bypass email authentication and test the app without needing to create a real Supabase account or deal with email verification.
 
 ## How to Use Test Mode
 
 ### 1. Start the App
+
 ```bash
 npm start
 # or
@@ -13,16 +15,21 @@ expo start
 ```
 
 ### 2. Access Test Mode
+
 On the login screen, you'll see a new button (only visible in development mode):
+
 - **"Enter Test Mode (No Email Required)"** - Click this button
 
 ### 3. What Happens
+
 - A test user is created locally without any Supabase interaction
 - You're automatically redirected to the onboarding flow
 - Your test data is saved to AsyncStorage (persists across app restarts)
 
 ### 4. Test User Details
+
 The test user has these default properties:
+
 - Email: testuser@harvest.com
 - Name: Test User
 - Age: 25
@@ -32,6 +39,7 @@ The test user has these default properties:
 ## Features in Test Mode
 
 ### ✅ What Works
+
 - Complete onboarding flow (all 11 steps)
 - Profile creation and editing
 - Swipe cards and gestures
@@ -41,6 +49,7 @@ The test user has these default properties:
 - Data persistence (your test data is saved locally)
 
 ### ⚠️ Limitations
+
 - Photos are stored locally (not uploaded to Supabase)
 - No real matching (since other users aren't real)
 - No chat functionality (requires real users)
@@ -48,12 +57,15 @@ The test user has these default properties:
 - Profile edits save locally only
 
 ## Logging Out
+
 - Use the logout button in settings
 - This clears all test data
 - You can enter test mode again for a fresh start
 
 ## Switching to Real Auth
+
 To test with real email authentication:
+
 1. Don't click "Test Mode"
 2. Create a real account with email/password
 3. Ensure your `.env` file has valid Supabase credentials:
@@ -65,19 +77,22 @@ To test with real email authentication:
 ## Troubleshooting
 
 ### Test Mode Not Showing
+
 - Ensure you're running in development mode (`__DEV__` is true)
 - The button only appears in development builds
 
 ### Data Not Persisting
+
 - Test data is stored in AsyncStorage
 - Clear app data/cache if you encounter issues
 
 ### Can't Exit Test Mode
+
 - Use the logout function in settings
 - Or manually clear AsyncStorage:
   ```javascript
-  AsyncStorage.removeItem('harvest-test-mode')
-  AsyncStorage.removeItem('harvest-test-user')
+  AsyncStorage.removeItem('harvest-test-mode');
+  AsyncStorage.removeItem('harvest-test-user');
   ```
 
 ## Code Changes Made
@@ -97,6 +112,7 @@ To test with real email authentication:
    - Skips Supabase profile checks for test users
 
 ## Benefits
+
 - No email required
 - No internet connection needed
 - Instant access to test the app

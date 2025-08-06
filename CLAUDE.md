@@ -1,14 +1,17 @@
 # Harvest App - Claude Memory
 
 ## Project Overview
+
 **Harvest** is a React Native dating app built with Expo and TypeScript, focused on "Mindful Dating, Real Connections". The app features a comprehensive onboarding flow, swipe-based matching, and is preparing for launch to 5-10k users.
 
 ## CRITICAL UI REQUIREMENTS
+
 **IMPORTANT**: The liquid glass UI implementation MUST follow the UI mockups in the `Harvest Screens SVG:PNG/` folder **EXACTLY 1:1**. Do not deviate from the mockup designs - all glass effects, blur levels, colors, spacing, and visual elements must match the mockups precisely.
 
 ## Current Tech Stack Analysis (As of July 2025)
 
 ### **Architecture**
+
 - **Framework**: Expo Router (~5.1.3) with React Native 0.79.5
 - **Navigation**: File-based routing with stack navigation
 - **State Management**: React Context API for user state
@@ -16,12 +19,14 @@
 - **Backend**: Supabase integration (configured but using demo data)
 
 ### **Current Dependencies**
+
 - React 19.0.0, React Native 0.79.5, Expo ~53.0.17
 - Navigation: Expo Router, React Navigation
 - UI: Expo Vector Icons, React Native Reanimated ~3.17.4
 - Utils: Image picker, date/time picker, slider components
 
 ### **Project Structure**
+
 ```
 app/
 ├── _layout.tsx           # Root layout with navigation stack
@@ -37,6 +42,7 @@ constants/               # App configuration and Supabase client
 ```
 
 ### **Current Features**
+
 1. **Authentication**: Demo login with predefined users
 2. **Onboarding**: Multi-step profile setup (age, bio, photos, preferences)
 3. **Swipe Cards**: Basic ProfileCard component with photo navigation
@@ -44,6 +50,7 @@ constants/               # App configuration and Supabase client
 5. **Tab Navigation**: Main app interface structure
 
 ### **Demo Users**
+
 - `demo@harvest.com` / `demo123` (completed onboarding)
 - `admin@harvest.com` / `admin123` (admin role)
 - `test@harvest.com` / `test123` (test user)
@@ -51,6 +58,7 @@ constants/               # App configuration and Supabase client
 ## Recommended Tech Stack Upgrades
 
 ### **Priority Upgrades**
+
 1. **State Management**: Context API → **Zustand**
    - Better performance, no unnecessary re-renders
    - Simpler API, built-in persistence
@@ -72,6 +80,7 @@ constants/               # App configuration and Supabase client
    - Performance monitoring tools
 
 ### **Backend Architecture**
+
 - **Supabase**: Confirmed as optimal choice
 - **Cost**: $25-100/month for 5-10k users (75-90% savings vs custom)
 - **Features**: Real-time, auth, storage, edge functions
@@ -80,18 +89,21 @@ constants/               # App configuration and Supabase client
 ## Development Phases
 
 ### **Phase 1: Tech Stack Modernization (Weeks 1-4)**
+
 - Week 1: Modern state management and dev tools
 - Week 2: Supabase foundation with enhanced schema
 - Week 3: Advanced swipe experience with gestures
 - Week 4: Real-time chat and matching system
 
 ### **Phase 2: Advanced Features (Weeks 5-8)**
+
 - Week 5: Premium features and matching intelligence
 - Week 6: Enhanced chat and social features
 - Week 7: Push notifications and engagement
 - Week 8: Profile enhancements and analytics
 
 ### **Phase 3: Launch Preparation (Weeks 9-12)**
+
 - Week 9: Comprehensive testing and QA
 - Week 10: App store preparation and CI/CD
 - Week 11: Beta testing and user feedback
@@ -100,12 +112,14 @@ constants/               # App configuration and Supabase client
 ## Implementation Priority
 
 ### **Immediate Actions**
+
 1. Install Zustand and modern dependencies
 2. Set up development tools (ESLint, Prettier, Husky)
 3. Create Supabase project with enhanced schema
 4. Implement gesture handler and reanimated
 
 ### **Key Files to Modernize**
+
 - `app/_layout.tsx` - Auth state management with Zustand
 - `app/login.tsx` - Real authentication
 - `app/_tabs/index.tsx` - Advanced swipe interface
@@ -114,12 +128,14 @@ constants/               # App configuration and Supabase client
 - Create `lib/supabase.ts` for backend integration
 
 ## Cost Analysis
+
 - **Current**: Demo/development phase
 - **5K users**: ~$43/month (Supabase Pro + optimized storage)
 - **10K users**: ~$102/month (includes additional database)
 - **Savings**: 75-90% vs custom AWS backend
 
 ## Success Metrics
+
 - **Week 4**: Modern stack implemented, real-time chat working
 - **Week 8**: Full features with premium options, 100+ beta users
 - **Week 12**: App store approval, 500+ active users, revenue stream
@@ -127,9 +143,11 @@ constants/               # App configuration and Supabase client
 ## Progress Tracking (Auto-updated every 15 minutes)
 
 ### **Current Session Progress**
+
 **Last Updated**: August 6, 2025 - Next Steps Documentation and TypeScript Fix
 
 #### **Completed Tasks**
+
 - ✅ Complete codebase analysis and architecture review
 - ✅ Identified current tech stack (React Native 0.79.5, Expo ~53.0.17, Context API)
 - ✅ Analyzed project structure and existing features
@@ -139,12 +157,12 @@ constants/               # App configuration and Supabase client
 - ✅ Established memory system for project continuity
 
 ##### **Tech Stack Modernization Completed**
+
 - ✅ **Migrated from Context API to Zustand**
   - Created `stores/useUserStore.ts` with state persistence
   - Maintained backward compatibility - all components work unchanged
   - Added AsyncStorage for state persistence across app restarts
   - Improved performance with selective re-renders
-  
 - ✅ **Implemented Gesture Handler v2 + Haptics**
   - Installed react-native-gesture-handler and expo-haptics
   - Created `SwipeableProfileCard.tsx` with advanced gestures
@@ -152,26 +170,24 @@ constants/               # App configuration and Supabase client
   - Implemented swipe left (dislike), right (like), up (super like)
   - Added haptic feedback when crossing swipe threshold
   - Visual indicators show swipe direction (LIKE/NOPE/SUPER LIKE)
-  
 - ✅ **Integrated Reanimated v3 Animations**
   - Smooth spring animations for card movement
   - Card rotation and scale effects during drag
   - 60fps performance on UI thread
   - Fade out animation on swipe completion
-  
 - ✅ **Updated NEXT_STEPS_PLAN.mdx**
   - Added progress update section at top
   - Marked completed items throughout document
   - Added implementation details for each upgrade
 
 ##### **Backend & UI Implementation Completed (July 19)**
+
 - ✅ **Supabase Backend Foundation**
   - Installed @supabase/supabase-js and dependencies
   - Created `lib/supabase.ts` with auth helpers
   - Built `stores/useAuthStore.ts` for auth state management
   - Created comprehensive database schema (001_initial_schema.sql)
   - Added .env.example and updated .gitignore
-  
 - ✅ **UI Component Library**
   - Created `constants/theme.ts` with maroon color palette (#A0354E)
   - Built core components: Button, Input, Card, Tag, Text
@@ -181,16 +197,15 @@ constants/               # App configuration and Supabase client
   - Consistent shadows, spacing, and typography
 
 ##### **Development Tools & Quality (July 19)**
+
 - ✅ **Updated Dependencies**
   - Updated 5 packages to latest compatible versions
   - Fixed npm warnings
-  
 - ✅ **Development Tools Setup**
   - Configured ESLint with React Native rules
   - Added Prettier for code formatting
   - Set up Husky for pre-commit hooks
   - Configured lint-staged for efficient linting
-  
 - ✅ **Bug Fixes & Optimizations**
   - Fixed all TypeScript errors
   - Removed console.log statements
@@ -198,19 +213,18 @@ constants/               # App configuration and Supabase client
   - Created CleanSwipeCard with better UX
   - Added loading states and error handling
   - Improved gesture performance
-  
 - ✅ **Authentication Integration**
   - Updated login screen with real Supabase auth
   - Replaced demo login with production-ready auth flow
   - Added loading states and error handling
   - Integrated auth state listener in root layout
-  
 - ✅ **Documentation**
   - Created UI_DESIGN_ANALYSIS.mdx from screen analysis
   - Created SUPABASE_SETUP.md for backend configuration
   - Updated NEXT_STEPS_PLAN.mdx with UI insights
 
 ##### **Authentication & Database Integration (July 19)**
+
 - ✅ **Complete Authentication System**
   - Created `useAuthStore.ts` with full profile integration
   - Built `lib/profiles.ts` service for user profile management
@@ -218,7 +232,6 @@ constants/               # App configuration and Supabase client
   - Implemented logout functionality with `LogoutButton` component
   - Created comprehensive `AUTH_SETUP.md` guide
   - Added `storage-buckets.sql` for profile photo storage
-  
 - ✅ **Onboarding Database Integration (Completed)**
   - Created `lib/onboarding.ts` for saving progress to Supabase
   - Built `hooks/useOnboarding.ts` for unified data saving
@@ -251,6 +264,7 @@ constants/               # App configuration and Supabase client
   - Users can now close app and resume exactly where they left off
 
 #### **Tier 1 Features Completed (July 19)**
+
 - ✅ **Fixed all console warnings and TypeScript errors**
   - Fixed type mismatches in photo arrays
   - Fixed router navigation type errors
@@ -288,16 +302,15 @@ constants/               # App configuration and Supabase client
   - Filters apply to swipe card stack in real-time
 
 #### **Final Cleanup & Verification (July 20)**
+
 - ✅ **Fixed Database Column Mismatches**
   - Updated `lib/profiles.ts` to use correct column names
   - Fixed: `first_name` → `nickname`, `city` → `location`, `max_distance` → `distance_preference`
   - Added support for `preferences` and `goals` fields
-  
 - ✅ **Marked Unused Components**
   - Added "UNUSED" comments to 6 old swipe card components
   - `CleanSwipeCard.tsx` is the active implementation
   - Can safely delete: SwipeCard, EnhancedSwipeCard, ProfileCard, MockupSwipeCard, SwipeableProfileCard
-  
 - ✅ **Comprehensive App Verification**
   - Auth flow: signup → profile creation → onboarding ✓
   - Onboarding: 11 steps save to database, progress restoration works ✓
@@ -305,62 +318,56 @@ constants/               # App configuration and Supabase client
   - Profile editing: All fields update correctly ✓
   - Swipe functionality: Gestures, animations, filters all working ✓
   - Navigation: All routes exist and work properly ✓
-  
 - ✅ **Critical Setup Requirements Documented**
   1. Must run `/supabase/quick_fix_schema.sql` in Supabase
   2. Must add environment variables (EXPO_PUBLIC_SUPABASE_URL/KEY)
   3. Must create `profile-photos` storage bucket in Supabase
 
 #### **Test Mode Implementation (July 20)**
+
 - ✅ **Created Test Mode for Development**
   - Added "Enter Test Mode" button on login screen (dev only)
   - Bypasses email authentication completely
   - Creates local mock user with DemoUser interface
   - Stores test data in AsyncStorage for persistence
   - Test mode flag in auth store tracks state
-  
 - ✅ **Fixed Test Mode Issues**
   - Updated AuthGuard to handle test mode users
   - Fixed onboarding save errors by checking isTestMode
   - Photos stay local in test mode (no Supabase upload)
   - Fixed TypeScript errors with DemoUser interface
   - Changed onboarding_completed to onboardingCompleted
-  
 - ✅ **Fixed Image Picker Deprecation**
   - Changed MediaTypeOptions to array syntax ['images']
   - Updated all 3 files using image picker
   - No more deprecation warnings
-  
 - ✅ **Updated Dependencies**
   - expo@53.0.20 (was 53.0.19)
   - expo-router@~5.1.4 (was 5.1.3)
   - react-native-svg@15.11.2 (was 15.12.0)
-  
 - ✅ **Cleaned Up Documentation**
   - Removed 16 unnecessary .md files
   - Kept only CLAUDE.md and TEST_MODE_GUIDE.md
   - Created clearTestMode.js helper script
 
 #### **Liquid Glass UI Implementation (July 21)**
+
 - ✅ **Created Liquid Glass UI System**
   - Built `components/liquid/LiquidGlassView.tsx` base component
   - Implements glassmorphism with expo-blur and expo-linear-gradient
   - Configurable blur intensity, tint, gradient colors
   - Follows mockups from `Harvest Screens SVG:PNG/` exactly
-  
 - ✅ **Updated Core Components with Liquid Glass**
   - CleanSwipeCard: Added liquid glass overlay on bottom info section
   - MatchModal: Created with liquid glass design for match notifications
   - ChatMenuPopup: Implemented liquid glass popup menu
   - Matches screen: Added liquid glass conversation cards
   - Gardener screen: Created lesson cards with liquid glass effect
-  
 - ✅ **Fixed Authentication Flow**
   - Created `app/auth.tsx` welcome screen
   - Fixed app starting at login instead of onboarding
   - Updated AuthGuard to handle auth screen properly
   - Added social login buttons (Facebook, Google, Email)
-  
 - ✅ **Fixed Critical Bugs (July 21)**
   - Onboarding complete screen text: Replaced custom Text with RN Text
   - Image loading: Replaced all picsum.photos URLs with Unsplash
@@ -369,6 +376,7 @@ constants/               # App configuration and Supabase client
   - Fixed animation timing and gesture completion handlers
 
 #### **Swipe Crash Investigation (July 21)**
+
 - ✅ **Attempted Fixes Applied**:
   - Updated all Unsplash image URLs with proper parameters to fix blank photo issue
   - Fixed gesture handler animation callbacks (removed deprecated withTiming completion handlers)
@@ -383,12 +391,12 @@ constants/               # App configuration and Supabase client
   - Need to investigate: React Native Gesture Handler compatibility, Reanimated worklet issues, or potential circular dependencies
 
 #### **UI Clipping Issues Fixed (July 21-22)**
+
 - ✅ **Comprehensive UI Audit Completed**
   - Found and fixed 15 major UI clipping issues across the app
   - All headers now use dynamic safe area insets instead of fixed padding
   - Tab bar icons no longer have negative margins
   - Modals properly cover full screen with `presentationStyle="overFullScreen"`
-  
 - ✅ **Specific Fixes Applied**:
   1. **Navigation Headers**: Dynamic `insets.top` instead of fixed `paddingTop: 60`
   2. **Swipe Card Action Bar**: Conditional spacing `insets.bottom > 0 ? insets.bottom + 20 : 30`
@@ -402,6 +410,7 @@ constants/               # App configuration and Supabase client
   10. **OptimizedImage**: Removed unsupported iOS headers
 
 #### **Profile Screen Redesign (July 22)**
+
 - ✅ **Complete UI Overhaul**:
   - Gradient header with maroon theme colors (#A0354E → #8B1E2D → #701625)
   - Circular profile photo (140x140) with white border
@@ -413,16 +422,17 @@ constants/               # App configuration and Supabase client
   - Photo grid shows 5 additional photos (main photo shown separately)
 
 #### **Navigator Updates (July 22)**
+
 - ✅ Changed Discover tab icon from "copy" (stacked squares) to "compass"
 - ✅ All tab icons now make semantic sense for their functions
 
 #### **Critical Bug Fixes Completed (July 30, 2025)**
+
 - ✅ **FIXED SWIPE CRASH ISSUE**
   - Root cause: React 19.0.0 incompatibility with React Native Reanimated
   - Solution: Created SafeSwipeCard using stable Animated API instead of Reanimated
   - Added proper cleanup with isMounted refs to prevent race conditions
   - Fixed animation timing issues and memory leaks
-  
 - ✅ **Comprehensive Bug Audit & Fixes**
   - Fixed navigation race conditions in AuthGuard with debounced routing
   - Added comprehensive error boundaries throughout the app
@@ -446,6 +456,7 @@ constants/               # App configuration and Supabase client
   - Added proper error handling and logging throughout
 
 #### **iOS 26 Glassmorphism Swipe Card Implementation (August 1, 2025)**
+
 - ✅ **Created HarvestSwipeCard Component**
   - Built from scratch with modern iOS 26 glassmorphism design
   - Smooth animations using React Native's Animated API
@@ -454,26 +465,24 @@ constants/               # App configuration and Supabase client
   - Loading states and error handling for images
   - Haptic feedback on swipes
   - Glass effect action buttons with proper styling
-  
 - ✅ **Fixed Component Registration Errors**
   - Removed iOS26LiquidGlass component usage due to React Native registration issues
   - Replaced with standard React Native components + BlurView for glass effects
   - Maintained visual aesthetics while ensuring compatibility
   - Fixed babel.config.js - removed deprecated expo-router/babel plugin
-  
 - ✅ **Demo Chat Integration**
   - Updated matches screen with realistic demo chat data
   - Created engaging conversations with timestamps
   - Added unread counts and online status indicators
   - Built full chat detail screen with glass effect input bar
   - Proper message formatting and time display using date-fns
-  
 - ✅ **Removed All Conflicting Swipe Cards**
   - Deleted CleanSwipeCard, SimpleSwipeCard, SafeSwipeCard
   - Single implementation: HarvestSwipeCard
   - No more conflicts or confusion
 
 #### **Session Progress (August 6, 2025)**
+
 - ✅ **Fixed TypeScript Error** - Removed base64-arraybuffer dependency from storage.ts
 - ✅ **Created HARVEST_NEXT_STEPS.mdx** - Comprehensive implementation guide with:
   - Complete SQL schemas for swipes, matches, and messages tables
@@ -485,9 +494,11 @@ constants/               # App configuration and Supabase client
 - ✅ **Identified ESLint Issues** - Minor warnings in multiple files
 
 #### **Currently Working On**
+
 - Preparing for production launch (5-10k users)
 
 #### **Next Priority Tasks** (From HARVEST_NEXT_STEPS.mdx)
+
 1. **Fix ESLint warnings** (Day 1) - Remove unused imports and variables
 2. **Polish UI/UX** (Days 2-3) - Add skeleton loaders, smooth transitions, image caching
 3. **Save swipes to database** (Days 3-5) - Implement swipes table and tracking
@@ -496,11 +507,13 @@ constants/               # App configuration and Supabase client
 6. **Add push notifications** (Week 3-4) - Match and message alerts
 
 #### **Blockers/Issues**
+
 - iOS26LiquidGlass component cannot be used directly - causes React Native registration errors
 - Workaround: Using BlurView + styled Views to achieve glass effects
 - iOS 18 simulator has linking permission errors with Expo SDK 53
 
 #### **Key Decisions Made**
+
 - Confirmed Supabase as backend choice (cost-effective, feature-rich)
 - Prioritized Zustand over Redux for state management
 - Chose Gesture Handler v2 + Reanimated v3 for smooth animations
@@ -515,13 +528,14 @@ constants/               # App configuration and Supabase client
 - Cleaned up documentation files to reduce clutter
 
 #### **Technical Implementation Details**
+
 - **Zustand Stores**: `/stores/useUserStore.ts`, `/stores/useAuthStore.ts`
 - **Supabase Config**: `/lib/supabase.ts`
 - **UI Components**: `/components/ui/` (Button, Input, Card, Tag, Text, Avatar, Badge, Chip, ProgressBar, Toggle)
 - **Theme Configuration**: `/constants/theme.ts`
 - **Database Schema**: `/supabase/migrations/001_initial_schema.sql`
 - **Swipeable Card**: `/components/HarvestSwipeCard.tsx` (ACTIVE - iOS 26 glassmorphism design)
-- **Dependencies Added**: 
+- **Dependencies Added**:
   - zustand, @react-native-async-storage/async-storage
   - @supabase/supabase-js, react-native-url-polyfill
   - react-native-gesture-handler, expo-haptics
@@ -540,7 +554,9 @@ constants/               # App configuration and Supabase client
 - **Helper Scripts**: `clearTestMode.js`, `fix-simulator.sh`
 
 ### **App Status Summary**
+
 **Production Ready**: All Tier 1 features are implemented and tested
+
 - ✅ Authentication & Authorization
 - ✅ 11-step Onboarding with Database Persistence
 - ✅ Profile Management & Photo Uploads
@@ -553,18 +569,22 @@ constants/               # App configuration and Supabase client
 - ✅ TypeScript fully compliant (zero errors)
 
 **Setup Requirements**:
+
 1. Run `/supabase/quick_fix_schema.sql` in Supabase SQL editor
 2. Add Supabase credentials to `.env` file
 3. Create `profile-photos` public storage bucket
 
 ### **Session Summary (August 6, 2025)**
-**What We Completed**: 
+
+**What We Completed**:
+
 1. **Fixed TypeScript Build Error**: Removed base64-arraybuffer dependency, using native blob upload instead
 2. **Created Comprehensive Documentation**: HARVEST_NEXT_STEPS.mdx with complete implementation guide
 3. **Analyzed App State**: Confirmed alpha showcase ready status
 4. **Planned Production Path**: Detailed 4-week timeline to launch for 5-10k users
 
 **Technical Solutions Applied**:
+
 - Direct blob upload to Supabase Storage (removed base64 conversion)
 - Complete SQL schemas for swipes, matches, and messages
 - Real-time chat implementation with Supabase channels
@@ -572,6 +592,7 @@ constants/               # App configuration and Supabase client
 - Production monitoring and deployment checklist
 
 **Documentation Created**:
+
 - `HARVEST_NEXT_STEPS.mdx` - 4-week implementation guide with:
   - Database schemas (migrations 004-006)
   - TypeScript service implementations
@@ -582,12 +603,15 @@ constants/               # App configuration and Supabase client
 **App Status**: Alpha showcase ready! Next phase is production preparation.
 
 **Immediate Next Steps** (Week 1):
+
 1. Fix ESLint warnings (Day 1)
 2. Polish UI/UX with skeleton loaders (Days 2-3)
 3. Implement swipe tracking to database (Days 3-5)
 
 ### **Memory Update Instructions**
+
 **IMPORTANT**: This memory file should be automatically updated every 15 minutes during active development sessions with:
+
 - Current progress on tasks
 - Completed implementations
 - Any issues encountered
@@ -597,6 +621,7 @@ constants/               # App configuration and Supabase client
 Update the "Last Updated" timestamp and progress sections to maintain accurate project state tracking.
 
 ## Notes
+
 - App has solid foundation with good UI/UX
 - Demo system works well for testing
 - Ready for production backend integration

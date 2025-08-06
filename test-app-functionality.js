@@ -13,7 +13,7 @@ console.log('🧪 Running Harvest App Functionality Tests...\n');
 const tests = {
   passed: 0,
   failed: 0,
-  warnings: 0
+  warnings: 0,
 };
 
 function testPass(name) {
@@ -35,7 +35,10 @@ function testWarn(name, warning) {
 console.log('1️⃣  Environment Configuration Tests');
 if (fs.existsSync('.env')) {
   const envContent = fs.readFileSync('.env', 'utf-8');
-  if (envContent.includes('EXPO_PUBLIC_SUPABASE_URL') && envContent.includes('EXPO_PUBLIC_SUPABASE_ANON_KEY')) {
+  if (
+    envContent.includes('EXPO_PUBLIC_SUPABASE_URL') &&
+    envContent.includes('EXPO_PUBLIC_SUPABASE_ANON_KEY')
+  ) {
     testPass('Environment variables configured');
   } else {
     testFail('Environment variables', 'Missing required Supabase keys');
@@ -51,13 +54,13 @@ const criticalFiles = [
   'app/_tabs/index.tsx',
   'components/CleanSwipeCard.tsx',
   'stores/useAuthStore.ts',
-  'lib/supabase.ts'
+  'lib/supabase.ts',
 ];
 
-criticalFiles.forEach(file => {
+criticalFiles.forEach((file) => {
   if (fs.existsSync(file)) {
     const content = fs.readFileSync(file, 'utf-8');
-    
+
     // Check for common import errors
     if (content.includes('import') && !content.includes('// @ts-ignore')) {
       testPass(`${file} imports look valid`);
@@ -77,14 +80,12 @@ const matches = profilesFile.match(unsplashPattern) || [];
 
 if (matches.length > 0) {
   testPass(`Found ${matches.length} Unsplash image URLs`);
-  
+
   // Check if URLs have proper parameters
-  const properUrls = matches.filter(url => 
-    url.includes('ixlib=') && 
-    url.includes('auto=format') && 
-    url.includes('fit=crop')
+  const properUrls = matches.filter(
+    (url) => url.includes('ixlib=') && url.includes('auto=format') && url.includes('fit=crop')
   );
-  
+
   if (properUrls.length === matches.length) {
     testPass('All image URLs have proper parameters');
   } else {
@@ -119,10 +120,10 @@ const navigationFiles = [
   'app/login.tsx',
   'app/onboarding/index.tsx',
   'app/onboarding/complete.tsx',
-  'app/_tabs/_layout.tsx'
+  'app/_tabs/_layout.tsx',
 ];
 
-navigationFiles.forEach(file => {
+navigationFiles.forEach((file) => {
   if (fs.existsSync(file)) {
     testPass(`${file} exists`);
   } else {
@@ -141,14 +142,14 @@ if (authStoreFile.includes('isTestMode')) {
 
 // Test 8: Database Schema
 console.log('\n8️⃣  Database Schema Tests');
-const migrationFiles = fs.readdirSync('supabase/migrations').filter(f => f.endsWith('.sql'));
+const migrationFiles = fs.readdirSync('supabase/migrations').filter((f) => f.endsWith('.sql'));
 if (migrationFiles.length > 0) {
   testPass(`Found ${migrationFiles.length} migration files`);
-  
+
   // Check for duplicate migration numbers
-  const migrationNumbers = migrationFiles.map(f => f.split('_')[0]);
+  const migrationNumbers = migrationFiles.map((f) => f.split('_')[0]);
   const duplicates = migrationNumbers.filter((num, idx) => migrationNumbers.indexOf(num) !== idx);
-  
+
   if (duplicates.length > 0) {
     testWarn('Migrations', `Duplicate migration numbers: ${duplicates.join(', ')}`);
   }
@@ -173,14 +174,17 @@ if (swipeCardFile.includes('runOnJS')) {
 
 // Test 10: Component Cleanup
 console.log('\n🔟 Component Cleanup Tests');
-const componentFiles = fs.readdirSync('components').filter(f => f.endsWith('.tsx'));
-const unusedComponents = componentFiles.filter(f => {
+const componentFiles = fs.readdirSync('components').filter((f) => f.endsWith('.tsx'));
+const unusedComponents = componentFiles.filter((f) => {
   const content = fs.readFileSync(path.join('components', f), 'utf-8');
   return content.includes('// UNUSED');
 });
 
 if (unusedComponents.length > 0) {
-  testWarn('Components', `${unusedComponents.length} components marked as UNUSED: ${unusedComponents.join(', ')}`);
+  testWarn(
+    'Components',
+    `${unusedComponents.length} components marked as UNUSED: ${unusedComponents.join(', ')}`
+  );
 }
 
 // Summary

@@ -1,9 +1,7 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Tabs } from 'expo-router';
 
-import Colors from '../../constants/Colors';
 import { useColorScheme } from '../../components/useColorScheme';
 import { useClientOnlyValue } from '../../components/useClientOnlyValue';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
@@ -17,8 +15,6 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <ErrorBoundary>
       <Tabs
@@ -59,6 +55,7 @@ export default function TabLayout() {
           options={{
             title: 'Chat',
             tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
+            headerShown: false,
           }}
         />
         <Tabs.Screen
@@ -66,6 +63,7 @@ export default function TabLayout() {
           options={{
             title: 'Profile',
             tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+            headerShown: false,
           }}
         />
       </Tabs>

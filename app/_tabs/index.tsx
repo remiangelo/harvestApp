@@ -20,12 +20,11 @@ export default function SwipingScreen() {
   const { currentUser } = useUserStore();
   const { user, isTestMode } = useAuthStore();
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-  const [likedProfiles, setLikedProfiles] = useState<string[]>([]);
-  const [dislikedProfiles, setDislikedProfiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filteredProfiles, setFilteredProfiles] = useState<DemoProfile[]>([]);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState<DemoProfile | null>(null);
+  const [nextProfiles, setNextProfiles] = useState<DemoProfile[]>([]);
 
   // Filter and sort profiles based on user preferences
   useEffect(() => {
@@ -48,11 +47,19 @@ export default function SwipingScreen() {
     setTimeout(() => {
       if (currentProfileIndex < validProfiles.length - 1) {
         setCurrentProfileIndex((prev) => prev + 1);
+        // Preload next 3 profiles
+        const nextProfilesToLoad = [];
+        for (let i = 1; i <= 3; i++) {
+          const nextIndex = currentProfileIndex + i;
+          if (nextIndex < validProfiles.length) {
+            nextProfilesToLoad.push(validProfiles[nextIndex]);
+          }
+        }
+        setNextProfiles(nextProfilesToLoad);
       } else {
         // Reset to beginning when we run out of profiles
         setCurrentProfileIndex(0);
-        setLikedProfiles([]);
-        setDislikedProfiles([]);
+        setNextProfiles([]);
         Alert.alert('No More Profiles! 🔄', "You've seen all the demo profiles. Starting over...", [
           { text: 'OK', style: 'default' },
         ]);
@@ -71,8 +78,6 @@ export default function SwipingScreen() {
       console.log('Current profile:', currentProfile.id);
 
       if (user && !isTestMode) {
-        setLikedProfiles((prev) => [...prev, currentProfile.id]);
-
         // Save swipe to database
         const result = await saveSwipe(user.id, currentProfile.id, 'like');
 
@@ -87,7 +92,6 @@ export default function SwipingScreen() {
       } else {
         // Test mode or no user - just simulate
         console.log('Test mode - simulating like');
-        setLikedProfiles((prev) => [...prev, currentProfile.id]);
         const isMatch = Math.random() > 0.3; // 70% match rate for demo
         if (isMatch) {
           setMatchedProfile(currentProfile);
@@ -113,8 +117,6 @@ export default function SwipingScreen() {
       console.log('Current profile:', currentProfile.id);
 
       if (user && !isTestMode) {
-        setDislikedProfiles((prev) => [...prev, currentProfile.id]);
-
         // Save swipe to database
         const result = await saveSwipe(user.id, currentProfile.id, 'nope');
 
@@ -126,7 +128,6 @@ export default function SwipingScreen() {
       } else {
         // Test mode or no user - just track locally
         console.log('Test mode - simulating dislike');
-        setDislikedProfiles((prev) => [...prev, currentProfile.id]);
         nextProfile();
       }
     } catch (error) {
@@ -147,8 +148,6 @@ export default function SwipingScreen() {
       console.log('Current profile:', currentProfile.id);
 
       if (user && !isTestMode) {
-        setLikedProfiles((prev) => [...prev, currentProfile.id]);
-
         // Save swipe to database
         const result = await saveSwipe(user.id, currentProfile.id, 'super_like');
 
@@ -163,7 +162,6 @@ export default function SwipingScreen() {
       } else {
         // Test mode or no user - just simulate
         console.log('Test mode - simulating super like');
-        setLikedProfiles((prev) => [...prev, currentProfile.id]);
         // Super likes have higher match rate
         const isMatch = Math.random() > 0.1; // 90% match rate for super likes
         if (isMatch) {
@@ -178,12 +176,6 @@ export default function SwipingScreen() {
       nextProfile();
     }
   }, [currentProfile, user, isTestMode, nextProfile]);
-
-  const resetProfiles = () => {
-    setCurrentProfileIndex(0);
-    setLikedProfiles([]);
-    setDislikedProfiles([]);
-  };
 
   if (isLoading) {
     return (
@@ -241,6 +233,7 @@ export default function SwipingScreen() {
 
         <HarvestSwipeCard
           profile={currentProfile}
+          nextProfiles={nextProfiles}
           onLike={handleLike}
           onDislike={handleDislike}
           onSuperLike={handleSuperLike}
@@ -252,6 +245,9 @@ export default function SwipingScreen() {
             onClose={() => {
               setShowMatchModal(false);
               setMatchedProfile(null);
+            }}
+            onSendMessage={() => {
+              // TODO: Navigate to chat screen
             }}
             userProfile={{
               name: currentUser?.name || 'You',
@@ -292,6 +288,8 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    borderBottomWidth: 0.5,
     flexDirection: 'row',
     justifyContent: 'space-between',
     left: 0,
@@ -301,8 +299,6 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     zIndex: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
   },
   loadingContainer: {
     alignItems: 'center',

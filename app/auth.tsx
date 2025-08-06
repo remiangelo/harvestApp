@@ -26,7 +26,7 @@ export default function AuthScreen() {
               Welcome!
             </Text>
             <Text variant="body" align="center" color="secondary" style={styles.welcomeSubtitle}>
-              Let's dive into your account!
+              Let&apos;s dive into your account!
             </Text>
           </View>
 
@@ -59,7 +59,7 @@ export default function AuthScreen() {
           {/* Terms */}
           <View style={styles.termsContainer}>
             <Text variant="caption" align="center" color="secondary">
-              I accept Harvest's <Text style={styles.link}>Legal Terms</Text> &{' '}
+              I accept Harvest&apos;s <Text style={styles.link}>Legal Terms</Text> &{' '}
               <Text style={styles.link}>Privacy Policy</Text>
             </Text>
           </View>

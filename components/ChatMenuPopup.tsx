@@ -32,7 +32,7 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
   onUnmatch,
 }) => {
   const insets = useSafeAreaInsets();
-  
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose}>

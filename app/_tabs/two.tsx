@@ -117,8 +117,8 @@ export default function ProfileScreen() {
     setIsEditing(false);
   };
 
-  const firstPhoto = profile.photos.find(photo => photo) || null;
-  
+  const firstPhoto = profile.photos.find((photo) => photo) || null;
+
   // Memoize the additional photos array to prevent re-renders
   const additionalPhotos = useMemo(() => {
     return profile.photos.slice(1);
@@ -168,7 +168,9 @@ export default function ProfileScreen() {
             )}
           </TouchableOpacity>
 
-          <Text style={styles.profileName}>{profile.name}, {profile.age}</Text>
+          <Text style={styles.profileName}>
+            {profile.name}, {profile.age}
+          </Text>
           <View style={styles.locationRow}>
             <Ionicons name="location" size={16} color="rgba(255,255,255,0.8)" />
             <Text style={styles.profileLocation}>{profile.location}</Text>
@@ -176,7 +178,7 @@ export default function ProfileScreen() {
         </View>
       </LinearGradient>
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         showsVerticalScrollIndicator={false}
@@ -250,11 +252,7 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>Interests</Text>
           <View style={styles.hobbiesContainer}>
             {profile.hobbies.map((hobby, index) => (
-              <LinearGradient
-                key={index}
-                colors={['#A0354E', '#8B1E2D']}
-                style={styles.hobbyTag}
-              >
+              <LinearGradient key={index} colors={['#A0354E', '#8B1E2D']} style={styles.hobbyTag}>
                 <Text style={styles.hobbyText}>{hobby}</Text>
               </LinearGradient>
             ))}
@@ -267,10 +265,7 @@ export default function ProfileScreen() {
             style={styles.actionButton}
             onPress={() => router.push('/profile-edit' as any)}
           >
-            <LinearGradient
-              colors={['#A0354E', '#8B1E2D']}
-              style={styles.actionButtonGradient}
-            >
+            <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.actionButtonGradient}>
               <Ionicons name="pencil" size={20} color="white" />
               <Text style={styles.actionButtonText}>Edit Profile</Text>
             </LinearGradient>
@@ -280,10 +275,7 @@ export default function ProfileScreen() {
             style={styles.actionButton}
             onPress={() => router.push('/settings' as any)}
           >
-            <LinearGradient
-              colors={['#666', '#444']}
-              style={styles.actionButtonGradient}
-            >
+            <LinearGradient colors={['#666', '#444']} style={styles.actionButtonGradient}>
               <Ionicons name="settings" size={20} color="white" />
               <Text style={styles.actionButtonText}>Settings</Text>
             </LinearGradient>
@@ -424,9 +416,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   mainPhotoContainer: {
+    borderColor: 'white',
     borderRadius: 70,
     borderWidth: 3,
-    borderColor: 'white',
     height: 140,
     marginBottom: 16,
     overflow: 'hidden',
@@ -470,8 +462,8 @@ const styles = StyleSheet.create({
   },
   quickActions: {
     flexDirection: 'row',
-    marginHorizontal: 16,
     marginBottom: 16,
+    marginHorizontal: 16,
   },
   sectionTitle: {
     color: '#222',

@@ -1,6 +1,7 @@
 # Harvest App - Next Steps Plan with Liquid Glass UI
 
 ## Progress Update (July 2025)
+
 - ✅ All Tier 1 features completed and production-ready
 - ✅ Modern tech stack implemented (Zustand, Gesture Handler, Reanimated)
 - ✅ Backend integration with Supabase
@@ -9,10 +10,13 @@
 ## Liquid Glass UI Integration Strategy
 
 ### Overview
+
 We'll use [liquid-glass-react](https://github.com/rdev/liquid-glass-react) as inspiration to create a modern glassmorphism design throughout the app. This approach will give us Apple-inspired liquid glass effects with customizable displacement, blur, and interaction properties, making the app feel modern and fluid.
 
 ### Important Note
+
 Since liquid-glass-react is designed for React web, we'll need to create React Native equivalents using:
+
 - **react-native-blur** for glassmorphism effects
 - **react-native-linear-gradient** for gradient overlays
 - **react-native-reanimated** for liquid animations
@@ -21,11 +25,13 @@ Since liquid-glass-react is designed for React web, we'll need to create React N
 ## Phase 1: Liquid Glass UI Foundation (Week 1)
 
 ### 1.1 Create React Native Liquid Glass Components
+
 ```bash
 npm install react-native-blur react-native-linear-gradient @shopify/react-native-skia
 ```
 
 #### Components to Build:
+
 1. **LiquidGlassView** - Base glassmorphism container
    - Props: `blurAmount`, `saturation`, `cornerRadius`, `glassTint`
    - Uses BlurView with customizable intensity
@@ -52,6 +58,7 @@ npm install react-native-blur react-native-linear-gradient @shopify/react-native
    - Liquid ripple effects
 
 ### 1.2 Theme System Update
+
 ```typescript
 // constants/liquidTheme.ts
 export const liquidGlassTheme = {
@@ -60,30 +67,31 @@ export const liquidGlassTheme = {
       light: 20,
       medium: 40,
       heavy: 60,
-      ultra: 80
+      ultra: 80,
     },
     tint: {
       light: 'rgba(255, 255, 255, 0.1)',
       dark: 'rgba(0, 0, 0, 0.1)',
-      maroon: 'rgba(160, 53, 78, 0.05)'
+      maroon: 'rgba(160, 53, 78, 0.05)',
     },
     saturation: {
       subtle: 110,
       standard: 140,
-      vibrant: 180
+      vibrant: 180,
     },
     displacement: {
       subtle: 30,
       standard: 70,
-      dramatic: 120
-    }
-  }
-}
+      dramatic: 120,
+    },
+  },
+};
 ```
 
 ## Phase 2: Core Features with Liquid Glass (Weeks 2-3)
 
 ### 2.1 Swipe Cards Enhancement
+
 - **LiquidSwipeCard** component
   - Glass overlay with dynamic blur based on swipe position
   - Liquid distortion effects on drag
@@ -91,18 +99,21 @@ export const liquidGlassTheme = {
   - Glass shatter animation on super like
 
 ### 2.2 Onboarding Flow Redesign
+
 - Glass panels that slide with liquid transitions
 - Frosted overlays for text readability
 - Interactive glass buttons with elasticity
 - Progress bar with liquid fill animation
 
 ### 2.3 Profile View Glassmorphism
+
 - Profile photos behind frosted glass
 - Liquid reveal animations for bio sections
 - Glass chips for interests/hobbies
 - Floating glass action buttons
 
 ### 2.4 Settings & Filters Glass UI
+
 - Glass panels for each setting section
 - Liquid sliders for age/distance filters
 - Toggle switches with glass material
@@ -111,28 +122,32 @@ export const liquidGlassTheme = {
 ## Phase 3: Real-time Features (Weeks 4-5)
 
 ### 3.1 Liquid Glass Chat Interface
+
 ```typescript
 // components/LiquidChatBubble.tsx
 interface LiquidChatBubbleProps {
-  message: string
-  isOwn: boolean
-  timestamp: Date
-  glassTint?: string
-  blurIntensity?: number
+  message: string;
+  isOwn: boolean;
+  timestamp: Date;
+  glassTint?: string;
+  blurIntensity?: number;
 }
 ```
+
 - Glass chat bubbles with different tints
 - Liquid animations for new messages
 - Frosted input bar with glass send button
 - Real-time typing indicator with liquid dots
 
 ### 3.2 Matching System with Glass Effects
+
 - Match notification with liquid glass modal
 - Animated glass hearts on match
 - Profile reveal with glass unwrap effect
 - Liquid confetti animation
 
 ### 3.3 Push Notifications Glass Style
+
 - In-app glass notification banners
 - Liquid slide-in animations
 - Glass backdrop for notification center
@@ -141,12 +156,14 @@ interface LiquidChatBubbleProps {
 ## Phase 4: Polish & Optimization (Week 6)
 
 ### 4.1 Gardener AI Coach Glass Interface
+
 - Floating glass chat widget
 - Liquid avatar with displacement effects
 - Glass suggestion cards
 - Smooth integration with chat system
 
 ### 4.2 Performance & Polish
+
 - **Performance optimization** for glass effects
 - **Accessibility features** for glass UI
 - **Battery usage optimization**
@@ -155,24 +172,28 @@ interface LiquidChatBubbleProps {
 ## Implementation Timeline
 
 ### Week 1: Foundation
+
 - [ ] Create base liquid glass components
 - [ ] Implement blur and gradient systems
 - [ ] Update theme configuration
 - [ ] Create glass component library
 
 ### Week 2-3: Core UI Migration
+
 - [ ] Convert swipe cards to liquid glass
 - [ ] Redesign onboarding with glass panels
 - [ ] Update profile views with glassmorphism
 - [ ] Implement glass settings screens
 
 ### Week 4-5: Real-time Features
+
 - [ ] Build glass chat interface
 - [ ] Create match animations
 - [ ] Implement notification system
 - [ ] Add real-time liquid effects
 
 ### Week 6: Polish & Launch
+
 - [ ] Develop Gardener AI interface
 - [ ] Performance optimization
 - [ ] Accessibility improvements
@@ -181,6 +202,7 @@ interface LiquidChatBubbleProps {
 ## Technical Implementation Details
 
 ### Performance Considerations
+
 1. **Blur Optimization**
    - Use `renderToHardwareTextureAndroid` for Android
    - Implement blur radius caching
@@ -194,6 +216,7 @@ interface LiquidChatBubbleProps {
    - Progressive enhancement strategy
 
 ### Platform-Specific Adaptations
+
 ```typescript
 // utils/liquidGlass.ts
 export const getLiquidGlassConfig = () => {
@@ -201,35 +224,37 @@ export const getLiquidGlassConfig = () => {
     return {
       blurType: 'light',
       blurAmount: 20,
-      reducedTransparencyFallback: 'rgba(255,255,255,0.9)'
-    }
+      reducedTransparencyFallback: 'rgba(255,255,255,0.9)',
+    };
   }
   return {
     blurType: 'light',
     blurAmount: 15, // Slightly less for Android performance
-    overlayColor: 'rgba(255,255,255,0.1)'
-  }
-}
+    overlayColor: 'rgba(255,255,255,0.1)',
+  };
+};
 ```
 
 ## Component Architecture
 
 ### Base Liquid Glass Component
+
 ```typescript
 // components/liquid/LiquidGlassView.tsx
 interface LiquidGlassViewProps {
-  children: React.ReactNode
-  blur?: number
-  tint?: string
-  saturation?: number
-  displacement?: number
-  elasticity?: number
-  onPress?: () => void
-  style?: ViewStyle
+  children: React.ReactNode;
+  blur?: number;
+  tint?: string;
+  saturation?: number;
+  displacement?: number;
+  elasticity?: number;
+  onPress?: () => void;
+  style?: ViewStyle;
 }
 ```
 
 ### Advanced Features
+
 1. **Dynamic Blur Based on Scroll**
    - Header blur increases on scroll
    - Content clarity improves when stationary
@@ -248,24 +273,28 @@ interface LiquidGlassViewProps {
 ## Migration Strategy
 
 ### Phase 1: Non-Breaking Addition
+
 1. Create liquid components alongside existing ones
 2. Add feature flags for A/B testing
 3. Gradually roll out to beta users
 4. Monitor performance metrics
 
 ### Phase 2: Full Migration
+
 1. Replace core components with liquid versions
 2. Update all screens with glass effects
 3. Remove old component implementations
 4. Document new component APIs
 
 ## Success Metrics
+
 - **Performance**: 60fps animations on 90% of devices
 - **User Engagement**: 25% increase in swipe interactions
 - **Visual Consistency**: Cohesive glass UI across all screens
 - **App Store Rating**: Target 4.8+ with new UI
 
 ## Next Immediate Steps
+
 1. Install liquid glass dependencies
 2. Create LiquidGlassView base component
 3. Build LiquidButton with animations
@@ -273,6 +302,7 @@ interface LiquidGlassViewProps {
 5. Test performance on various devices
 
 ## Resources
+
 - [Liquid Glass React Repo](https://github.com/rdev/liquid-glass-react)
 - [React Native Blur](https://github.com/Kureev/react-native-blur)
 - [React Native Skia](https://shopify.github.io/react-native-skia/)

@@ -17,6 +17,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DemoProfile } from '../data/demoProfiles';
 import * as Haptics from 'expo-haptics';
 import { theme } from '../constants/theme';
+import { supabase } from '../lib/supabase';
+import { useUser } from '../context/UserContext';
+import { getCurrentUser } from '../lib/supabase';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const SWIPE_THRESHOLD = screenWidth * 0.25;
@@ -77,38 +80,62 @@ export default function HarvestSwipeCard({
     Animated.parallel([
       Animated.spring(position, {
         toValue: { x: 0, y: 0 },
-        friction: 4,
+        friction: 6,
+        tension: 40,
+        speed: 12,
+        bounciness: 8,
         useNativeDriver: false,
       }),
-      Animated.timing(cardScale, {
+      Animated.spring(cardScale, {
         toValue: 1,
-        duration: 200,
+        friction: 6,
+        tension: 40,
         useNativeDriver: false,
       }),
       Animated.timing(likeOpacity, {
         toValue: 0,
-        duration: 200,
+        duration: 150,
         useNativeDriver: false,
       }),
       Animated.timing(nopeOpacity, {
         toValue: 0,
-        duration: 200,
+        duration: 150,
         useNativeDriver: false,
       }),
       Animated.timing(superLikeOpacity, {
         toValue: 0,
-        duration: 200,
+        duration: 150,
         useNativeDriver: false,
       }),
     ]).start();
   }, [position, cardScale, likeOpacity, nopeOpacity, superLikeOpacity]);
 
   const swipeComplete = useCallback(
-    (direction: 'left' | 'right' | 'up') => {
+    async (direction: 'left' | 'right' | 'up') => {
       if (isAnimating.current || !isMounted.current) return;
       isAnimating.current = true;
 
       triggerHaptic();
+
+      // Get current user
+      const { user } = await getCurrentUser();
+      if (!user) {
+        console.error('No user found');
+        return;
+      }
+
+      // Save swipe to database
+      const { error } = await supabase.from('swipes').insert([
+        {
+          swiper_id: user.id,
+          swiped_id: profile.id,
+          action: direction === 'left' ? 'nope' : direction === 'up' ? 'super_like' : 'like',
+        },
+      ]);
+
+      if (error) {
+        console.error('Error saving swipe:', error);
+      }
 
       setTimeout(() => {
         if (!isMounted.current) return;
@@ -130,7 +157,7 @@ export default function HarvestSwipeCard({
         isAnimating.current = false;
       }, SWIPE_OUT_DURATION);
     },
-    [onDislike, onLike, onSuperLike, triggerHaptic]
+    [onDislike, onLike, onSuperLike, triggerHaptic, profile.id]
   );
 
   const forceSwipe = useCallback(

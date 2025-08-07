@@ -13,6 +13,7 @@ import { MatchModal } from '../../components/MatchModal';
 import { saveSwipe } from '../../lib/swipes';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
+import { notificationService } from '../../lib/notifications';
 
 export default function SwipingScreen() {
   const router = useRouter();
@@ -79,6 +80,8 @@ export default function SwipingScreen() {
         if (result.success && result.isMatch) {
           setMatchedProfile(currentProfile);
           setShowMatchModal(true);
+          // Send match notification
+          await notificationService.sendMatchNotification(currentProfile.name, currentProfile.photos[0]);
         } else if (!result.success) {
           console.error('Failed to save swipe:', result.error);
         }
@@ -91,6 +94,8 @@ export default function SwipingScreen() {
         if (isMatch) {
           setMatchedProfile(currentProfile);
           setShowMatchModal(true);
+          // Send match notification
+          await notificationService.sendMatchNotification(currentProfile.name, currentProfile.photos[0]);
         }
         nextProfile();
       }
@@ -141,6 +146,8 @@ export default function SwipingScreen() {
         if (result.success && result.isMatch) {
           setMatchedProfile(currentProfile);
           setShowMatchModal(true);
+          // Send match notification
+          await notificationService.sendMatchNotification(currentProfile.name, currentProfile.photos[0]);
         } else if (!result.success) {
           console.error('Failed to save swipe:', result.error);
         }

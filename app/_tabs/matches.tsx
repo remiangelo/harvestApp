@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   Image,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,39 +17,85 @@ import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { router } from 'expo-router';
 import { demoChats, getUnreadChatCount } from '../../data/demoChats';
 import { format } from 'date-fns';
+import { supabase } from '../../lib/supabase';
+import { useUser } from '../../context/UserContext';
 
-const recentMatches = [
-  {
-    id: '1',
-    name: 'Maya',
-    photo:
-      'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=400&h=400&fit=crop&crop=face',
-    likes: 32,
-  },
-  {
-    id: '2',
-    name: 'Sophie',
-    photo:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
-    likes: 0,
-  },
-  {
-    id: '3',
-    name: 'Elena',
-    photo:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face',
-    likes: 0,
-  },
-  {
-    id: '4',
-    name: 'Aria',
-    photo:
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face',
-    likes: 0,
-  },
-];
+// Remove the hardcoded recentMatches array
 
 export default function MatchesScreen() {
+  const [recentMatches, setRecentMatches] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [chatsLoading, setChatsLoading] = useState(true);
+  const { currentUser } = useUser();
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const fetchMatches = async () => {
+      try {
+        // Get matches for the current user
+        const { data, error } = await supabase
+          .from('matches')
+          .select(`
+            id,
+            matched_at,
+            user1_id,
+            user2_id,
+            profiles!matches_user1_id_fkey (
+              id,
+              name,
+              avatar_url
+            ),
+            profiles!matches_user2_id_fkey (
+              id,
+              name,
+              avatar_url
+            )
+          `)
+          .or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`)
+          .order('matched_at', { ascending: false })
+          .limit(4);
+
+        if (error) {
+          console.error('Error fetching matches:', error);
+          return;
+        }
+
+        // Format matches data
+        const formattedMatches = data.map((match: any) => {
+          // Determine which profile is the other user
+          const otherUser = match.user1_id === currentUser?.id
+            ? match.profiles[1]
+            : match.profiles[0];
+
+          return {
+            id: match.id,
+            name: otherUser.name,
+            photo: otherUser.avatar_url,
+            likes: 0, // This would come from a separate likes count query
+          };
+        });
+
+        setRecentMatches(formattedMatches);
+      } catch (error) {
+        console.error('Error in fetchMatches:', error);
+      } finally {
+        setLoading(false);
+        // Animate in content
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }
+    };
+
+    fetchMatches();
+    // Simulate chat loading
+    setTimeout(() => setChatsLoading(false), 1000);
+  }, [currentUser, fadeAnim]);
+
   const formatMessageTime = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -92,20 +140,44 @@ export default function MatchesScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.matchesScroll}
           >
-            {recentMatches.map((match) => (
-              <TouchableOpacity key={match.id} style={styles.matchItem}>
-                <View style={styles.matchImageContainer}>
-                  <Image source={{ uri: match.photo }} style={styles.matchImage} />
-                  {match.likes > 0 && (
-                    <View style={styles.likeBadge}>
-                      <Ionicons name="heart" size={16} color="white" />
-                      <Text style={styles.likeCount}>{match.likes}</Text>
+            {loading ? (
+              // Skeleton loader for matches
+              <>
+                {[1, 2, 3, 4].map((index) => (
+                  <View key={`skeleton-match-${index}`} style={styles.matchItem}>
+                    <View style={[styles.matchImageContainer, styles.skeletonImage]} />
+                    <View style={[styles.skeletonText, { width: 60, height: 14, marginTop: 8 }]} />
+                  </View>
+                ))}
+              </>
+            ) : recentMatches.length > 0 ? (
+              recentMatches.map((match) => (
+                <Animated.View
+                  key={match.id}
+                  style={[
+                    { opacity: fadeAnim },
+                  ]}
+                >
+                  <TouchableOpacity style={styles.matchItem}>
+                    <View style={styles.matchImageContainer}>
+                      <Image source={{ uri: match.photo }} style={styles.matchImage} />
+                      {match.likes > 0 && (
+                        <View style={styles.likeBadge}>
+                          <Ionicons name="heart" size={16} color="white" />
+                          <Text style={styles.likeCount}>{match.likes}</Text>
+                        </View>
+                      )}
                     </View>
-                  )}
-                </View>
-                <Text style={styles.matchName}>{match.name}</Text>
-              </TouchableOpacity>
-            ))}
+                    <Text style={styles.matchName}>{match.name}</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              ))
+            ) : (
+              <View style={styles.noMatchesContainer}>
+                <Text style={styles.noMatchesText}>No matches yet</Text>
+                <Text style={styles.noMatchesSubtext}>Keep swiping!</Text>
+              </View>
+            )}
           </ScrollView>
         </View>
       </LinearGradient>
@@ -119,7 +191,21 @@ export default function MatchesScreen() {
         glassTint="rgba(255, 255, 255, 0.95)"
       >
         <ScrollView showsVerticalScrollIndicator={false}>
-          {demoChats.map((chat, index) => (
+          {chatsLoading ? (
+            // Skeleton loader for chats
+            <>
+              {[1, 2, 3, 4, 5].map((index) => (
+                <View key={`skeleton-chat-${index}`} style={styles.conversationItem}>
+                  <View style={[styles.avatar, styles.skeletonAvatar]} />
+                  <View style={styles.conversationContent}>
+                    <View style={[styles.skeletonText, { width: 120, height: 16 }]} />
+                    <View style={[styles.skeletonText, { width: 200, height: 14, marginTop: 8 }]} />
+                  </View>
+                </View>
+              ))}
+            </>
+          ) : (
+            demoChats.map((chat, index) => (
             <TouchableOpacity
               key={chat.id}
               style={[styles.conversationItem, index === demoChats.length - 1 && styles.lastItem]}
@@ -149,7 +235,8 @@ export default function MatchesScreen() {
                 <Ionicons name="chevron-forward" size={20} color="#999" style={{ marginLeft: 8 }} />
               </View>
             </TouchableOpacity>
-          ))}
+            ))
+          )}
         </ScrollView>
       </LiquidGlassView>
     </View>
@@ -161,6 +248,34 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     height: 50,
     width: 50,
+  },
+  skeletonAvatar: {
+    backgroundColor: '#e0e0e0',
+  },
+  skeletonImage: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 35,
+    height: 70,
+    width: 70,
+  },
+  skeletonText: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 4,
+  },
+  noMatchesContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 40,
+  },
+  noMatchesText: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  noMatchesSubtext: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 14,
+    marginTop: 4,
   },
   avatarContainer: {
     marginRight: 12,

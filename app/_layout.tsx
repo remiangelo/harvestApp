@@ -1,8 +1,8 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -11,6 +11,8 @@ import { useAuthStore } from '../stores/useAuthStore';
 import { onAuthStateChange } from '../lib/supabase';
 import { AuthGuard } from '../components/AuthGuard';
 import { ErrorBoundary as CustomErrorBoundary } from '../components/ErrorBoundary';
+import { notificationService } from '../lib/notifications';
+import * as Notifications from 'expo-notifications';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -26,6 +28,10 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const router = useRouter();
+  const notificationListener = useRef<any>();
+  const responseListener = useRef<any>();
+  
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
@@ -44,6 +50,44 @@ export default function RootLayout() {
       }, 2000);
     }
   }, [loaded]);
+
+  // Set up push notifications
+  useEffect(() => {
+    // Register for push notifications
+    notificationService.registerForPushNotifications();
+
+    // Handle notifications when app is in foreground
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log('Notification received:', notification);
+      // You can show a custom in-app notification here
+    });
+
+    // Handle notification response (when user taps notification)
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      const { type, conversationId, matchId } = response.notification.request.content.data as any;
+      
+      if (type === 'message' && conversationId) {
+        // Navigate to chat screen
+        router.push(`/chat?id=${conversationId}`);
+      } else if (type === 'match' && matchId) {
+        // Navigate to matches screen
+        router.push('/_tabs/matches');
+      } else if (type === 'super_like') {
+        // Navigate to discover screen
+        router.push('/_tabs');
+      }
+    });
+
+    // Cleanup
+    return () => {
+      if (notificationListener.current) {
+        Notifications.removeNotificationSubscription(notificationListener.current);
+      }
+      if (responseListener.current) {
+        Notifications.removeNotificationSubscription(responseListener.current);
+      }
+    };
+  }, [router]);
 
   if (!loaded) {
     return null;

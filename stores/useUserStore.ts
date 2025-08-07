@@ -4,9 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DemoUser } from '../data/demoUsers';
 
 interface UserState {
-  currentUser: DemoUser | null;
+  currentUser: (DemoUser & { id?: string }) | null;
   onboardingData: Partial<DemoUser>;
-  setCurrentUser: (user: DemoUser | null) => void;
+  setCurrentUser: (user: (DemoUser & { id?: string }) | null) => void;
   updateOnboardingData: (data: Partial<DemoUser>) => void;
   clearOnboardingData: () => void;
   logout: () => void;

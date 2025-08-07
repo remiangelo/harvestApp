@@ -70,6 +70,29 @@ export const getCurrentUser = async () => {
     data: { user },
     error,
   } = await supabase.auth.getUser();
+  
+  if (user) {
+    // Get user profile data
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('Error fetching profile:', profileError);
+    }
+    
+    // Merge user data with profile data
+    return {
+      user: {
+        ...user,
+        ...profile
+      },
+      error
+    };
+  }
+  
   return { user, error };
 };
 

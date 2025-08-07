@@ -21,8 +21,10 @@ export default {
       },
       infoPlist: {
         NSCameraUsageDescription: 'Harvest needs access to your camera to take profile photos.',
-        NSPhotoLibraryUsageDescription: 'Harvest needs access to your photo library to select profile photos.',
-        NSLocationWhenInUseUsageDescription: 'Harvest uses your location to show you potential matches nearby.',
+        NSPhotoLibraryUsageDescription:
+          'Harvest needs access to your photo library to select profile photos.',
+        NSLocationWhenInUseUsageDescription:
+          'Harvest uses your location to show you potential matches nearby.',
       },
       associatedDomains: ['applinks:harvest-app.com'],
     },
@@ -59,7 +61,8 @@ export default {
       [
         'expo-location',
         {
-          locationAlwaysAndWhenInUsePermission: 'Allow Harvest to use your location to find matches nearby.',
+          locationAlwaysAndWhenInUsePermission:
+            'Allow Harvest to use your location to find matches nearby.',
         },
       ],
       [
@@ -75,13 +78,13 @@ export default {
     },
     extra: {
       eas: {
-        projectId: 'your-project-id', // Replace with your EAS project ID
+        projectId: '4bf484c4-576a-4d5a-8373-1c854bb46ea7', // Replace with your EAS project ID
       },
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     },
     updates: {
-      url: 'https://u.expo.dev/your-project-id', // Replace with your project ID
+      url: 'https://u.expo.dev/4bf484c4-576a-4d5a-8373-1c854bb46ea7', // Replace with your project ID
       fallbackToCacheTimeout: 30000,
     },
     runtimeVersion: {

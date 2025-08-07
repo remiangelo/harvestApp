@@ -3,11 +3,11 @@
 ## ✅ Pre-Deployment Tasks
 
 ### 1. Environment Configuration
-- [ ] Set up production Supabase project
-- [ ] Configure production environment variables in EAS Secrets
+- [x] Set up production Supabase project
+- [x] Configure production environment variables in EAS Secrets
   - `EXPO_PUBLIC_SUPABASE_URL`
   - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-- [ ] Update `app.config.js` with production values
+- [x] Update `app.config.js` with production values
 - [ ] Set up push notification credentials (FCM for Android, APNs for iOS)
 
 ### 2. Database Setup

@@ -1,0 +1,334 @@
+# 🚀 TestFlight Deployment Guide for Harvest App
+
+This guide will walk you through deploying your Expo-based Harvest app to Apple's TestFlight for beta testing.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- ✅ **Apple Developer Account** ($99/year)
+- ✅ **Expo CLI** installed globally (`npm install -g @expo/cli`)
+- ✅ **EAS CLI** installed globally (`npm install -g eas-cli`)
+- ✅ **Xcode** installed (latest version recommended)
+- ✅ **Valid iOS provisioning profiles and certificates**
+
+## Step 1: Configure Your App for iOS
+
+### 1.1 Update app.config.js
+
+Ensure your `app.config.js` has the correct iOS configuration:
+
+```javascript
+export default {
+  expo: {
+    name: "Harvest",
+    slug: "harvest-app",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/icon.png",
+    userInterfaceStyle: "dark",
+    splash: {
+      image: "./assets/splash.png",
+      resizeMode: "contain",
+      backgroundColor: "#000000"
+    },
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: "com.yourcompany.harvest", // Change this to your bundle ID
+      buildNumber: "1",
+      infoPlist: {
+        NSCameraUsageDescription: "This app uses the camera to take profile photos.",
+        NSPhotoLibraryUsageDescription: "This app accesses your photo library to select profile photos.",
+        NSLocationWhenInUseUsageDescription: "This app uses location to show nearby matches."
+      }
+    },
+    plugins: [
+      "expo-router",
+      "expo-image-picker",
+      "expo-location"
+    ]
+  }
+};
+```
+
+### 1.2 Update Bundle Identifier
+
+1. Choose a unique bundle identifier (e.g., `com.yourcompany.harvest`)
+2. Make sure it matches your Apple Developer Account team ID
+3. Update it in both `app.config.js` and `eas.json`
+
+## Step 2: Configure EAS Build
+
+### 2.1 Initialize EAS
+
+If you haven't already, initialize EAS in your project:
+
+```bash
+eas login
+eas build:configure
+```
+
+### 2.2 Update eas.json
+
+Ensure your `eas.json` is configured for iOS builds:
+
+```json
+{
+  "cli": {
+    "version": ">= 5.2.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "production": {
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@example.com",
+        "ascAppId": "your-app-store-connect-app-id",
+        "appleTeamId": "YOUR_TEAM_ID"
+      }
+    }
+  }
+}
+```
+
+## Step 3: Set Up App Store Connect
+
+### 3.1 Create App in App Store Connect
+
+1. Go to [App Store Connect](https://appstoreconnect.apple.com)
+2. Click **"My Apps"** → **"+"** → **"New App"**
+3. Fill in the app information:
+   - **Platform**: iOS
+   - **Name**: Harvest
+   - **Primary Language**: English
+   - **Bundle ID**: Select your bundle identifier
+   - **SKU**: A unique identifier (e.g., `harvest-app-2024`)
+
+### 3.2 Configure App Information
+
+1. **App Information**:
+   - Category: Social Networking
+   - Content Rights: Check if you have all rights
+   
+2. **Pricing and Availability**:
+   - Set to Free (or your preferred pricing)
+   - Select availability countries
+
+3. **App Privacy**:
+   - Configure data collection practices
+   - Add privacy policy URL if required
+
+## Step 4: Build for TestFlight
+
+### 4.1 Create Production Build
+
+Run the following command to create a production build:
+
+```bash
+eas build --platform ios --profile production
+```
+
+This will:
+- Build your app in the cloud
+- Generate an IPA file
+- Automatically sign it with your certificates
+
+### 4.2 Monitor Build Progress
+
+- Check build status at: https://expo.dev/accounts/[username]/projects/harvest-app/builds
+- Build typically takes 10-20 minutes
+- You'll receive an email when complete
+
+## Step 5: Submit to TestFlight
+
+### 5.1 Automatic Submission (Recommended)
+
+Use EAS Submit to automatically upload to TestFlight:
+
+```bash
+eas submit --platform ios --latest
+```
+
+### 5.2 Manual Submission (Alternative)
+
+If automatic submission fails:
+
+1. Download the IPA file from your EAS build
+2. Open **Transporter** app (from Mac App Store)
+3. Drag and drop the IPA file
+4. Click **"Deliver"**
+
+## Step 6: Configure TestFlight
+
+### 6.1 Processing Time
+
+- After upload, Apple processes the build (5-30 minutes)
+- You'll receive an email when processing is complete
+
+### 6.2 Add Test Information
+
+In App Store Connect → TestFlight:
+
+1. **Test Information**:
+   - Beta App Name: Harvest
+   - Beta App Description: Dating app for meaningful connections
+   - Feedback Email: your-email@example.com
+   - Marketing URL: (optional)
+   - Privacy Policy URL: (if applicable)
+
+2. **Test Details**:
+   - What to Test: "Test the swiping functionality, profile creation, and matching system"
+   - App Review Information: Provide test account credentials if needed
+
+### 6.3 Export Compliance
+
+For most apps, you can select:
+- **"No"** for encryption (unless you're using custom encryption)
+- This allows immediate TestFlight distribution
+
+## Step 7: Add Beta Testers
+
+### 7.1 Internal Testing
+
+1. Go to **TestFlight** → **Internal Testing**
+2. Click **"+"** to create a new group
+3. Add internal testers (up to 100 people with App Store Connect access)
+
+### 7.2 External Testing
+
+1. Go to **TestFlight** → **External Testing**
+2. Click **"+"** to create a new group
+3. Add external testers by email (up to 10,000 people)
+4. **Note**: External testing requires Apple review (24-48 hours)
+
+## Step 8: Distribute to Testers
+
+### 8.1 Send Invitations
+
+1. Select your build in TestFlight
+2. Choose tester groups
+3. Click **"Start Testing"**
+4. Testers will receive email invitations
+
+### 8.2 Tester Instructions
+
+Send testers these instructions:
+
+1. Install **TestFlight** app from App Store
+2. Open invitation email on iOS device
+3. Tap **"Start Testing"** or **"Install"**
+4. Provide feedback through TestFlight app
+
+## Step 9: Monitor and Update
+
+### 9.1 Collect Feedback
+
+- Monitor crash reports in App Store Connect
+- Review tester feedback in TestFlight
+- Check analytics for usage patterns
+
+### 9.2 Release Updates
+
+For new builds:
+
+```bash
+# Increment build number in app.config.js
+# Then run:
+eas build --platform ios --profile production
+eas submit --platform ios --latest
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Build Fails**:
+   - Check bundle identifier uniqueness
+   - Verify Apple Developer Account status
+   - Review build logs for specific errors
+
+2. **Submission Rejected**:
+   - Ensure app icons are correct size/format
+   - Check for missing privacy descriptions
+   - Verify bundle identifier matches certificates
+
+3. **TestFlight Processing Stuck**:
+   - Wait up to 24 hours
+   - Check for Apple system status issues
+   - Contact Apple Developer Support if needed
+
+### Useful Commands
+
+```bash
+# Check EAS build status
+eas build:list
+
+# View build logs
+eas build:view [build-id]
+
+# Check submission status
+eas submit:list
+
+# Update credentials
+eas credentials
+```
+
+## Security Best Practices
+
+1. **Never commit credentials** to version control
+2. **Use EAS Secrets** for sensitive environment variables
+3. **Enable two-factor authentication** on Apple Developer Account
+4. **Regularly rotate certificates** and provisioning profiles
+5. **Review app permissions** before submission
+
+## Next Steps
+
+After successful TestFlight deployment:
+
+1. **Gather user feedback** and iterate
+2. **Fix critical bugs** identified in beta testing
+3. **Prepare for App Store submission** when ready
+4. **Set up crash reporting** (e.g., Sentry, Bugsnag)
+5. **Implement analytics** for user behavior tracking
+
+---
+
+## Quick Reference
+
+| Task | Command |
+|------|---------|
+| Build for iOS | `eas build --platform ios --profile production` |
+| Submit to TestFlight | `eas submit --platform ios --latest` |
+| Check build status | `eas build:list` |
+| Update credentials | `eas credentials` |
+
+## Support Resources
+
+- [Expo EAS Build Documentation](https://docs.expo.dev/build/introduction/)
+- [Apple TestFlight Documentation](https://developer.apple.com/testflight/)
+- [App Store Connect Help](https://help.apple.com/app-store-connect/)
+- [Expo Discord Community](https://discord.gg/expo)
+
+---
+
+**Happy Testing! 🎉**
+
+Remember to test thoroughly on different iOS devices and versions before releasing to the App Store.

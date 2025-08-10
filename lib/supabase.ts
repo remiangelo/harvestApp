@@ -1,5 +1,5 @@
 import 'react-native-url-polyfill/auto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from './async-storage.web';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
@@ -70,7 +70,7 @@ export const getCurrentUser = async () => {
     data: { user },
     error,
   } = await supabase.auth.getUser();
-  
+
   if (user) {
     // Get user profile data (stored in 'users' table)
     const { data: profile, error: profileError } = await supabase
@@ -78,11 +78,11 @@ export const getCurrentUser = async () => {
       .select('*')
       .eq('id', user.id)
       .single();
-    
+
     if (profileError && profileError.code !== 'PGRST116') {
       console.error('Error fetching profile:', profileError);
     }
-    
+
     // Merge user data with profile data
     return {
       user: {
@@ -92,7 +92,7 @@ export const getCurrentUser = async () => {
       error,
     };
   }
-  
+
   return { user, error };
 };
 

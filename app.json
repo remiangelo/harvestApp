@@ -16,7 +16,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.remiangelo.harvestApp"
+      "bundleIdentifier": "com.remiangelo.harvestApp",
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {

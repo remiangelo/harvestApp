@@ -1,7 +1,7 @@
 export default {
   expo: {
     name: 'Harvest',
-    slug: 'harvest-app',
+    slug: 'harvest',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',

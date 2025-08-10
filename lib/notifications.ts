@@ -9,6 +9,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -52,9 +54,11 @@ export class NotificationService {
         return;
       }
       
-      token = (await Notifications.getExpoPushTokenAsync({
-        projectId: 'your-project-id', // Replace with your project ID
-      })).data;
+      token = (
+        await Notifications.getExpoPushTokenAsync({
+          projectId: '4bf484c4-576a-4d5a-8373-1c854bb46ea7', // Replace with your project ID
+        })
+      ).data;
       
       this.pushToken = token;
       await this.savePushToken(token);
@@ -68,11 +72,13 @@ export class NotificationService {
   // Save push token to database
   private async savePushToken(token: string) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { error } = await supabase
-        .from('profiles')
+        .from('users')
         .update({ push_token: token })
         .eq('id', user.id);
 
@@ -114,7 +120,7 @@ export class NotificationService {
   async sendSuperLikeNotification(userName: string) {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Someone Super Liked You! 💝",
+        title: 'Someone Super Liked You! 💝',
         body: `${userName} really wants to connect with you!`,
         data: { type: 'super_like', userName },
         sound: 'default',
@@ -126,12 +132,12 @@ export class NotificationService {
   // Handle notification response (when user taps notification)
   setupNotificationListeners(navigation: any) {
     // This listener is fired whenever a notification is received while the app is foregrounded
-    const notificationListener = Notifications.addNotificationReceivedListener(notification => {
+    const notificationListener = Notifications.addNotificationReceivedListener((notification) => {
       console.log('Notification received:', notification);
     });
 
     // This listener is fired whenever a user taps on or interacts with a notification
-    const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+    const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
       const { type, conversationId } = response.notification.request.content.data;
       
       if (type === 'message' && conversationId) {
@@ -175,7 +181,9 @@ export class NotificationService {
         sound: 'default',
       },
       trigger: {
+        type: 'timeInterval',
         seconds,
+        repeats: false,
       },
     });
   }

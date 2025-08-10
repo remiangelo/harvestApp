@@ -72,9 +72,9 @@ export const getCurrentUser = async () => {
   } = await supabase.auth.getUser();
   
   if (user) {
-    // Get user profile data
+    // Get user profile data (stored in 'users' table)
     const { data: profile, error: profileError } = await supabase
-      .from('profiles')
+      .from('users')
       .select('*')
       .eq('id', user.id)
       .single();
@@ -87,9 +87,9 @@ export const getCurrentUser = async () => {
     return {
       user: {
         ...user,
-        ...profile
+        ...(profile || {}),
       },
-      error
+      error,
     };
   }
   

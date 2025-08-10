@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -29,9 +30,9 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const router = useRouter();
-  const notificationListener = useRef<any>();
-  const responseListener = useRef<any>();
-  
+  const notificationListener = useRef<any>(null);
+  const responseListener = useRef<any>(null);
+
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
@@ -57,15 +58,15 @@ export default function RootLayout() {
     notificationService.registerForPushNotifications();
 
     // Handle notifications when app is in foreground
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+    notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
       console.log('Notification received:', notification);
       // You can show a custom in-app notification here
     });
 
     // Handle notification response (when user taps notification)
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
       const { type, conversationId, matchId } = response.notification.request.content.data as any;
-      
+
       if (type === 'message' && conversationId) {
         // Navigate to chat screen
         router.push(`/chat?id=${conversationId}`);

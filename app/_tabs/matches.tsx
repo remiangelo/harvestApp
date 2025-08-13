@@ -37,22 +37,24 @@ export default function MatchesScreen() {
         // Get matches for the current user
         const { data, error } = await supabase
           .from('matches')
-          .select(`
+          .select(
+            `
             id,
             matched_at,
             user1_id,
             user2_id,
-            profiles!matches_user1_id_fkey (
+            user1:profiles!user1_id (
               id,
-              name,
+              nickname,
               avatar_url
             ),
-            profiles!matches_user2_id_fkey (
+            user2:profiles!user2_id (
               id,
-              name,
+              nickname,
               avatar_url
             )
-          `)
+          `
+          )
           .or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`)
           .order('matched_at', { ascending: false })
           .limit(4);
@@ -65,13 +67,11 @@ export default function MatchesScreen() {
         // Format matches data
         const formattedMatches = data.map((match: any) => {
           // Determine which profile is the other user
-          const otherUser = match.user1_id === currentUser?.id
-            ? match.profiles[1]
-            : match.profiles[0];
+          const otherUser = match.user1_id === currentUser?.id ? match.user2 : match.user1;
 
           return {
             id: match.id,
-            name: otherUser.name,
+            name: otherUser.nickname || 'Unknown',
             photo: otherUser.avatar_url,
             likes: 0, // This would come from a separate likes count query
           };
@@ -152,12 +152,7 @@ export default function MatchesScreen() {
               </>
             ) : recentMatches.length > 0 ? (
               recentMatches.map((match) => (
-                <Animated.View
-                  key={match.id}
-                  style={[
-                    { opacity: fadeAnim },
-                  ]}
-                >
+                <Animated.View key={match.id} style={{ opacity: fadeAnim }}>
                   <TouchableOpacity style={styles.matchItem}>
                     <View style={styles.matchImageContainer}>
                       <Image source={{ uri: match.photo }} style={styles.matchImage} />
@@ -206,35 +201,40 @@ export default function MatchesScreen() {
             </>
           ) : (
             demoChats.map((chat, index) => (
-            <TouchableOpacity
-              key={chat.id}
-              style={[styles.conversationItem, index === demoChats.length - 1 && styles.lastItem]}
-              onPress={() => router.push(`/chat?id=${chat.id}` as any)}
-            >
-              <View style={styles.avatarContainer}>
-                <Image source={{ uri: chat.profileImage }} style={styles.avatar} />
-                {chat.isOnline && <View style={styles.onlineDot} />}
-              </View>
-
-              <View style={styles.conversationContent}>
-                <View style={styles.conversationHeader}>
-                  <Text style={styles.conversationName}>{chat.name}</Text>
-                  <Text style={styles.timestamp}>{formatMessageTime(chat.lastMessageTime)}</Text>
+              <TouchableOpacity
+                key={chat.id}
+                style={[styles.conversationItem, index === demoChats.length - 1 && styles.lastItem]}
+                onPress={() => router.push(`/chat?id=${chat.id}` as any)}
+              >
+                <View style={styles.avatarContainer}>
+                  <Image source={{ uri: chat.profileImage }} style={styles.avatar} />
+                  {chat.isOnline && <View style={styles.onlineDot} />}
                 </View>
-                <Text style={styles.lastMessage} numberOfLines={1}>
-                  {chat.lastMessage}
-                </Text>
-              </View>
 
-              <View style={styles.conversationMeta}>
-                {chat.unreadCount > 0 && (
-                  <View style={styles.unreadCountBadge}>
-                    <Text style={styles.unreadCountText}>{chat.unreadCount}</Text>
+                <View style={styles.conversationContent}>
+                  <View style={styles.conversationHeader}>
+                    <Text style={styles.conversationName}>{chat.name}</Text>
+                    <Text style={styles.timestamp}>{formatMessageTime(chat.lastMessageTime)}</Text>
                   </View>
-                )}
-                <Ionicons name="chevron-forward" size={20} color="#999" style={{ marginLeft: 8 }} />
-              </View>
-            </TouchableOpacity>
+                  <Text style={styles.lastMessage} numberOfLines={1}>
+                    {chat.lastMessage}
+                  </Text>
+                </View>
+
+                <View style={styles.conversationMeta}>
+                  {chat.unreadCount > 0 && (
+                    <View style={styles.unreadCountBadge}>
+                      <Text style={styles.unreadCountText}>{chat.unreadCount}</Text>
+                    </View>
+                  )}
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color="#999"
+                    style={{ marginLeft: 8 }}
+                  />
+                </View>
+              </TouchableOpacity>
             ))
           )}
         </ScrollView>
@@ -248,34 +248,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     height: 50,
     width: 50,
-  },
-  skeletonAvatar: {
-    backgroundColor: '#e0e0e0',
-  },
-  skeletonImage: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 35,
-    height: 70,
-    width: 70,
-  },
-  skeletonText: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 4,
-  },
-  noMatchesContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 40,
-  },
-  noMatchesText: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  noMatchesSubtext: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: 14,
-    marginTop: 4,
   },
   avatarContainer: {
     marginRight: 12,
@@ -385,6 +357,21 @@ const styles = StyleSheet.create({
   matchesScroll: {
     paddingRight: 20,
   },
+  noMatchesContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    paddingVertical: 20,
+  },
+  noMatchesSubtext: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 14,
+    marginTop: 4,
+  },
+  noMatchesText: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   onlineDot: {
     backgroundColor: '#34C759',
     borderColor: 'white',
@@ -404,6 +391,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 15,
+  },
+  skeletonAvatar: {
+    backgroundColor: '#e0e0e0',
+  },
+  skeletonImage: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 35,
+    height: 70,
+    width: 70,
+  },
+  skeletonText: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 4,
   },
   timestamp: {
     color: '#999',

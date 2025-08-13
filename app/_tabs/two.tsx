@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,6 +30,14 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const { currentUser, updateOnboardingData } = useUserStore();
   const { user } = useAuthStore();
+
+  // Animation values for header
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 50],
+    outputRange: [0, -100],
+    extrapolate: 'clamp',
+  });
 
   const [profile, setProfile] = useState({
     name: 'John Doe',
@@ -129,7 +138,7 @@ export default function ProfileScreen() {
       {/* Gradient Background Header */}
       <LinearGradient colors={['#A0354E', '#8B1E2D', '#701625']} style={styles.headerGradient}>
         <SafeAreaView>
-          <View style={styles.header}>
+          <Animated.View style={[styles.header, { transform: [{ translateY: headerTranslateY }] }]}>
             <TouchableOpacity onPress={() => router.push('/settings' as any)}>
               <Ionicons name="settings-outline" size={24} color="white" />
             </TouchableOpacity>
@@ -140,7 +149,7 @@ export default function ProfileScreen() {
             >
               <Ionicons name={isEditing ? 'checkmark' : 'create-outline'} size={24} color="white" />
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         </SafeAreaView>
 
         {/* Profile Header Card */}
@@ -178,10 +187,14 @@ export default function ProfileScreen() {
         </View>
       </LinearGradient>
 
-      <ScrollView
+      <Animated.ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         showsVerticalScrollIndicator={false}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+          useNativeDriver: true,
+        })}
+        scrollEventThrottle={16}
       >
         {/* Bio Section */}
         <LiquidGlassView
@@ -286,7 +299,7 @@ export default function ProfileScreen() {
         <View style={styles.logoutContainer}>
           <LogoutButton fullWidth />
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }

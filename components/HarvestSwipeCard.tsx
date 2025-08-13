@@ -18,13 +18,11 @@ import { DemoProfile } from '../data/demoProfiles';
 import * as Haptics from 'expo-haptics';
 import { theme } from '../constants/theme';
 import { supabase } from '../lib/supabase';
-import { useUser } from '../context/UserContext';
 import { getCurrentUser } from '../lib/supabase';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const SWIPE_THRESHOLD = screenWidth * 0.25;
 const SWIPE_OUT_DURATION = 250;
-const ROTATION_MULTIPLIER = 0.03;
 
 interface HarvestSwipeCardProps {
   profile: DemoProfile;
@@ -80,16 +78,10 @@ export default function HarvestSwipeCard({
     Animated.parallel([
       Animated.spring(position, {
         toValue: { x: 0, y: 0 },
-        friction: 6,
-        tension: 40,
-        speed: 12,
-        bounciness: 8,
         useNativeDriver: false,
       }),
       Animated.spring(cardScale, {
         toValue: 1,
-        friction: 6,
-        tension: 40,
         useNativeDriver: false,
       }),
       Animated.timing(likeOpacity, {
@@ -269,8 +261,9 @@ export default function HarvestSwipeCard({
 
   return (
     <View style={styles.container}>
+      {/* Fullscreen card */}
       <Animated.View style={[styles.card, getCardStyle()]} {...panResponder.panHandlers}>
-        {/* Main photo container */}
+        {/* Main photo container - now fullscreen */}
         <View style={styles.photoContainer}>
           {/* Skeleton loader */}
           {imageLoading && (
@@ -304,7 +297,7 @@ export default function HarvestSwipeCard({
             </View>
           )}
 
-          {/* Photo navigation */}
+          {/* Photo navigation - invisible touch areas */}
           <TouchableOpacity
             style={[styles.photoNav, styles.photoNavLeft]}
             onPress={prevPhoto}
@@ -316,7 +309,7 @@ export default function HarvestSwipeCard({
             activeOpacity={0.001}
           />
 
-          {/* Photo dots indicator */}
+          {/* Photo dots indicator - positioned at top */}
           <View style={[styles.photoIndicator, { top: insets.top + 20 }]}>
             {profile.photos.map((_, index) => (
               <View
@@ -344,126 +337,110 @@ export default function HarvestSwipeCard({
               <Text style={styles.superLikeText}>SUPER LIKE</Text>
             </View>
           </Animated.View>
-        </View>
 
-        {/* Bottom info with glass effect */}
-        <View style={styles.infoContainer}>
-          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject}>
+          {/* Side gradient indicators - circular expansion */}
+          <View style={styles.leftGradientContainer}>
             <LinearGradient
-              colors={['rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0.15)']}
+              colors={['rgba(255, 59, 48, 0.08)', 'transparent']}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.leftGradientBar}
+            />
+            <LinearGradient
+              colors={['transparent', 'rgba(255, 59, 48, 0.06)', 'transparent']}
+              locations={[0, 0.5, 1]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
+              style={styles.leftGradientVertical}
             />
-          </BlurView>
-          <View style={styles.infoContent}>
-            <View style={styles.header}>
-              <Text style={styles.name}>
-                {profile.name}, {profile.age}
-              </Text>
-              <View style={styles.locationRow}>
-                <Ionicons name="location" size={16} color="rgba(255,255,255,0.8)" />
-                <Text style={styles.location}>{profile.location}</Text>
-              </View>
-            </View>
-
-            {/* Compatibility badges */}
-            <View style={styles.compatibilityRow}>
-              <View style={styles.compatibilityBadge}>
-                <LinearGradient colors={['#FF6B6B', '#FF5252']} style={styles.badgeGradient}>
-                  <Text style={styles.badgeLabel}>Interests</Text>
-                  <Text style={styles.badgeValue}>95%</Text>
-                </LinearGradient>
-              </View>
-
-              <View style={styles.compatibilityBadge}>
-                <LinearGradient colors={['#FFB901', '#FFA500']} style={styles.badgeGradient}>
-                  <Text style={styles.badgeLabel}>Personality</Text>
-                  <Text style={styles.badgeValue}>98%</Text>
-                </LinearGradient>
-              </View>
-
-              <View style={styles.compatibilityBadge}>
-                <LinearGradient colors={['#4ECDC4', '#44A39A']} style={styles.badgeGradient}>
-                  <Text style={styles.badgeLabel}>Overall</Text>
-                  <Text style={styles.badgeValue}>96%</Text>
-                </LinearGradient>
-              </View>
-            </View>
-
-            {/* Hobbies */}
-            <View style={styles.hobbiesRow}>
-              {profile.hobbies.slice(0, 4).map((hobby, index) => (
-                <View key={index} style={styles.hobbyTag}>
-                  <Text style={styles.hobbyText}>{hobby}</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Bio */}
-            <Text style={styles.bio} numberOfLines={3}>
-              {profile.bio}
-            </Text>
           </View>
+          <View style={styles.rightGradientContainer}>
+            <LinearGradient
+              colors={['transparent', 'rgba(52, 199, 89, 0.08)']}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.rightGradientBar}
+            />
+            <LinearGradient
+              colors={['transparent', 'rgba(52, 199, 89, 0.06)', 'transparent']}
+              locations={[0, 0.5, 1]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.rightGradientVertical}
+            />
+          </View>
+
+          {/* Bottom gradient overlay for info */}
+          <LinearGradient
+            colors={[
+              'transparent',
+              'rgba(0,0,0,0.3)',
+              'rgba(0,0,0,0.6)',
+              'rgba(0,0,0,0.85)',
+              'rgba(0,0,0,0.95)',
+            ]}
+            locations={[0, 0.4, 0.6, 0.8, 1]}
+            style={styles.bottomGradient}
+          >
+            <View style={styles.infoContent}>
+              <View style={styles.header}>
+                <Text style={styles.name}>
+                  {profile.name}, {profile.age}
+                </Text>
+                <View style={styles.locationRow}>
+                  <Ionicons name="location" size={16} color="rgba(255,255,255,0.8)" />
+                  <Text style={styles.location}>{profile.location}</Text>
+                </View>
+              </View>
+
+              {/* Compatibility badges */}
+              <View style={styles.compatibilityRow}>
+                <View style={styles.compatibilityBadge}>
+                  <LinearGradient colors={['#FF6B6B', '#FF5252']} style={styles.badgeGradient}>
+                    <Text style={styles.badgeLabel}>Interests</Text>
+                    <Text style={styles.badgeValue}>95%</Text>
+                  </LinearGradient>
+                </View>
+
+                <View style={styles.compatibilityBadge}>
+                  <LinearGradient colors={['#FFB901', '#FFA500']} style={styles.badgeGradient}>
+                    <Text style={styles.badgeLabel}>Personality</Text>
+                    <Text style={styles.badgeValue}>98%</Text>
+                  </LinearGradient>
+                </View>
+
+                <View style={styles.compatibilityBadge}>
+                  <LinearGradient colors={['#4ECDC4', '#44A39A']} style={styles.badgeGradient}>
+                    <Text style={styles.badgeLabel}>Overall</Text>
+                    <Text style={styles.badgeValue}>96%</Text>
+                  </LinearGradient>
+                </View>
+              </View>
+
+              {/* Hobbies */}
+              <View style={styles.hobbiesRow}>
+                {profile.hobbies.slice(0, 4).map((hobby, index) => (
+                  <View key={index} style={styles.hobbyTag}>
+                    <Text style={styles.hobbyText}>{hobby}</Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* Bio */}
+              {profile.bio && (
+                <Text style={styles.bio} numberOfLines={2}>
+                  {profile.bio}
+                </Text>
+              )}
+            </View>
+          </LinearGradient>
         </View>
       </Animated.View>
-
-      {/* Action buttons */}
-      <View style={[styles.actionBar, { bottom: insets.bottom + 30 }]}>
-        <TouchableOpacity style={[styles.actionButton, styles.rewindButton]}>
-          <Ionicons name="refresh" size={28} color="#FDB901" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, styles.dislikeButton]}
-          onPress={() => forceSwipe('left')}
-        >
-          <Ionicons name="close" size={40} color="#FF3B30" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, styles.superLikeButton]}
-          onPress={() => onSuperLike && forceSwipe('up')}
-        >
-          <Ionicons name="star" size={28} color="#00C9FF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, styles.likeButton]}
-          onPress={() => forceSwipe('right')}
-        >
-          <Ionicons name="heart" size={35} color="#4FC3A1" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.actionButton, styles.boostButton]}>
-          <Ionicons name="flash" size={28} color="#9C27B0" />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  actionBar: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    paddingHorizontal: 20,
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignSelf: 'center',
-  },
-  actionButton: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 30,
-    borderWidth: 1,
-    height: 60,
-    justifyContent: 'center',
-    width: 60,
-  },
   activeDot: {
     backgroundColor: '#fff',
   },
@@ -476,77 +453,67 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.9)',
     fontSize: 10,
     fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   badgeValue: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     marginTop: 2,
   },
   bio: {
-    color: 'rgba(255,255,255,0.9)',
+    color: 'rgba(255,255,255,0.95)',
     fontSize: 15,
     lineHeight: 21,
   },
-  boostButton: {
-    borderRadius: 25,
-    height: 50,
-    width: 50,
+  bottomGradient: {
+    bottom: 0,
+    left: 0,
+    minHeight: 280,
+    paddingBottom: 120, // More space for tab bar and bio visibility
+    paddingTop: 60,
+    position: 'absolute',
+    right: 0,
   },
   card: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 20,
-    elevation: 10,
-    height: screenHeight * 0.75,
-    marginHorizontal: 10,
-    position: 'absolute',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    top: '12%',
-    width: screenWidth - 20,
-    alignSelf: 'center',
+    height: screenHeight,
     left: 0,
-    right: 0,
+    position: 'absolute',
+    top: 0,
+    width: screenWidth,
   },
   compatibilityBadge: {
     borderRadius: 12,
+    elevation: 5,
     flex: 1,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   compatibilityRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   container: {
     backgroundColor: '#000',
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dislikeButton: {
-    borderRadius: 35,
-    height: 70,
-    width: 70,
   },
   dot: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
     borderRadius: 2,
     height: 3,
     marginHorizontal: 3,
     width: 30,
   },
   errorContainer: {
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     backgroundColor: '#1a1a1a',
-    bottom: 0,
     justifyContent: 'center',
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
   },
   errorText: {
     color: '#666',
@@ -554,17 +521,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   header: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   hobbiesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   hobbyTag: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.3)',
     borderRadius: 16,
     borderWidth: 1,
     paddingHorizontal: 12,
@@ -573,21 +540,10 @@ const styles = StyleSheet.create({
   hobbyText: {
     color: '#fff',
     fontSize: 13,
-    fontWeight: '500',
-  },
-  infoContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    bottom: 0,
-    left: 0,
-    minHeight: 180,
-    overflow: 'hidden',
-    position: 'absolute',
-    right: 0,
+    fontWeight: '600',
   },
   infoContent: {
-    padding: 20,
+    paddingHorizontal: 20,
   },
   labelContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -597,15 +553,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
-  likeButton: {
-    borderRadius: 35,
-    height: 70,
-    width: 70,
+  leftGradientBar: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    top: 0,
+    width: '100%',
+  },
+  leftGradientContainer: {
+    bottom: 0,
+    left: 0,
+    overflow: 'hidden',
+    position: 'absolute',
+    top: 0,
+    width: 100,
+    zIndex: 5,
+  },
+  leftGradientVertical: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    top: 0,
+    width: '100%',
   },
   likeLabel: {
     left: 20,
     position: 'absolute',
-    top: 80,
+    top: '40%',
     transform: [{ rotate: '-30deg' }],
     zIndex: 20,
   },
@@ -613,21 +587,15 @@ const styles = StyleSheet.create({
     color: '#4FC3A1',
     fontSize: 32,
     fontWeight: 'bold',
-    padding: 10,
-    paddingHorizontal: 20,
   },
   loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.7)',
-    bottom: 0,
     justifyContent: 'center',
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
   },
   location: {
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(255,255,255,0.9)',
     fontSize: 16,
     marginLeft: 4,
   },
@@ -637,14 +605,14 @@ const styles = StyleSheet.create({
   },
   name: {
     color: '#fff',
-    fontSize: 28,
+    fontSize: 34,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   nopeLabel: {
     position: 'absolute',
     right: 20,
-    top: 80,
+    top: '40%',
     transform: [{ rotate: '30deg' }],
     zIndex: 20,
   },
@@ -655,17 +623,14 @@ const styles = StyleSheet.create({
     color: '#FF3B30',
     fontSize: 32,
     fontWeight: 'bold',
-    padding: 10,
-    paddingHorizontal: 20,
   },
   photo: {
     height: '100%',
     width: '100%',
   },
   photoContainer: {
-    borderRadius: 20,
+    backgroundColor: '#000',
     flex: 1,
-    overflow: 'hidden',
   },
   photoIndicator: {
     flexDirection: 'row',
@@ -688,10 +653,28 @@ const styles = StyleSheet.create({
   photoNavRight: {
     right: 0,
   },
-  rewindButton: {
-    borderRadius: 25,
-    height: 50,
-    width: 50,
+  rightGradientBar: {
+    bottom: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: '100%',
+  },
+  rightGradientContainer: {
+    bottom: 0,
+    overflow: 'hidden',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: 100,
+    zIndex: 5,
+  },
+  rightGradientVertical: {
+    bottom: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: '100%',
   },
   skeletonImage: {
     ...StyleSheet.absoluteFillObject,
@@ -700,27 +683,19 @@ const styles = StyleSheet.create({
   skeletonLoader: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#333',
-    borderRadius: 20,
     overflow: 'hidden',
-  },
-  superLikeButton: {
-    borderRadius: 25,
-    height: 50,
-    width: 50,
   },
   superLikeLabel: {
     alignItems: 'center',
-    bottom: 160,
     left: 0,
     position: 'absolute',
     right: 0,
+    top: '35%',
     zIndex: 20,
   },
   superLikeText: {
     color: '#00C9FF',
     fontSize: 32,
     fontWeight: 'bold',
-    padding: 10,
-    paddingHorizontal: 20,
   },
 });

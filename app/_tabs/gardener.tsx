@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Dimensions,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -74,20 +75,32 @@ const currentLesson = {
 export default function GardenerScreen() {
   const insets = useSafeAreaInsets();
 
+  // Animation values for header
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 50],
+    outputRange: [0, -100],
+    extrapolate: 'clamp',
+  });
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+          useNativeDriver: true,
+        })}
+        scrollEventThrottle={16}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <Animated.View style={[styles.header, { transform: [{ translateY: headerTranslateY }] }]}>
           <Text style={styles.headerTitle}>The</Text>
           <Text style={styles.headerTitle}>Gardener</Text>
           <Text style={styles.headerSubtitle}>
             Chat with the Gardener, Practice Conversations, ...
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Gardener Avatar */}
         <View style={styles.avatarContainer}>
@@ -186,7 +199,7 @@ export default function GardenerScreen() {
             </LiquidGlassView>
           </View>
         </LinearGradient>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }

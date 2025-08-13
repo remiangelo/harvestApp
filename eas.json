@@ -18,7 +18,7 @@
       }
     },
     "preview": {
-      "distribution": "internal",
+      "distribution": "store",
       "env": {
         "EXPO_PUBLIC_ENV": "preview"
       },
@@ -52,6 +52,17 @@
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
         "track": "production"
+      }
+    },
+    "preview": {
+      "ios": {
+        "appleId": "albinmartens@outlook.com",
+        "ascAppId": "6749823296",
+        "appleTeamId": "L3P46Q9398"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
       }
     }
   }

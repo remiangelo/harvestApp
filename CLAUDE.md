@@ -512,6 +512,15 @@ constants/               # App configuration and Supabase client
   - Fixed style property order in HarvestSwipeCard.tsx
   - Resolved all critical linting errors blocking commits
 
+- ✅ **Fixed TestFlight Submission Bundle ID Mismatch**
+  - App Store Connect configured with bundle ID: `com.harvest.harvestdating`
+  - Updated iOS native configuration files:
+    - Modified `ios/harvestApp.xcodeproj/project.pbxproj` (both Debug & Release)
+    - Updated `ios/harvestApp/Info.plist` URL schemes
+    - Changed display name to "Harvest"
+  - Updated `app.json` with correct bundle ID and Apple Team ID (L3P46Q9398)
+  - Issue: EAS Build uses native iOS config when `ios/` directory exists, ignoring app.json
+
 #### **Session Progress (August 7, 2025)**
 
 - ✅ **Completed Real-time Chat Functionality**

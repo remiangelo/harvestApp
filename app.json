@@ -16,8 +16,9 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.remiangelo.harvestApp",
-      "buildNumber": "2"
+      "bundleIdentifier": "com.harvest.harvestdating",
+      "buildNumber": "2",
+      "appleTeamId": "L3P46Q9398"
     },
     "android": {
       "adaptiveIcon": {

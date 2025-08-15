@@ -4,9 +4,11 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from '../components/ui';
 import { theme } from '../constants/theme';
+import { useAuthStore } from '../stores/useAuthStore';
 
 export default function AuthScreen() {
   const router = useRouter();
+  const { loginWithOAuth } = useAuthStore();
 
   return (
     <LinearGradient colors={['#FFFFFF', '#FFF5F7', '#FFE5EA']} style={styles.container}>
@@ -32,7 +34,11 @@ export default function AuthScreen() {
 
           {/* Social Login Buttons */}
           <View style={styles.socialButtons}>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => loginWithOAuth('facebook')}
+              testID="facebook-login"
+            >
               <Image
                 source={{ uri: 'https://img.icons8.com/color/48/facebook-new.png' }}
                 style={styles.socialIcon}
@@ -40,7 +46,11 @@ export default function AuthScreen() {
               <Text style={styles.socialButtonText}>Continue with Facebook</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => loginWithOAuth('google')}
+              testID="google-login"
+            >
               <Image
                 source={{ uri: 'https://img.icons8.com/color/48/google-logo.png' }}
                 style={styles.socialIcon}

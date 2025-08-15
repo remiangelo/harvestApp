@@ -65,6 +65,11 @@ export const signOut = async () => {
   return { error };
 };
 
+export const signInWithOAuth = async (provider: 'google' | 'facebook') => {
+  const { data, error } = await supabase.auth.signInWithOAuth({ provider });
+  return { data, error };
+};
+
 export const getCurrentUser = async () => {
   const {
     data: { user },

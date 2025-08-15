@@ -1,5 +1,5 @@
 // Image processing utilities
-// TODO: Install expo-image-manipulator for image compression and resizing
+import * as ImageManipulator from 'expo-image-manipulator';
 
 interface ImageProcessOptions {
   maxWidth?: number;
@@ -11,9 +11,19 @@ export const processImageForUpload = async (
   uri: string,
   options: ImageProcessOptions = {}
 ): Promise<string> => {
-  // For now, return the original URI
-  // TODO: Implement image processing when expo-image-manipulator is installed
-  return uri;
+  const { maxWidth, maxHeight, quality } = options;
+  const actions: ImageManipulator.Action[] = [];
+
+  if (maxWidth || maxHeight) {
+    actions.push({ resize: { width: maxWidth, height: maxHeight } });
+  }
+
+  const result = await ImageManipulator.manipulateAsync(uri, actions, {
+    compress: quality ?? 1,
+    format: ImageManipulator.SaveFormat.JPEG,
+  });
+
+  return result.uri;
 };
 
 export const validateImageFile = (uri: string): boolean => {

@@ -2,7 +2,14 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase, signIn, signUp, signOut, getCurrentUser } from '../lib/supabase';
+import {
+  supabase,
+  signIn,
+  signUp,
+  signOut,
+  getCurrentUser,
+  signInWithOAuth,
+} from '../lib/supabase';
 import { createProfile, getProfile, UserProfile } from '../lib/profiles';
 import useUserStore from './useUserStore';
 
@@ -17,6 +24,7 @@ interface AuthState {
   // Actions
   initialize: () => Promise<void>;
   login: (email: string, password: string) => Promise<{ error: any }>;
+  loginWithOAuth: (provider: 'google' | 'facebook') => Promise<{ error: any }>;
   register: (email: string, password: string) => Promise<{ error: any }>;
   logout: () => Promise<void>;
   setSession: (session: Session | null) => void;
@@ -120,6 +128,38 @@ export const useAuthStore = create<AuthState>()(
             if (profile) {
               useUserStore.getState().setCurrentUser(profile);
             }
+          }
+
+          return { error: null };
+        } catch (error) {
+          set({ isLoading: false });
+          return { error };
+        }
+      },
+
+      loginWithOAuth: async (provider: 'google' | 'facebook') => {
+        try {
+          set({ isLoading: true });
+          const { data, error } = await signInWithOAuth(provider);
+          if (error) {
+            set({ isLoading: false });
+            return { error };
+          }
+
+          if (data.user && data.session) {
+            const { data: profile } = await getProfile(data.user.id);
+            set({
+              user: data.user,
+              session: data.session,
+              profile,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+            if (profile) {
+              useUserStore.getState().setCurrentUser(profile);
+            }
+          } else {
+            set({ isLoading: false });
           }
 
           return { error: null };

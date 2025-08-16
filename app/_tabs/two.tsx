@@ -33,9 +33,9 @@ export default function ProfileScreen() {
 
   // Animation values for header
   const scrollY = useRef(new Animated.Value(0)).current;
-  const headerTranslateY = scrollY.interpolate({
-    inputRange: [0, 50],
-    outputRange: [0, -100],
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0],
     extrapolate: 'clamp',
   });
 
@@ -135,106 +135,111 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Gradient Background Header */}
-      <LinearGradient colors={['#A0354E', '#8B1E2D', '#701625']} style={styles.headerGradient}>
-        <SafeAreaView>
-          <Animated.View style={[styles.header, { transform: [{ translateY: headerTranslateY }] }]}>
-            <TouchableOpacity onPress={() => router.push('/settings' as any)}>
-              <Ionicons name="settings-outline" size={24} color="white" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Profile</Text>
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
-            >
-              <Ionicons name={isEditing ? 'checkmark' : 'create-outline'} size={24} color="white" />
-            </TouchableOpacity>
-          </Animated.View>
-        </SafeAreaView>
+      <SafeAreaView style={styles.safeArea}>
+        {/* Minimal Header */}
+        <Animated.View
+          style={[styles.header, { opacity: headerOpacity, paddingTop: insets.top + 12 }]}
+        >
+          <TouchableOpacity onPress={() => router.push('/settings' as any)}>
+            <Ionicons name="settings-outline" size={24} color="#333" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => (isEditing ? handleSave() : setIsEditing(true))}>
+            <Ionicons name={isEditing ? 'checkmark' : 'create-outline'} size={24} color="#333" />
+          </TouchableOpacity>
+        </Animated.View>
 
-        {/* Profile Header Card */}
-        <View style={styles.profileHeader}>
-          <TouchableOpacity
-            style={styles.mainPhotoContainer}
-            onPress={() => isEditing && pickImage(0)}
-            disabled={!isEditing}
-          >
-            {firstPhoto ? (
-              <OptimizedImage
-                source={{ uri: firstPhoto }}
-                style={styles.mainPhoto}
-                showLoadingIndicator={true}
+        <Animated.ScrollView
+          style={styles.content}
+          contentContainerStyle={{ paddingBottom: 80 }}
+          showsVerticalScrollIndicator={false}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+            listener: (event: any) => {
+              const y = event.nativeEvent.contentOffset.y;
+              // Notify tab bar about scroll
+              if ((global as any).handleTabBarScroll) {
+                (global as any).handleTabBarScroll(y);
+              }
+            },
+          })}
+          scrollEventThrottle={16}
+        >
+          {/* Compact Profile Header */}
+          <View style={[styles.profileHeader, { paddingTop: insets.top + 35 }]}>
+            <View style={styles.profileInfo}>
+              <TouchableOpacity
+                style={styles.mainPhotoContainer}
+                onPress={() => isEditing && pickImage(0)}
+                disabled={!isEditing}
+              >
+                {firstPhoto ? (
+                  <OptimizedImage
+                    source={{ uri: firstPhoto }}
+                    style={styles.mainPhoto}
+                    showLoadingIndicator={true}
+                  />
+                ) : (
+                  <View style={styles.emptyMainPhoto}>
+                    <Ionicons name="camera" size={24} color="#999" />
+                  </View>
+                )}
+                {isEditing && (
+                  <View style={styles.editPhotoOverlay}>
+                    <Ionicons name="camera" size={16} color="white" />
+                  </View>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.nameSection}>
+                <Text style={styles.profileName}>
+                  {profile.name}, {profile.age}
+                </Text>
+                <View style={styles.locationRow}>
+                  <Ionicons name="location" size={14} color="#666" />
+                  <Text style={styles.profileLocation}>{profile.location}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          {/* Bio Section */}
+          <View style={styles.bioSection}>
+            <Text style={styles.sectionTitle}>About</Text>
+            {isEditing ? (
+              <TextInput
+                style={styles.bioInput}
+                value={profile.bio}
+                onChangeText={(text) => setProfile({ ...profile, bio: text })}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                placeholder="Tell us about yourself..."
+                placeholderTextColor="#999"
               />
             ) : (
-              <View style={styles.emptyMainPhoto}>
-                <Ionicons name="camera" size={40} color="white" />
-              </View>
+              <Text style={styles.bioText}>{profile.bio}</Text>
             )}
-            {isEditing && (
-              <View style={styles.editPhotoOverlay}>
-                <Ionicons name="camera" size={24} color="white" />
-              </View>
-            )}
-          </TouchableOpacity>
-
-          <Text style={styles.profileName}>
-            {profile.name}, {profile.age}
-          </Text>
-          <View style={styles.locationRow}>
-            <Ionicons name="location" size={16} color="rgba(255,255,255,0.8)" />
-            <Text style={styles.profileLocation}>{profile.location}</Text>
           </View>
-        </View>
-      </LinearGradient>
 
-      <Animated.ScrollView
-        style={styles.content}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
-        showsVerticalScrollIndicator={false}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
-          useNativeDriver: true,
-        })}
-        scrollEventThrottle={16}
-      >
-        {/* Bio Section */}
-        <LiquidGlassView
-          intensity={85}
-          tint="light"
-          style={styles.bioSection}
-          borderRadius={20}
-          glassTint="rgba(255, 255, 255, 0.95)"
-        >
-          <Text style={styles.sectionTitle}>About Me</Text>
-          {isEditing ? (
-            <TextInput
-              style={styles.bioInput}
-              value={profile.bio}
-              onChangeText={(text) => setProfile({ ...profile, bio: text })}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-              placeholder="Tell us about yourself..."
-              placeholderTextColor="#999"
-            />
-          ) : (
-            <Text style={styles.bioText}>{profile.bio}</Text>
-          )}
-        </LiquidGlassView>
+          {/* Interests */}
+          <View style={styles.hobbiesSection}>
+            <Text style={styles.sectionTitle}>Interests</Text>
+            <View style={styles.hobbiesContainer}>
+              {profile.hobbies.map((hobby, index) => (
+                <View key={index} style={styles.hobbyTag}>
+                  <Text style={styles.hobbyText}>{hobby}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
 
-        {/* Photos Grid */}
-        <LiquidGlassView
-          intensity={85}
-          tint="light"
-          style={styles.photosSection}
-          borderRadius={20}
-          glassTint="rgba(255, 255, 255, 0.95)"
-        >
-          <Text style={styles.sectionTitle}>My Photos</Text>
-          <View style={styles.photosGrid}>
-            {additionalPhotos.map((photo, index) => (
-              <View key={index + 1} style={styles.photoContainer}>
+          {/* Photos Grid */}
+          <View style={styles.photosSection}>
+            <Text style={styles.sectionTitle}>Photos</Text>
+            <View style={styles.photosGrid}>
+              {additionalPhotos.map((photo, index) => (
                 <TouchableOpacity
-                  style={[styles.photoSlot, photo && styles.filledSlot]}
+                  key={index + 1}
+                  style={styles.photoSlot}
                   onPress={() => isEditing && pickImage(index + 1)}
                   disabled={!isEditing}
                 >
@@ -246,245 +251,243 @@ export default function ProfileScreen() {
                     />
                   ) : (
                     <View style={styles.emptyPhoto}>
-                      <Ionicons name="add" size={28} color={theme.colors.primary} />
+                      <Ionicons name="add" size={20} color="#ccc" />
                     </View>
                   )}
                 </TouchableOpacity>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
-        </LiquidGlassView>
 
-        {/* Hobbies Section */}
-        <LiquidGlassView
-          intensity={85}
-          tint="light"
-          style={styles.hobbiesSection}
-          borderRadius={20}
-          glassTint="rgba(255, 255, 255, 0.95)"
-        >
-          <Text style={styles.sectionTitle}>Interests</Text>
-          <View style={styles.hobbiesContainer}>
-            {profile.hobbies.map((hobby, index) => (
-              <LinearGradient key={index} colors={['#A0354E', '#8B1E2D']} style={styles.hobbyTag}>
-                <Text style={styles.hobbyText}>{hobby}</Text>
-              </LinearGradient>
-            ))}
+          {/* Action Buttons */}
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => router.push('/profile-edit' as any)}
+            >
+              <Text style={styles.actionButtonText}>Edit Full Profile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => router.push('/settings' as any)}
+            >
+              <Text style={styles.secondaryButtonText}>Account Settings</Text>
+            </TouchableOpacity>
           </View>
-        </LiquidGlassView>
 
-        {/* Quick Actions */}
-        <View style={styles.quickActions}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => router.push('/profile-edit' as any)}
-          >
-            <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.actionButtonGradient}>
-              <Ionicons name="pencil" size={20} color="white" />
-              <Text style={styles.actionButtonText}>Edit Profile</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => router.push('/settings' as any)}
-          >
-            <LinearGradient colors={['#666', '#444']} style={styles.actionButtonGradient}>
-              <Ionicons name="settings" size={20} color="white" />
-              <Text style={styles.actionButtonText}>Settings</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        {/* Logout */}
-        <View style={styles.logoutContainer}>
-          <LogoutButton fullWidth />
-        </View>
-      </Animated.ScrollView>
+          {/* Logout */}
+          <View style={styles.logoutContainer}>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={() => useAuthStore.getState().logout()}
+            >
+              <Text style={styles.logoutText}>Log Out</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   actionButton: {
-    borderRadius: 12,
-    flex: 1,
-    marginHorizontal: 6,
-    overflow: 'hidden',
-  },
-  actionButtonGradient: {
     alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingVertical: 12,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 8,
+    marginBottom: 12,
+    paddingVertical: 14,
   },
   actionButtonText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+  },
+  actionButtons: {
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   bioInput: {
-    color: '#222',
-    fontSize: 16,
-    lineHeight: 24,
-    minHeight: 100,
-    textAlignVertical: 'top',
+    backgroundColor: '#fff',
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    borderWidth: 1,
+    color: '#333',
+    fontSize: 15,
+    lineHeight: 22,
+    minHeight: 66,
+    padding: 8,
   },
   bioSection: {
-    marginBottom: 16,
-    marginHorizontal: 16,
-    marginTop: -40,
-    padding: 20,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   bioText: {
-    color: '#444',
-    fontSize: 16,
-    lineHeight: 24,
+    color: '#333',
+    fontSize: 15,
+    lineHeight: 22,
   },
   container: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#FAFAFA',
     flex: 1,
   },
   content: {
     flex: 1,
   },
-  editButton: {
-    padding: 4,
-  },
   editPhotoOverlay: {
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 50,
-    bottom: 10,
-    height: 40,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 12,
+    bottom: 5,
+    height: 24,
     justifyContent: 'center',
     position: 'absolute',
-    right: 10,
-    width: 40,
+    right: 5,
+    width: 24,
   },
   emptyMainPhoto: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#f5f5f5',
     height: '100%',
     justifyContent: 'center',
     width: '100%',
   },
   emptyPhoto: {
     alignItems: 'center',
-    backgroundColor: 'rgba(160, 53, 78, 0.1)',
-    flex: 1,
+    height: '100%',
     justifyContent: 'center',
-  },
-  filledSlot: {
-    borderColor: theme.colors.primary,
-    borderWidth: 2,
+    width: '100%',
   },
   header: {
-    alignItems: 'center',
+    backgroundColor: 'transparent',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    left: 0,
     paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerGradient: {
-    paddingBottom: 60,
-  },
-  headerTitle: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: '600',
+    paddingVertical: 12,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 10,
   },
   hobbiesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: 8,
   },
   hobbiesSection: {
-    marginBottom: 16,
-    marginHorizontal: 16,
-    padding: 20,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   hobbyTag: {
-    borderRadius: 20,
-    marginBottom: 8,
-    marginRight: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    backgroundColor: '#f0f0f0',
+    borderColor: '#e0e0e0',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
   },
   hobbyText: {
-    color: 'white',
+    color: '#333',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   locationRow: {
     alignItems: 'center',
     flexDirection: 'row',
     marginTop: 4,
   },
+  logoutButton: {
+    alignItems: 'center',
+    paddingVertical: 14,
+  },
   logoutContainer: {
-    marginHorizontal: 16,
-    marginTop: 16,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+  },
+  logoutText: {
+    color: '#999',
+    fontSize: 15,
+    fontWeight: '500',
   },
   mainPhoto: {
     height: '100%',
     width: '100%',
   },
   mainPhotoContainer: {
-    borderColor: 'white',
-    borderRadius: 70,
-    borderWidth: 3,
-    height: 140,
-    marginBottom: 16,
+    backgroundColor: '#f0f0f0',
+    borderColor: '#fff',
+    borderRadius: 40,
+    borderWidth: 2,
+    height: 80,
     overflow: 'hidden',
-    width: 140,
+    width: 80,
+  },
+  nameSection: {
+    flex: 1,
+    marginLeft: 16,
   },
   photo: {
     height: '100%',
     width: '100%',
   },
-  photoContainer: {
-    padding: 4,
-    width: '33.333%',
-  },
   photoSlot: {
     aspectRatio: 1,
-    backgroundColor: '#F8F8F8',
-    borderRadius: 12,
+    backgroundColor: '#f5f5f5',
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    borderWidth: 1,
     overflow: 'hidden',
+    width: (screenWidth - 40 - 16) / 3,
   },
   photosGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -4,
+    gap: 8,
   },
   photosSection: {
-    marginBottom: 16,
-    marginHorizontal: 16,
-    padding: 20,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   profileHeader: {
-    alignItems: 'center',
     paddingBottom: 20,
+    paddingHorizontal: 20,
+  },
+  profileInfo: {
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   profileLocation: {
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#666',
     fontSize: 14,
     marginLeft: 4,
   },
   profileName: {
-    color: 'white',
-    fontSize: 28,
-    fontWeight: 'bold',
+    color: '#1a1a1a',
+    fontSize: 24,
+    fontWeight: '700',
   },
-  quickActions: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    marginHorizontal: 16,
+  safeArea: {
+    flex: 1,
+  },
+  secondaryButton: {
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingVertical: 14,
+  },
+  secondaryButtonText: {
+    color: '#333',
+    fontSize: 16,
+    fontWeight: '500',
   },
   sectionTitle: {
-    color: '#222',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    color: '#1a1a1a',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
   },
 });

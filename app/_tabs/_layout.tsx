@@ -4,6 +4,7 @@ import { Tabs } from 'expo-router';
 
 import { useClientOnlyValue } from '../../components/useClientOnlyValue';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
+import { CustomTabBar } from '../../components/CustomTabBar';
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -17,6 +18,7 @@ export default function TabLayout() {
   return (
     <ErrorBoundary>
       <Tabs
+        tabBar={(props) => <CustomTabBar {...props} />}
         screenOptions={{
           tabBarActiveTintColor: '#A0354E',
           tabBarInactiveTintColor: '#A0354E',
@@ -24,14 +26,6 @@ export default function TabLayout() {
           // Disable the static render of the header on web
           // to prevent a hydration error in React Navigation v6.
           headerShown: useClientOnlyValue(false, true),
-          tabBarStyle: {
-            position: 'absolute',
-            backgroundColor: 'transparent',
-            borderTopWidth: 0,
-            elevation: 0,
-            shadowOpacity: 0,
-            height: 70,
-          },
         }}
       >
         <Tabs.Screen

@@ -185,7 +185,17 @@ export default function MatchesScreen() {
         borderRadius={24}
         glassTint="rgba(255, 255, 255, 0.95)"
       >
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          onScroll={(event) => {
+            const y = event.nativeEvent.contentOffset.y;
+            // Notify tab bar about scroll
+            if ((global as any).handleTabBarScroll) {
+              (global as any).handleTabBarScroll(y);
+            }
+          }}
+          scrollEventThrottle={16}
+        >
           {chatsLoading ? (
             // Skeleton loader for chats
             <>

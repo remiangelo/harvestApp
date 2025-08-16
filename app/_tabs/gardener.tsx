@@ -50,7 +50,18 @@ export default function QuestionnaireScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        onScroll={(event) => {
+          const y = event.nativeEvent.contentOffset.y;
+          // Notify tab bar about scroll
+          if ((global as any).handleTabBarScroll) {
+            (global as any).handleTabBarScroll(y);
+          }
+        }}
+        scrollEventThrottle={16}
+      >
         {questions.map((q) => (
           <View key={q.id} style={styles.question}>
             <Text style={styles.questionText}>{q.text}</Text>

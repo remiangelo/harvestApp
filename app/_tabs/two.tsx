@@ -232,24 +232,25 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>My Photos</Text>
           <View style={styles.photosGrid}>
             {additionalPhotos.map((photo, index) => (
-              <TouchableOpacity
-                key={index + 1}
-                style={[styles.photoSlot, photo && styles.filledSlot]}
-                onPress={() => isEditing && pickImage(index + 1)}
-                disabled={!isEditing}
-              >
-                {photo ? (
-                  <OptimizedImage
-                    source={{ uri: photo }}
-                    style={styles.photo}
-                    showLoadingIndicator={true}
-                  />
-                ) : (
-                  <View style={styles.emptyPhoto}>
-                    <Ionicons name="add" size={28} color={theme.colors.primary} />
-                  </View>
-                )}
-              </TouchableOpacity>
+              <View key={index + 1} style={styles.photoContainer}>
+                <TouchableOpacity
+                  style={[styles.photoSlot, photo && styles.filledSlot]}
+                  onPress={() => isEditing && pickImage(index + 1)}
+                  disabled={!isEditing}
+                >
+                  {photo ? (
+                    <OptimizedImage
+                      source={{ uri: photo }}
+                      style={styles.photo}
+                      showLoadingIndicator={true}
+                    />
+                  ) : (
+                    <View style={styles.emptyPhoto}>
+                      <Ionicons name="add" size={28} color={theme.colors.primary} />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </View>
             ))}
           </View>
         </LiquidGlassView>
@@ -441,18 +442,20 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
   },
+  photoContainer: {
+    padding: 4,
+    width: '33.333%',
+  },
   photoSlot: {
     aspectRatio: 1,
     backgroundColor: '#F8F8F8',
     borderRadius: 12,
-    marginBottom: 10,
     overflow: 'hidden',
-    width: '31%',
   },
   photosGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    marginHorizontal: -4,
   },
   photosSection: {
     marginBottom: 16,

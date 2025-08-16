@@ -260,6 +260,7 @@ export default function LoginScreen() {
               onPress={() => setIsLogin(!isLogin)}
               variant="ghost"
               style={styles.switchButton}
+              textStyle={styles.switchButtonText}
             />
 
             {/* Test Mode Button - Only in development */}
@@ -369,6 +370,9 @@ const styles = StyleSheet.create({
   },
   switchButton: {
     marginBottom: theme.spacing.md,
+  },
+  switchButtonText: {
+    color: theme.colors.primary,
   },
   testButton: {
     marginBottom: theme.spacing.md,

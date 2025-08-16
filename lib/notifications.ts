@@ -43,23 +43,23 @@ export class NotificationService {
     if (Device.isDevice) {
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
-      
+
       if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
-      
+
       if (finalStatus !== 'granted') {
         console.log('Failed to get push token for push notification!');
         return;
       }
-      
+
       token = (
         await Notifications.getExpoPushTokenAsync({
           projectId: '4bf484c4-576a-4d5a-8373-1c854bb46ea7', // Replace with your project ID
         })
       ).data;
-      
+
       this.pushToken = token;
       await this.savePushToken(token);
     } else {
@@ -139,7 +139,7 @@ export class NotificationService {
     // This listener is fired whenever a user taps on or interacts with a notification
     const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
       const { type, conversationId } = response.notification.request.content.data;
-      
+
       if (type === 'message' && conversationId) {
         // Navigate to chat screen
         navigation.navigate('chat', { id: conversationId });
@@ -180,11 +180,7 @@ export class NotificationService {
         body,
         sound: 'default',
       },
-      trigger: {
-        type: 'timeInterval',
-        seconds,
-        repeats: false,
-      },
+      trigger: seconds,
     });
   }
 

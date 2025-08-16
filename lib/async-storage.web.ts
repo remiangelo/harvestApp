@@ -12,7 +12,7 @@ const localStorage =
         length: 0,
       };
 
-export const AsyncStorage = {
+const AsyncStorage = {
   getItem: (key: string): Promise<string | null> => {
     return new Promise((resolve) => {
       try {
@@ -24,11 +24,11 @@ export const AsyncStorage = {
     });
   },
 
-  setItem: (key: string, value: string): Promise<null> => {
+  setItem: (key: string, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       try {
         localStorage.setItem(key, value);
-        resolve(null);
+        resolve();
       } catch (e) {
         console.warn('AsyncStorage.setItem error:', e);
         reject(e);
@@ -36,11 +36,11 @@ export const AsyncStorage = {
     });
   },
 
-  removeItem: (key: string): Promise<null> => {
+  removeItem: (key: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       try {
         localStorage.removeItem(key);
-        resolve(null);
+        resolve();
       } catch (e) {
         console.warn('AsyncStorage.removeItem error:', e);
         reject(e);
@@ -136,3 +136,5 @@ export const AsyncStorage = {
     });
   },
 };
+
+export default AsyncStorage;

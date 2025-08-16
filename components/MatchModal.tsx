@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, Modal, Dimensions, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView, LiquidGlassButton, LiquidGlassBadge } from './liquid';
 import * as Haptics from 'expo-haptics';
@@ -37,7 +36,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
   compatibility,
 }) => {
   const insets = useSafeAreaInsets();
-  const confettiRef = useRef<any>(null);
+  const confettiRef = useRef<ConfettiCannon>(null);
 
   useEffect(() => {
     if (visible) {
@@ -66,81 +65,91 @@ export const MatchModal: React.FC<MatchModalProps> = ({
         fallSpeed={3000}
         autoStart={false}
       />
-      <BlurView intensity={30} tint="dark" style={styles.backdrop}>
-        <View
-          style={[
-            styles.container,
-            { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 },
-          ]}
-        >
-          {/* Profile Cards */}
-          <View style={styles.cardsContainer}>
-            <View style={styles.cardWrapper}>
-              <View style={[styles.card, styles.leftCard]}>
-                <Image source={{ uri: userProfile.photo }} style={styles.photo} />
+      <BlurView intensity={90} tint="dark" style={styles.backdrop}>
+        {/* Additional dark overlay for better contrast */}
+        <View style={styles.darkOverlay} />
+
+        {/* Content Container with Glass Effect */}
+        <View style={styles.contentWrapper}>
+          <LiquidGlassView
+            intensity={95}
+            tint="light"
+            style={[
+              styles.glassContainer,
+              { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 },
+            ]}
+            borderRadius={24}
+            glassTint="rgba(255, 255, 255, 0.98)"
+          >
+            {/* Profile Cards */}
+            <View style={styles.cardsContainer}>
+              <View style={styles.cardWrapper}>
+                <View style={[styles.card, styles.leftCard]}>
+                  <Image source={{ uri: userProfile.photo }} style={styles.photo} />
+                </View>
+                <View style={styles.heartBadge}>
+                  <Text style={styles.heartEmoji}>❤️</Text>
+                </View>
               </View>
-              <View style={styles.heartBadge}>
-                <Text style={styles.heartEmoji}>❤️</Text>
+
+              <View style={[styles.card, styles.rightCard]}>
+                <Image source={{ uri: matchProfile.photo }} style={styles.photo} />
+                <View style={[styles.heartBadge, styles.rightHeartBadge]}>
+                  <Text style={styles.heartEmoji}>❤️</Text>
+                </View>
               </View>
             </View>
 
-            <View style={[styles.card, styles.rightCard]}>
-              <Image source={{ uri: matchProfile.photo }} style={styles.photo} />
-              <View style={[styles.heartBadge, styles.rightHeartBadge]}>
-                <Text style={styles.heartEmoji}>❤️</Text>
-              </View>
+            {/* Match Text */}
+            <Text style={styles.matchTitle}>It&apos;s a match, {userProfile.name}!</Text>
+            <Text style={styles.matchSubtitle}>
+              We think you&apos;re a great match! Our algorithm{'\n'}
+              has given you {compatibility.overall}% compatibility.
+            </Text>
+            <Text style={styles.matchHint}>Try asking them about their love for travel</Text>
+
+            {/* Compatibility Metrics with Liquid Glass */}
+            <View style={styles.metricsContainer}>
+              <LiquidGlassBadge
+                label="Interests"
+                value={`${compatibility.interests}%`}
+                color="#FF6B6B"
+                size="large"
+              />
+              <LiquidGlassBadge
+                label="Personality"
+                value={`${compatibility.personality}%`}
+                color="#FFB901"
+                size="large"
+              />
+              <LiquidGlassBadge
+                label="Match"
+                value={`${compatibility.overall}%`}
+                color="#4ECDC4"
+                size="large"
+              />
             </View>
-          </View>
 
-          {/* Match Text */}
-          <Text style={styles.matchTitle}>It&apos;s a match, {userProfile.name}!</Text>
-          <Text style={styles.matchSubtitle}>
-            We think you&apos;re a great match! Our algorithm{'\n'}
-            has given you {compatibility.overall}% compatibility.
-          </Text>
-          <Text style={styles.matchHint}>Try asking them about their love for travel</Text>
-
-          {/* Compatibility Metrics with Liquid Glass */}
-          <View style={styles.metricsContainer}>
-            <LiquidGlassBadge
-              label="Interests"
-              value={`${compatibility.interests}%`}
-              color="#FF6B6B"
+            {/* Action Buttons */}
+            <LiquidGlassButton
+              title="Send message"
+              variant="primary"
               size="large"
+              onPress={() => {
+                onSendMessage();
+                onClose();
+              }}
+              style={styles.primaryButton}
             />
-            <LiquidGlassBadge
-              label="Personality"
-              value={`${compatibility.personality}%`}
-              color="#FFB901"
-              size="large"
-            />
-            <LiquidGlassBadge
-              label="Match"
-              value={`${compatibility.overall}%`}
-              color="#4ECDC4"
-              size="large"
-            />
-          </View>
 
-          {/* Action Buttons */}
-          <LiquidGlassButton
-            title="Send message"
-            variant="primary"
-            size="large"
-            onPress={() => {
-              onSendMessage();
-              onClose();
-            }}
-            style={styles.primaryButton}
-          />
-
-          <LiquidGlassButton
-            title="Keep searching"
-            variant="secondary"
-            size="large"
-            onPress={onClose}
-            style={styles.secondaryButton}
-          />
+            <LiquidGlassButton
+              title="Keep searching"
+              variant="secondary"
+              size="large"
+              onPress={onClose}
+              style={styles.secondaryButton}
+            />
+          </LiquidGlassView>
         </View>
       </BlurView>
     </Modal>
@@ -181,9 +190,24 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     width: 280,
   },
-  container: {
+  contentWrapper: {
     alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
+  },
+  darkOverlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  glassContainer: {
+    alignItems: 'center',
+    maxWidth: 400,
+    padding: 20,
+    width: screenWidth - 40,
   },
   heartBadge: {
     alignItems: 'center',
@@ -212,14 +236,16 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   matchHint: {
-    color: '#999',
+    color: '#555',
     fontSize: 14,
+    fontWeight: '500',
     marginBottom: 30,
     textAlign: 'center',
   },
   matchSubtitle: {
-    color: '#666',
+    color: '#333',
     fontSize: 16,
+    fontWeight: '500',
     lineHeight: 22,
     marginBottom: 10,
     textAlign: 'center',
@@ -227,9 +253,12 @@ const styles = StyleSheet.create({
   matchTitle: {
     color: '#A0354E',
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: '800',
     marginBottom: 10,
     textAlign: 'center',
+    textShadowColor: 'rgba(255, 255, 255, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   metricsContainer: {
     flexDirection: 'row',

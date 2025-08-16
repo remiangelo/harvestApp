@@ -521,6 +521,21 @@ constants/               # App configuration and Supabase client
   - Updated `app.json` with correct bundle ID and Apple Team ID (L3P46Q9398)
   - Issue: EAS Build uses native iOS config when `ios/` directory exists, ignoring app.json
 
+#### **Session Progress (August 16, 2025)**
+
+- ✅ **Fixed Test Suite Failures**
+  - Installed missing `expo-image-manipulator` dependency for imageUtils tests
+  - Fixed StyledText test async rendering issues (reverted to sync after linter correction)
+  - Updated snapshot to match current component output
+  - All 4 test suites now passing (8 tests total)
+
+- ✅ **Recent Pull Request Updates**
+  - Merged PR #1: Added image resizing and compression functionality
+  - Merged PR #2: Refactored swipe persistence to use callbacks
+  - Updated login and profile screens
+  - Replaced gardener screen with questionnaire-based approach
+  - Enabled OAuth login methods (Google, Facebook integration)
+
 #### **Session Progress (August 7, 2025)**
 
 - ✅ **Completed Real-time Chat Functionality**

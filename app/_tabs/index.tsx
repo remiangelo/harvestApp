@@ -81,7 +81,10 @@ export default function SwipingScreen() {
           setMatchedProfile(currentProfile);
           setShowMatchModal(true);
           // Send match notification
-          await notificationService.sendMatchNotification(currentProfile.name, currentProfile.photos[0]);
+          await notificationService.sendMatchNotification(
+            currentProfile.name,
+            currentProfile.photos[0]
+          );
         } else if (!result.success) {
           console.error('Failed to save swipe:', result.error);
         }
@@ -95,7 +98,10 @@ export default function SwipingScreen() {
           setMatchedProfile(currentProfile);
           setShowMatchModal(true);
           // Send match notification
-          await notificationService.sendMatchNotification(currentProfile.name, currentProfile.photos[0]);
+          await notificationService.sendMatchNotification(
+            currentProfile.name,
+            currentProfile.photos[0]
+          );
         }
         nextProfile();
       }
@@ -147,7 +153,10 @@ export default function SwipingScreen() {
           setMatchedProfile(currentProfile);
           setShowMatchModal(true);
           // Send match notification
-          await notificationService.sendMatchNotification(currentProfile.name, currentProfile.photos[0]);
+          await notificationService.sendMatchNotification(
+            currentProfile.name,
+            currentProfile.photos[0]
+          );
         } else if (!result.success) {
           console.error('Failed to save swipe:', result.error);
         }

@@ -15,11 +15,11 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { getDemoChatById, demoChats } from '../data/demoChats';
+import { demoChats } from '../data/demoChats';
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../context/UserContext';
-import { ActivityIndicator, Animated } from 'react-native';
+import { Animated } from 'react-native';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
@@ -32,56 +32,9 @@ export default function ChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const subscriptionRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Find the match for this chat
   const match = demoChats.find((c) => c.id === id);
-  
-  if (!match) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Chat not found</Text>
-      </SafeAreaView>
-    );
-  }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
 
   // Load messages when component mounts
   useEffect(() => {
@@ -100,13 +53,15 @@ export default function ChatScreen() {
         if (!conversation) {
           // For now, just use demo messages
           const demoMessages = match.messages || [];
-          setMessages(demoMessages.map((msg: any, index: number) => ({
-            id: `demo-${index}`,
-            conversation_id: match.id,
-            sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
-            content: msg.text,
-            created_at: msg.timestamp,
-          })));
+          setMessages(
+            demoMessages.map((msg: any, index: number) => ({
+              id: `demo-${index}`,
+              conversation_id: match.id,
+              sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
+              content: msg.text,
+              created_at: msg.timestamp,
+            }))
+          );
           setLoading(false);
           return;
         }
@@ -122,13 +77,15 @@ export default function ChatScreen() {
           console.error('Error loading messages:', error);
           // Fall back to demo messages
           const demoMessages = match.messages || [];
-          setMessages(demoMessages.map((msg: any, index: number) => ({
-            id: `demo-${index}`,
-            conversation_id: match.id,
-            sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
-            content: msg.text,
-            created_at: msg.timestamp,
-          })));
+          setMessages(
+            demoMessages.map((msg: any, index: number) => ({
+              id: `demo-${index}`,
+              conversation_id: match.id,
+              sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
+              content: msg.text,
+              created_at: msg.timestamp,
+            }))
+          );
         } else {
           setMessages(data || []);
         }
@@ -136,13 +93,15 @@ export default function ChatScreen() {
         console.error('Error in loadMessages:', error);
         // Fall back to demo messages
         const demoMessages = match.messages || [];
-        setMessages(demoMessages.map((msg: any, index: number) => ({
-          id: `demo-${index}`,
-          conversation_id: match.id,
-          sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
-          content: msg.text,
-          created_at: msg.timestamp,
-        })));
+        setMessages(
+          demoMessages.map((msg: any, index: number) => ({
+            id: `demo-${index}`,
+            conversation_id: match.id,
+            sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
+            content: msg.text,
+            created_at: msg.timestamp,
+          }))
+        );
       } finally {
         setLoading(false);
       }
@@ -176,7 +135,7 @@ export default function ChatScreen() {
           setTimeout(() => {
             scrollViewRef.current?.scrollToEnd({ animated: true });
           }, 100);
-          
+
           // Send notification if message is from other user
           if (newMessage.sender_id !== currentUser.id) {
             const { notificationService } = await import('../lib/notifications');
@@ -197,10 +156,10 @@ export default function ChatScreen() {
         );
         setOtherUserTyping(isOtherTyping);
       })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+      .on('presence', { event: 'join' }, ({ key: _key, newPresences: _newPresences }) => {
         // Handle user joining
       })
-      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+      .on('presence', { event: 'leave' }, ({ key: _key, leftPresences: _leftPresences }) => {
         // Handle user leaving
         setOtherUserTyping(false);
       })
@@ -234,6 +193,14 @@ export default function ChatScreen() {
     }
   }, [messages]);
 
+  // Early return if match not found (after all hooks)
+  if (!match) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.errorText}>Chat not found</Text>
+      </SafeAreaView>
+    );
+  }
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !currentUser || !match) return;
@@ -278,9 +245,7 @@ export default function ChatScreen() {
 
       // Replace the optimistic message with the real one
       if (data) {
-        setMessages((current) =>
-          current.map((m) => (m.id === optimisticMessage.id ? data : m))
-        );
+        setMessages((current) => current.map((m) => (m.id === optimisticMessage.id ? data : m)));
       }
     } catch (error) {
       console.error('Error in sendMessage:', error);
@@ -364,10 +329,7 @@ export default function ChatScreen() {
               {[1, 2, 3, 4, 5].map((index) => (
                 <View
                   key={`skeleton-${index}`}
-                  style={[
-                    styles.messageRow,
-                    index % 2 === 0 && styles.messageRowRight,
-                  ]}
+                  style={[styles.messageRow, index % 2 === 0 && styles.messageRowRight]}
                 >
                   {index % 2 !== 0 && (
                     <View style={[styles.messageAvatar, styles.skeletonAvatar]} />
@@ -406,19 +368,23 @@ export default function ChatScreen() {
                   {isCurrentUser ? (
                     <View style={styles.currentUserMessage}>
                       <Text style={styles.currentUserMessageText}>{message.content}</Text>
-                      <Text style={styles.messageTime}>{formatMessageTime(message.created_at)}</Text>
+                      <Text style={styles.messageTime}>
+                        {formatMessageTime(message.created_at)}
+                      </Text>
                     </View>
                   ) : (
                     <View style={styles.otherUserMessage}>
                       <Text style={styles.otherUserMessageText}>{message.content}</Text>
-                      <Text style={styles.messageTime}>{formatMessageTime(message.created_at)}</Text>
+                      <Text style={styles.messageTime}>
+                        {formatMessageTime(message.created_at)}
+                      </Text>
                     </View>
                   )}
                 </View>
               );
             })
           )}
-          
+
           {/* Typing Indicator */}
           {otherUserTyping && (
             <View style={styles.typingIndicatorRow}>
@@ -489,6 +455,23 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     lineHeight: 20,
+  },
+  emptyState: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: 100,
+  },
+  emptyStateSubtext: {
+    color: '#666',
+    fontSize: 14,
+    marginTop: 8,
+  },
+  emptyStateText: {
+    color: '#333',
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
   },
   errorText: {
     color: '#666',
@@ -614,27 +597,16 @@ const styles = StyleSheet.create({
     height: 14,
     width: '80%',
   },
-  emptyState: {
+  typingDot: {
+    backgroundColor: '#666',
+    borderRadius: 4,
+    height: 8,
+    marginHorizontal: 2,
+    width: 8,
+  },
+  typingDots: {
     alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 100,
-  },
-  emptyStateText: {
-    color: '#333',
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 16,
-  },
-  emptyStateSubtext: {
-    color: '#666',
-    fontSize: 14,
-    marginTop: 8,
-  },
-  typingIndicatorRow: {
-    alignItems: 'flex-end',
     flexDirection: 'row',
-    marginBottom: 16,
   },
   typingIndicator: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -642,16 +614,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  typingDots: {
+  typingIndicatorRow: {
+    alignItems: 'flex-end',
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  typingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#666',
-    marginHorizontal: 2,
+    marginBottom: 16,
   },
 });
-

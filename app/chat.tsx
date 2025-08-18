@@ -22,6 +22,7 @@ import { useUser } from '../context/UserContext';
 import { isUuid, ensureConversation } from '../lib/chat';
 import { Animated, Alert } from 'react-native';
 import { ChatMenuPopup } from '../components/ChatMenuPopup';
+import { conversationStarters } from '../lib/gardener';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
@@ -35,9 +36,17 @@ export default function ChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const subscriptionRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [showStarters, setShowStarters] = useState(false);
+  const [starters, setStarters] = useState<string[]>([]);
 
   // Find the match for this chat
   const match = demoChats.find((c) => c.id === id);
+
+  useEffect(() => {
+    if (showStarters) {
+      setStarters(conversationStarters());
+    }
+  }, [showStarters]);
 
   // Load messages when component mounts
   useEffect(() => {
@@ -415,6 +424,30 @@ export default function ChatScreen() {
             </View>
           )}
         </ScrollView>
+        {showStarters && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.starterContainer}
+            contentContainerStyle={styles.starterContent}
+          >
+            {starters.map((s) => (
+              <TouchableOpacity
+                key={s}
+                style={styles.starterChip}
+                onPress={() => {
+                  setNewMessage(s);
+                  setShowStarters(false);
+                }}
+              >
+                <Text style={styles.starterText}>{s}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={styles.starterClose} onPress={() => setShowStarters(false)}>
+              <Ionicons name="close" size={20} color="#A0354E" />
+            </TouchableOpacity>
+          </ScrollView>
+        )}
 
         {/* Input Bar */}
         <View style={styles.inputBar}>
@@ -460,7 +493,7 @@ export default function ChatScreen() {
         }}
         onGardenerAI={() => {
           setMenuVisible(false);
-          router.push('/(tabs)/gardener');
+          setShowStarters(true);
         }}
         onReportProfile={() => {
           setMenuVisible(false);
@@ -639,6 +672,29 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     height: 14,
     width: '80%',
+  },
+  starterChip: {
+    backgroundColor: 'rgba(160, 53, 78, 0.1)',
+    borderRadius: 16,
+    marginRight: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  starterClose: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  starterContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  starterContent: {
+    alignItems: 'center',
+  },
+  starterText: {
+    color: '#A0354E',
+    fontSize: 14,
   },
   typingDot: {
     backgroundColor: '#666',

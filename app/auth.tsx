@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, SafeAreaView, TouchableOpacity, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Text } from '../components/ui';
+import { LiquidGlassView } from '../components/liquid/LiquidGlassView';
 import { theme } from '../constants/theme';
 import { useAuthStore } from '../stores/useAuthStore';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function AuthScreen() {
   const router = useRouter();
@@ -16,20 +17,23 @@ export default function AuthScreen() {
         <View style={styles.content}>
           {/* Logo */}
           <View style={styles.logoContainer}>
-            <View style={styles.logo}>
+            <LiquidGlassView
+              intensity={70}
+              tint="light"
+              style={styles.logo}
+              borderRadius={50}
+              glassTint="rgba(255, 255, 255, 0.95)"
+            >
               <Text style={styles.logoText}>H</Text>
-            </View>
+            </LiquidGlassView>
             <Text style={styles.appName}>Harvest</Text>
+            <Text style={styles.tagline}>Mindful Dating, Real Connections</Text>
           </View>
 
           {/* Welcome Text */}
           <View style={styles.welcomeContainer}>
-            <Text variant="h1" align="center" style={styles.welcomeTitle}>
-              Welcome!
-            </Text>
-            <Text variant="body" align="center" color="secondary" style={styles.welcomeSubtitle}>
-              Let&apos;s dive into your account!
-            </Text>
+            <Text style={styles.welcomeTitle}>Welcome Back!</Text>
+            <Text style={styles.welcomeSubtitle}>Choose how you&apos;d like to continue</Text>
           </View>
 
           {/* Social Login Buttons */}
@@ -38,38 +42,70 @@ export default function AuthScreen() {
               style={styles.socialButton}
               onPress={() => loginWithOAuth('facebook')}
               testID="facebook-login"
+              activeOpacity={0.8}
             >
-              <Image
-                source={{ uri: 'https://img.icons8.com/color/48/facebook-new.png' }}
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+              <LiquidGlassView
+                intensity={60}
+                tint="light"
+                style={styles.socialButtonGlass}
+                borderRadius={30}
+                glassTint="rgba(255, 255, 255, 0.95)"
+              >
+                <Ionicons
+                  name="logo-facebook"
+                  size={24}
+                  color="#1877F2"
+                  style={styles.socialIcon}
+                />
+                <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+              </LiquidGlassView>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.socialButton}
               onPress={() => loginWithOAuth('google')}
               testID="google-login"
+              activeOpacity={0.8}
             >
-              <Image
-                source={{ uri: 'https://img.icons8.com/color/48/google-logo.png' }}
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialButtonText}>Continue with Google</Text>
+              <LiquidGlassView
+                intensity={60}
+                tint="light"
+                style={styles.socialButtonGlass}
+                borderRadius={30}
+                glassTint="rgba(255, 255, 255, 0.95)"
+              >
+                <Ionicons name="logo-google" size={24} color="#EA4335" style={styles.socialIcon} />
+                <Text style={styles.socialButtonText}>Continue with Google</Text>
+              </LiquidGlassView>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.socialButton} onPress={() => router.push('/login')}>
-              <View style={styles.emailIcon}>
-                <Text style={styles.emailIconText}>@</Text>
-              </View>
-              <Text style={styles.socialButtonText}>Continue with Email</Text>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => router.push('/login')}
+              activeOpacity={0.8}
+            >
+              <LiquidGlassView
+                intensity={60}
+                tint="light"
+                style={styles.socialButtonGlass}
+                borderRadius={30}
+                glassTint="rgba(255, 255, 255, 0.95)"
+              >
+                <Ionicons
+                  name="mail"
+                  size={24}
+                  color={theme.colors.primary}
+                  style={styles.socialIcon}
+                />
+                <Text style={styles.socialButtonText}>Continue with Email</Text>
+              </LiquidGlassView>
             </TouchableOpacity>
           </View>
 
           {/* Terms */}
           <View style={styles.termsContainer}>
-            <Text variant="caption" align="center" color="secondary">
-              I accept Harvest&apos;s <Text style={styles.link}>Legal Terms</Text> &{' '}
+            <Text style={styles.termsText}>
+              By continuing, you agree to our <Text style={styles.link}>Terms of Service</Text> and{' '}
               <Text style={styles.link}>Privacy Policy</Text>
             </Text>
           </View>
@@ -99,8 +135,9 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   appName: {
     color: theme.colors.text.primary,
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
+    marginTop: theme.spacing.md,
   },
   container: {
     flex: 1,
@@ -124,31 +161,14 @@ const styles = StyleSheet.create({
     top: 0,
     zIndex: -1,
   },
-  emailIcon: {
-    alignItems: 'center',
-    backgroundColor: theme.colors.text.primary,
-    borderRadius: 12,
-    height: 24,
-    justifyContent: 'center',
-    marginRight: theme.spacing.md,
-    width: 24,
-  },
-  emailIconText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   link: {
     color: theme.colors.primary,
     textDecorationLine: 'underline',
   },
   logo: {
     alignItems: 'center',
-    backgroundColor: '#F5E6E8',
-    borderRadius: 24,
     height: 100,
     justifyContent: 'center',
-    marginBottom: theme.spacing.md,
     width: 100,
   },
   logoContainer: {
@@ -157,27 +177,20 @@ const styles = StyleSheet.create({
   },
   logoText: {
     color: theme.colors.primary,
-    fontSize: 48,
+    fontSize: 52,
     fontWeight: 'bold',
   },
   safeArea: {
     flex: 1,
   },
   socialButton: {
+    width: '100%',
+  },
+  socialButtonGlass: {
     alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 30,
-    elevation: 3,
     flexDirection: 'row',
     paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    paddingVertical: theme.spacing.md + 2,
   },
   socialButtonText: {
     color: theme.colors.text.primary,
@@ -191,9 +204,12 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xxl,
   },
   socialIcon: {
-    height: 24,
     marginRight: theme.spacing.md,
-    width: 24,
+  },
+  tagline: {
+    color: theme.colors.text.secondary,
+    fontSize: 14,
+    marginTop: theme.spacing.xs,
   },
   termsContainer: {
     bottom: 40,
@@ -201,13 +217,25 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: theme.spacing.xl,
   },
+  termsText: {
+    color: theme.colors.text.secondary,
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
   welcomeContainer: {
     marginBottom: theme.spacing.xxl,
   },
   welcomeSubtitle: {
+    color: theme.colors.text.secondary,
     fontSize: 16,
+    marginTop: theme.spacing.sm,
+    textAlign: 'center',
   },
   welcomeTitle: {
-    marginBottom: theme.spacing.sm,
+    color: theme.colors.text.primary,
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

@@ -19,7 +19,9 @@ import { demoChats } from '../data/demoChats';
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../context/UserContext';
-import { Animated } from 'react-native';
+import { isUuid, ensureConversation } from '../lib/chat';
+import { Animated, Alert } from 'react-native';
+import { ChatMenuPopup } from '../components/ChatMenuPopup';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
@@ -29,6 +31,7 @@ export default function ChatScreen() {
   const [loading, setLoading] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const [otherUserTyping, setOtherUserTyping] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const subscriptionRef = useRef<any>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -42,12 +45,24 @@ export default function ChatScreen() {
 
     const loadMessages = async () => {
       try {
-        // First check if we have a conversations table entry
-        const { data: conversation } = await supabase
-          .from('conversations')
-          .select('*')
-          .eq('id', match.id)
-          .single();
+        let conversationId: string | null = null;
+        // If the route id is a real UUID, treat it as a conversation id
+        if (isUuid(String(id))) {
+          conversationId = String(id);
+        } else {
+          // Otherwise, try resolving via match id if it looks like UUID
+          conversationId = await ensureConversation(String(match.id));
+        }
+
+        let conversation: any = null;
+        if (conversationId) {
+          const { data } = await supabase
+            .from('conversations')
+            .select('*')
+            .eq('id', conversationId)
+            .single();
+          conversation = data;
+        }
 
         // If no conversation exists, create one (for demo purposes)
         if (!conversation) {
@@ -56,7 +71,7 @@ export default function ChatScreen() {
           setMessages(
             demoMessages.map((msg: any, index: number) => ({
               id: `demo-${index}`,
-              conversation_id: match.id,
+              conversation_id: String(id),
               sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
               content: msg.text,
               created_at: msg.timestamp,
@@ -70,7 +85,7 @@ export default function ChatScreen() {
         const { data, error } = await supabase
           .from('messages')
           .select('*')
-          .eq('conversation_id', match.id)
+          .eq('conversation_id', conversationId as string)
           .order('created_at', { ascending: true });
 
         if (error) {
@@ -80,7 +95,7 @@ export default function ChatScreen() {
           setMessages(
             demoMessages.map((msg: any, index: number) => ({
               id: `demo-${index}`,
-              conversation_id: match.id,
+              conversation_id: String(id),
               sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
               content: msg.text,
               created_at: msg.timestamp,
@@ -96,7 +111,7 @@ export default function ChatScreen() {
         setMessages(
           demoMessages.map((msg: any, index: number) => ({
             id: `demo-${index}`,
-            conversation_id: match.id,
+            conversation_id: String(id),
             sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
             content: msg.text,
             created_at: msg.timestamp,
@@ -115,6 +130,7 @@ export default function ChatScreen() {
     if (!match || !currentUser) return;
 
     // Create a channel for real-time messages and presence
+    const conversationKey = isUuid(String(id)) ? String(id) : String(match.id);
     const channel = supabase
       .channel(`chat:${match.id}`)
       .on(
@@ -123,7 +139,7 @@ export default function ChatScreen() {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `conversation_id=eq.${match.id}`,
+          filter: `conversation_id=eq.${conversationKey}`,
         },
         async (payload) => {
           const newMessage = payload.new as any;
@@ -211,7 +227,7 @@ export default function ChatScreen() {
     // Optimistically add the message to the UI
     const optimisticMessage = {
       id: `temp-${Date.now()}`,
-      conversation_id: match.id,
+      conversation_id: isUuid(String(id)) ? String(id) : String(match.id),
       sender_id: currentUser.id,
       content: messageText,
       created_at: new Date().toISOString(),
@@ -226,7 +242,7 @@ export default function ChatScreen() {
         .from('messages')
         .insert([
           {
-            conversation_id: match.id,
+            conversation_id: isUuid(String(id)) ? String(id) : String(match.id),
             sender_id: currentUser.id,
             content: messageText,
             created_at: new Date().toISOString(),
@@ -304,7 +320,7 @@ export default function ChatScreen() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.moreButton}>
+            <TouchableOpacity style={styles.moreButton} onPress={() => setMenuVisible(true)}>
               <Ionicons name="ellipsis-vertical" size={24} color="white" />
             </TouchableOpacity>
           </View>
@@ -428,6 +444,33 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      {/* Chat menu */}
+      <ChatMenuPopup
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        matchName={match.name}
+        matchPhoto={match.profileImage}
+        isActive={!!match.isOnline}
+        onShareProfile={() => {
+          setMenuVisible(false);
+          Alert.alert('Share', "Profile sharing isn't configured yet.");
+        }}
+        onToggleReady={() => {
+          // Hook into match state when backend is ready
+        }}
+        onGardenerAI={() => {
+          setMenuVisible(false);
+          router.push('/(tabs)/gardener');
+        }}
+        onReportProfile={() => {
+          setMenuVisible(false);
+          Alert.alert('Report', 'Thanks for the report. We will review.');
+        }}
+        onUnmatch={() => {
+          setMenuVisible(false);
+          Alert.alert('Unmatch', 'Unmatch logic will be implemented with matches table.');
+        }}
+      />
     </View>
   );
 }

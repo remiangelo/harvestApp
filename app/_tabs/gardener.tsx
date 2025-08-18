@@ -108,9 +108,12 @@ const quickAdvice: QuickAdvice[] = [
   },
 ];
 
+import { getDailyReflection, getLastReflection } from '../../lib/gardener';
+
 export default function GardenerScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedAdvice, setExpandedAdvice] = useState<string | null>(null);
+  const [reflection, setReflection] = useState<string>('');
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => {
@@ -120,6 +123,15 @@ export default function GardenerScreen() {
       useNativeDriver: true,
     }).start();
   }, [fadeAnim]);
+
+  React.useEffect(() => {
+    // Load last reflection or today’s reflection
+    (async () => {
+      const last = await getLastReflection();
+      if (last) setReflection(last);
+      else setReflection(await getDailyReflection());
+    })();
+  }, []);
 
   const categories = [
     { id: 'all', label: 'All Tips', icon: 'apps' },
@@ -309,12 +321,12 @@ export default function GardenerScreen() {
             <Text style={styles.reflectionTitle}>Daily Reflection</Text>
           </LinearGradient>
 
-          <Text style={styles.reflectionText}>
-            &quot;The best relationships are built on friendship first. Focus on genuinely getting
-            to know someone rather than trying to impress them.&quot;
-          </Text>
+          <Text style={styles.reflectionText}>“{reflection || 'Loading…'}”</Text>
 
-          <TouchableOpacity style={styles.reflectionButton}>
+          <TouchableOpacity
+            style={styles.reflectionButton}
+            onPress={async () => setReflection(await getDailyReflection(new Date(Date.now() + 1)))}
+          >
             <Text style={styles.reflectionButtonText}>Get New Reflection</Text>
           </TouchableOpacity>
         </LiquidGlassView>

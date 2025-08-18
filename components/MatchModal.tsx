@@ -65,21 +65,21 @@ export const MatchModal: React.FC<MatchModalProps> = ({
         fallSpeed={3000}
         autoStart={false}
       />
-      <BlurView intensity={90} tint="dark" style={styles.backdrop}>
+      <BlurView intensity={60} tint="dark" style={styles.backdrop}>
         {/* Additional dark overlay for better contrast */}
         <View style={styles.darkOverlay} />
 
         {/* Content Container with Glass Effect */}
         <View style={styles.contentWrapper}>
           <LiquidGlassView
-            intensity={95}
+            intensity={70}
             tint="light"
             style={[
               styles.glassContainer,
               { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 },
             ]}
             borderRadius={24}
-            glassTint="rgba(255, 255, 255, 0.98)"
+            glassTint="rgba(255, 255, 255, 0.92)"
           >
             {/* Profile Cards */}
             <View style={styles.cardsContainer}>
@@ -108,24 +108,24 @@ export const MatchModal: React.FC<MatchModalProps> = ({
             </Text>
             <Text style={styles.matchHint}>Try asking them about their love for travel</Text>
 
-            {/* Compatibility Metrics with Liquid Glass */}
+            {/* Compatibility Metrics with Maroon Theme */}
             <View style={styles.metricsContainer}>
               <LiquidGlassBadge
                 label="Interests"
                 value={`${compatibility.interests}%`}
-                color="#FF6B6B"
+                color="#A0354E"
                 size="large"
               />
               <LiquidGlassBadge
                 label="Personality"
                 value={`${compatibility.personality}%`}
-                color="#FFB901"
+                color="#C4566B"
                 size="large"
               />
               <LiquidGlassBadge
                 label="Match"
                 value={`${compatibility.overall}%`}
-                color="#4ECDC4"
+                color="#7A9B8E"
                 size="large"
               />
             </View>

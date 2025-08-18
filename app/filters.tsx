@@ -30,6 +30,8 @@ export default function FiltersScreen() {
   const [filters, setFilters] = useState({
     ageRange: { min: 18, max: 50 },
     maxDistance: 50,
+    distanceUnit: 'miles' as 'miles' | 'km',
+    allOfUS: false,
     interestedIn: 'all',
     showMe: true,
   });
@@ -43,6 +45,8 @@ export default function FiltersScreen() {
         },
         maxDistance:
           (currentUser as any).distance_preference || (currentUser as any).maxDistance || 50,
+        distanceUnit: (currentUser as any).distanceUnit || 'miles',
+        allOfUS: (currentUser as any).allOfUS || false,
         interestedIn: currentUser.preferences || 'all',
         showMe: (currentUser as any).showMe !== false,
       });
@@ -53,7 +57,9 @@ export default function FiltersScreen() {
     // Update user preferences
     updateOnboardingData({
       agePreference: filters.ageRange,
-      distance_preference: filters.maxDistance,
+      distance_preference: filters.allOfUS ? 9999 : filters.maxDistance,
+      distanceUnit: filters.distanceUnit,
+      allOfUS: filters.allOfUS,
       preferences: filters.interestedIn,
       showMe: filters.showMe,
     } as any);
@@ -73,6 +79,8 @@ export default function FiltersScreen() {
           setFilters({
             ageRange: { min: 18, max: 50 },
             maxDistance: 50,
+            distanceUnit: 'miles',
+            allOfUS: false,
             interestedIn: 'all',
             showMe: true,
           });
@@ -153,31 +161,88 @@ export default function FiltersScreen() {
         {/* Distance Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Maximum Distance</Text>
-          <View style={styles.distanceContainer}>
-            <Text style={styles.distanceText}>{filters.maxDistance} miles</Text>
+
+          {/* Unit toggle */}
+          <View style={styles.unitToggleContainer}>
+            <TouchableOpacity
+              style={[
+                styles.unitButton,
+                filters.distanceUnit === 'miles' && styles.unitButtonActive,
+              ]}
+              onPress={() => setFilters((prev) => ({ ...prev, distanceUnit: 'miles' }))}
+            >
+              <Text
+                style={[
+                  styles.unitButtonText,
+                  filters.distanceUnit === 'miles' && styles.unitButtonTextActive,
+                ]}
+              >
+                Miles
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.unitButton, filters.distanceUnit === 'km' && styles.unitButtonActive]}
+              onPress={() => setFilters((prev) => ({ ...prev, distanceUnit: 'km' }))}
+            >
+              <Text
+                style={[
+                  styles.unitButtonText,
+                  filters.distanceUnit === 'km' && styles.unitButtonTextActive,
+                ]}
+              >
+                Kilometers
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          <Slider
-            style={styles.slider}
-            minimumValue={1}
-            maximumValue={500}
-            step={1}
-            value={filters.maxDistance}
-            onValueChange={(value) => {
-              setFilters((prev) => ({
-                ...prev,
-                maxDistance: value,
-              }));
-            }}
-            minimumTrackTintColor={theme.colors.primary}
-            maximumTrackTintColor="#e0e0e0"
-            thumbTintColor={theme.colors.primary}
-          />
+          {/* All of US toggle */}
+          <TouchableOpacity
+            style={styles.allOfUSContainer}
+            onPress={() => setFilters((prev) => ({ ...prev, allOfUS: !prev.allOfUS }))}
+          >
+            <View style={styles.checkboxContainer}>
+              <View style={[styles.checkbox, filters.allOfUS && styles.checkboxChecked]}>
+                {filters.allOfUS && <Ionicons name="checkmark" size={16} color="white" />}
+              </View>
+              <Text style={styles.allOfUSText}>Search all of United States</Text>
+            </View>
+          </TouchableOpacity>
 
-          <View style={styles.distanceLabels}>
-            <Text style={styles.distanceLabel}>1 mile</Text>
-            <Text style={styles.distanceLabel}>500 miles</Text>
-          </View>
+          {!filters.allOfUS && (
+            <>
+              <View style={styles.distanceContainer}>
+                <Text style={styles.distanceText}>
+                  {filters.maxDistance} {filters.distanceUnit === 'km' ? 'km' : 'miles'}
+                </Text>
+              </View>
+
+              <Slider
+                style={styles.slider}
+                minimumValue={1}
+                maximumValue={500}
+                step={1}
+                value={filters.maxDistance}
+                onValueChange={(value) => {
+                  setFilters((prev) => ({
+                    ...prev,
+                    maxDistance: value,
+                  }));
+                }}
+                minimumTrackTintColor={theme.colors.primary}
+                maximumTrackTintColor="#e0e0e0"
+                thumbTintColor={theme.colors.primary}
+              />
+
+              <View style={styles.distanceLabels}>
+                <Text style={styles.distanceLabel}>
+                  1 {filters.distanceUnit === 'km' ? 'km' : 'mile'}
+                </Text>
+                <Text style={styles.distanceLabel}>
+                  500 {filters.distanceUnit === 'km' ? 'km' : 'miles'}
+                </Text>
+              </View>
+            </>
+          )}
         </View>
 
         {/* Show Me Section */}
@@ -246,9 +311,33 @@ export default function FiltersScreen() {
 }
 
 const styles = StyleSheet.create({
+  allOfUSContainer: {
+    marginBottom: 20,
+  },
+  allOfUSText: {
+    color: theme.colors.text.primary,
+    fontSize: 16,
+  },
   bottomSection: {
     paddingHorizontal: 20,
     paddingVertical: 24,
+  },
+  checkbox: {
+    alignItems: 'center',
+    borderColor: theme.colors.primary,
+    borderRadius: 4,
+    borderWidth: 2,
+    height: 24,
+    justifyContent: 'center',
+    marginRight: 12,
+    width: 24,
+  },
+  checkboxChecked: {
+    backgroundColor: theme.colors.primary,
+  },
+  checkboxContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   container: {
     backgroundColor: '#fff',
@@ -396,5 +485,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+  },
+  unitButton: {
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    borderWidth: 1,
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  unitButtonActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  unitButtonText: {
+    color: theme.colors.text.primary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  unitButtonTextActive: {
+    color: 'white',
+  },
+  unitToggleContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 20,
   },
 });

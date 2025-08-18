@@ -130,6 +130,7 @@ function RootLayoutNav() {
               <Stack.Screen name="settings" options={{ headerShown: false }} />
               <Stack.Screen name="profile-edit" options={{ headerShown: false }} />
               <Stack.Screen name="filters" options={{ headerShown: false }} />
+              <Stack.Screen name="chat" options={{ headerShown: false }} />
             </Stack>
           </ThemeProvider>
         </AuthGuard>

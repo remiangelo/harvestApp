@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Switch, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -32,6 +32,12 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
   onUnmatch,
 }) => {
   const insets = useSafeAreaInsets();
+  const [isReadyToMoveOff, setIsReadyToMoveOff] = useState(false);
+
+  const handleToggleReady = (value: boolean) => {
+    setIsReadyToMoveOff(value);
+    onToggleReady(value);
+  };
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -74,12 +80,17 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
                 <Ionicons name="share-outline" size={20} color="#666" />
               </TouchableOpacity>
 
-              {/* Ready to move */}
+              {/* Ready to move off the app */}
               <View style={styles.menuItem}>
-                <Text style={styles.menuItemText}>Ready to move?</Text>
+                <View style={styles.readyToMoveContainer}>
+                  <Text style={styles.menuItemText}>Ready to move off the app?</Text>
+                  {isReadyToMoveOff && (
+                    <Text style={styles.readyToMoveSubtext}>You can now share contact info</Text>
+                  )}
+                </View>
                 <Switch
-                  value={false}
-                  onValueChange={onToggleReady}
+                  value={isReadyToMoveOff}
+                  onValueChange={handleToggleReady}
                   trackColor={{ false: '#E5E5E5', true: '#A0354E' }}
                   thumbColor="white"
                 />
@@ -179,6 +190,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 4,
+  },
+  readyToMoveContainer: {
+    flex: 1,
+  },
+  readyToMoveSubtext: {
+    color: '#A0354E',
+    fontSize: 12,
+    marginTop: 4,
   },
   statusDot: {
     backgroundColor: '#ccc',

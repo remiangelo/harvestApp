@@ -8,6 +8,8 @@ export const theme = {
     primary: '#A0354E', // Maroon/burgundy - main brand color
     primaryDark: '#7D2A3D', // Darker variant for pressed states
     primaryLight: '#C4566B', // Lighter variant
+    primaryMuted: '#8B2E43', // Slightly darker muted variant
+    primarySoft: 'rgba(160, 53, 78, 0.15)', // 15% opacity for subtle backgrounds
 
     // Secondary colors
     secondary: '#F5E6D3', // Cream/beige - app icon background
@@ -41,6 +43,11 @@ export const theme = {
     like: '#10B981', // Green for like
     nope: '#DC2626', // Red for nope
     superLike: '#3B82F6', // Blue for super like
+
+    // Complementary accent colors for maroon theme
+    dustyPink: '#D4738A', // Softer accent
+    mutedGold: '#B8956A', // Earthy complement
+    sageGreen: '#7A9B8E', // Muted green for balance
 
     // Gradients
     gradients: {

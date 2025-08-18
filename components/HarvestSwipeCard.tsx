@@ -316,34 +316,36 @@ export default function HarvestSwipeCard({
             </View>
           </Animated.View>
 
-          {/* Side gradient indicators - circular expansion */}
+          {/* Side gradient indicators - visible in middle 30% of screen */}
           <View style={styles.leftGradientContainer}>
             <LinearGradient
-              colors={['rgba(255, 59, 48, 0.08)', 'transparent']}
+              colors={['rgba(220, 38, 38, 0.18)', 'rgba(220, 38, 38, 0.06)', 'transparent']}
+              locations={[0, 0.15, 1]}
               start={{ x: 0, y: 0.5 }}
               end={{ x: 1, y: 0.5 }}
               style={styles.leftGradientBar}
             />
             <LinearGradient
-              colors={['transparent', 'rgba(255, 59, 48, 0.06)', 'transparent']}
+              colors={['transparent', 'rgba(220, 38, 38, 0.08)', 'transparent']}
               locations={[0, 0.5, 1]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
+              start={{ x: 0, y: 0.35 }}
+              end={{ x: 0, y: 0.65 }}
               style={styles.leftGradientVertical}
             />
           </View>
           <View style={styles.rightGradientContainer}>
             <LinearGradient
-              colors={['transparent', 'rgba(52, 199, 89, 0.08)']}
+              colors={['transparent', 'rgba(16, 185, 129, 0.06)', 'rgba(16, 185, 129, 0.18)']}
+              locations={[0, 0.85, 1]}
               start={{ x: 0, y: 0.5 }}
               end={{ x: 1, y: 0.5 }}
               style={styles.rightGradientBar}
             />
             <LinearGradient
-              colors={['transparent', 'rgba(52, 199, 89, 0.06)', 'transparent']}
+              colors={['transparent', 'rgba(16, 185, 129, 0.08)', 'transparent']}
               locations={[0, 0.5, 1]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
+              start={{ x: 0, y: 0.35 }}
+              end={{ x: 0, y: 0.65 }}
               style={styles.rightGradientVertical}
             />
           </View>
@@ -371,24 +373,33 @@ export default function HarvestSwipeCard({
                 </View>
               </View>
 
-              {/* Compatibility badges */}
+              {/* Compatibility badges - maroon theme variants */}
               <View style={styles.compatibilityRow}>
                 <View style={styles.compatibilityBadge}>
-                  <LinearGradient colors={['#FF6B6B', '#FF5252']} style={styles.badgeGradient}>
+                  <LinearGradient
+                    colors={['rgba(160, 53, 78, 0.9)', 'rgba(139, 46, 67, 0.85)']}
+                    style={styles.badgeGradient}
+                  >
                     <Text style={styles.badgeLabel}>Interests</Text>
                     <Text style={styles.badgeValue}>95%</Text>
                   </LinearGradient>
                 </View>
 
                 <View style={styles.compatibilityBadge}>
-                  <LinearGradient colors={['#FFB901', '#FFA500']} style={styles.badgeGradient}>
+                  <LinearGradient
+                    colors={['rgba(196, 86, 107, 0.9)', 'rgba(184, 149, 106, 0.85)']}
+                    style={styles.badgeGradient}
+                  >
                     <Text style={styles.badgeLabel}>Personality</Text>
                     <Text style={styles.badgeValue}>98%</Text>
                   </LinearGradient>
                 </View>
 
                 <View style={styles.compatibilityBadge}>
-                  <LinearGradient colors={['#4ECDC4', '#44A39A']} style={styles.badgeGradient}>
+                  <LinearGradient
+                    colors={['rgba(122, 155, 142, 0.9)', 'rgba(212, 115, 138, 0.85)']}
+                    style={styles.badgeGradient}
+                  >
                     <Text style={styles.badgeLabel}>Overall</Text>
                     <Text style={styles.badgeValue}>96%</Text>
                   </LinearGradient>
@@ -508,15 +519,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   hobbyTag: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'rgba(160, 53, 78, 0.15)',
+    borderColor: 'rgba(160, 53, 78, 0.25)',
     borderRadius: 16,
     borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   hobbyText: {
-    color: '#fff',
+    color: 'rgba(255,255,255,0.95)',
     fontSize: 13,
     fontWeight: '600',
   },
@@ -544,7 +555,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'absolute',
     top: 0,
-    width: 100,
+    width: 80,
     zIndex: 5,
   },
   leftGradientVertical: {
@@ -644,7 +655,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
-    width: 100,
+    width: 80,
     zIndex: 5,
   },
   rightGradientVertical: {

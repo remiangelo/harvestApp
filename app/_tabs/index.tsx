@@ -183,15 +183,6 @@ export default function SwipingScreen() {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-          <Text style={styles.logo}>Harvest</Text>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => router.push('/filters' as any)}
-          >
-            <Ionicons name="options-outline" size={24} color={theme.colors.text.primary} />
-          </TouchableOpacity>
-        </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>Loading profiles...</Text>
@@ -203,15 +194,6 @@ export default function SwipingScreen() {
   if (!currentProfile) {
     return (
       <View style={styles.container}>
-        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-          <Text style={styles.logo}>Harvest</Text>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => router.push('/filters' as any)}
-          >
-            <Ionicons name="options-outline" size={24} color={theme.colors.text.primary} />
-          </TouchableOpacity>
-        </View>
         <View style={styles.content}>
           <Text style={styles.title}>No Profiles Available</Text>
           <Text style={styles.subtitle}>Check back later for new matches!</Text>
@@ -223,16 +205,13 @@ export default function SwipingScreen() {
   return (
     <ErrorBoundary>
       <View style={styles.container}>
-        {/* Header */}
-        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-          <Text style={styles.logo}>Harvest</Text>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => router.push('/filters' as any)}
-          >
-            <Ionicons name="options-outline" size={24} color={theme.colors.text.primary} />
-          </TouchableOpacity>
-        </View>
+        {/* Filters button in top right */}
+        <TouchableOpacity
+          style={[styles.filterButton, { top: insets.top + 10 }]}
+          onPress={() => router.push('/filters' as any)}
+        >
+          <Ionicons name="options-outline" size={24} color="white" />
+        </TouchableOpacity>
 
         <HarvestSwipeCard
           profile={currentProfile}
@@ -284,24 +263,17 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   filterButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  header: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
-    borderBottomWidth: 0.5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    left: 0,
-    paddingBottom: 20,
-    paddingHorizontal: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 22,
+    elevation: 5,
+    padding: 10,
     position: 'absolute',
-    right: 0,
-    top: 0,
-    zIndex: 10,
+    right: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 100,
   },
   loadingContainer: {
     alignItems: 'center',
@@ -312,11 +284,6 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 16,
     marginTop: 16,
-  },
-  logo: {
-    color: theme.colors.primary,
-    fontSize: 32,
-    fontWeight: 'bold',
   },
   subtitle: {
     color: '#555',

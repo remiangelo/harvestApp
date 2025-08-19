@@ -180,7 +180,7 @@ export class NotificationService {
         body,
         sound: 'default',
       },
-      trigger: seconds,
+      trigger: { seconds } as any,
     });
   }
 

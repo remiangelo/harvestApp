@@ -34,7 +34,7 @@ export default function ChatScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const subscriptionRef = useRef<any>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<any>(null);
 
   // Find the match for this chat
   const match = demoChats.find((c) => c.id === id);
@@ -141,7 +141,7 @@ export default function ChatScreen() {
           table: 'messages',
           filter: `conversation_id=eq.${conversationKey}`,
         },
-        async (payload) => {
+        async (payload: any) => {
           const newMessage = payload.new as any;
           // Add the new message to the list
           setMessages((current) => [...current, newMessage]);
@@ -172,14 +172,14 @@ export default function ChatScreen() {
         );
         setOtherUserTyping(isOtherTyping);
       })
-      .on('presence', { event: 'join' }, ({ key: _key, newPresences: _newPresences }) => {
+      .on('presence', { event: 'join' }, ({ key: _key, newPresences: _newPresences }: any) => {
         // Handle user joining
       })
-      .on('presence', { event: 'leave' }, ({ key: _key, leftPresences: _leftPresences }) => {
+      .on('presence', { event: 'leave' }, ({ key: _key, leftPresences: _leftPresences }: any) => {
         // Handle user leaving
         setOtherUserTyping(false);
       })
-      .subscribe(async (status) => {
+      .subscribe(async (status: any) => {
         if (status === 'SUBSCRIBED') {
           // Track user presence
           await channel.track({
@@ -460,7 +460,7 @@ export default function ChatScreen() {
         }}
         onGardenerAI={() => {
           setMenuVisible(false);
-          router.push('/(tabs)/gardener');
+          router.push('/gardener' as any);
         }}
         onReportProfile={() => {
           setMenuVisible(false);

@@ -10,7 +10,6 @@ import {
   StatusBar,
   Animated,
   TextInput,
-  ViewStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -155,7 +154,7 @@ export default function ChatTabScreen() {
           </View>
         ) : (
           <Animated.View style={{ opacity: fadeAnim }}>
-            {filteredChats.map((chat, index) => (
+            {filteredChats.map((chat) => (
               <TouchableOpacity
                 key={chat.id}
                 onPress={() => router.push(`/chat?id=${chat.id}`)}
@@ -164,12 +163,7 @@ export default function ChatTabScreen() {
                 <LiquidGlassView
                   intensity={60}
                   tint="light"
-                  style={
-                    [
-                      styles.conversationCard,
-                      index === filteredChats.length - 1 ? styles.lastCard : {},
-                    ] as ViewStyle[]
-                  }
+                  style={styles.conversationCard}
                   borderRadius={16}
                   glassTint="rgba(255, 255, 255, 0.92)"
                 >
@@ -348,9 +342,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  lastCard: {
-    marginBottom: 100,
   },
   lastMessage: {
     color: '#666',

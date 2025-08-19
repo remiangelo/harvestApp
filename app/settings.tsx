@@ -111,7 +111,10 @@ export default function SettingsScreen() {
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => router.push('/subscriptions' as any)}
+          >
             <View style={styles.settingInfo}>
               <Ionicons name="card-outline" size={20} color={theme.colors.text.primary} />
               <Text style={styles.settingText}>Subscription & Billing</Text>
@@ -225,7 +228,10 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Support</Text>
 
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => router.push('/help-center' as any)}
+          >
             <View style={styles.settingInfo}>
               <Ionicons name="help-circle-outline" size={20} color={theme.colors.text.primary} />
               <Text style={styles.settingText}>Help Center</Text>
@@ -233,7 +239,10 @@ export default function SettingsScreen() {
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => router.push('/help-center' as any)}
+          >
             <View style={styles.settingInfo}>
               <Ionicons name="flag-outline" size={20} color={theme.colors.text.primary} />
               <Text style={styles.settingText}>Report a Problem</Text>

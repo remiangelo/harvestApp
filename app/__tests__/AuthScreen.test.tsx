@@ -14,12 +14,12 @@ describe('AuthScreen social logins', () => {
   });
 
   it('renders social login text', () => {
-    let tree: renderer.ReactTestRenderer;
+    let tree: renderer.ReactTestRenderer | undefined;
     act(() => {
       tree = renderer.create(<AuthScreen />);
     });
-    expect(tree.root.findByProps({ children: 'Continue with Google' })).toBeTruthy();
-    expect(tree.root.findByProps({ children: 'Continue with Facebook' })).toBeTruthy();
+    expect(tree!.root.findByProps({ children: 'Continue with Google' })).toBeTruthy();
+    expect(tree!.root.findByProps({ children: 'Continue with Facebook' })).toBeTruthy();
   });
 
   it('calls loginWithOAuth with correct provider', () => {

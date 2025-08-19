@@ -8,7 +8,6 @@ import {
   SafeAreaView,
   StatusBar,
   Animated,
-  ViewStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -184,12 +183,7 @@ export default function GardenerScreen() {
                 <LiquidGlassView
                   intensity={selectedCategory === category.id ? 70 : 40}
                   tint="light"
-                  style={
-                    [
-                      styles.categoryChip,
-                      selectedCategory === category.id ? styles.categoryChipActive : {},
-                    ] as ViewStyle[]
-                  }
+                  style={styles.categoryChip}
                   borderRadius={20}
                   glassTint={
                     selectedCategory === category.id
@@ -231,16 +225,12 @@ export default function GardenerScreen() {
                 glassTint="rgba(255, 255, 255, 0.92)"
               >
                 <LinearGradient
-                  colors={tip.gradient as readonly [string, string, ...string[]]}
+                  colors={tip.gradient as any}
                   style={styles.tipIcon}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  <Ionicons
-                    name={tip.icon as keyof typeof Ionicons.glyphMap}
-                    size={24}
-                    color="white"
-                  />
+                  <Ionicons name={tip.icon as any} size={24} color="white" />
                 </LinearGradient>
 
                 <View style={styles.tipContent}>
@@ -364,6 +354,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '600',
+    paddingRight: 10,
   },
   adviceSection: {
     marginTop: 32,
@@ -375,13 +366,11 @@ const styles = StyleSheet.create({
   categoryChip: {
     alignItems: 'center',
     flexDirection: 'row',
+    height: 40,
+    justifyContent: 'center',
     marginRight: 10,
     paddingHorizontal: 16,
     paddingVertical: 8,
-  },
-  categoryChipActive: {
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    borderWidth: 1,
   },
   categoryIcon: {
     marginRight: 6,

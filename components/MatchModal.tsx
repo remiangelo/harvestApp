@@ -74,10 +74,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
           <LiquidGlassView
             intensity={70}
             tint="light"
-            style={[
-              styles.glassContainer,
-              { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 },
-            ]}
+            style={styles.glassContainer as any}
             borderRadius={24}
             glassTint="rgba(255, 255, 255, 0.92)"
           >
@@ -94,7 +91,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
 
               <View style={[styles.card, styles.rightCard]}>
                 <Image source={{ uri: matchProfile.photo }} style={styles.photo} />
-                <View style={[styles.heartBadge, styles.rightHeartBadge]}>
+                <View style={styles.heartBadge}>
                   <Text style={styles.heartEmoji}>❤️</Text>
                 </View>
               </View>
@@ -268,6 +265,7 @@ const styles = StyleSheet.create({
   },
   photo: {
     height: '100%',
+    resizeMode: 'cover',
     width: '100%',
   },
   primaryButton: {
@@ -279,12 +277,7 @@ const styles = StyleSheet.create({
     width: screenWidth - 80,
   },
   rightCard: {
-    marginLeft: -40,
     transform: [{ rotate: '10deg' }],
-  },
-  rightHeartBadge: {
-    bottom: -10,
-    right: 10,
   },
   secondaryButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',

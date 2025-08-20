@@ -1,4 +1,4 @@
-import AsyncStorage from './async-storage.web';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Simple, local Gardener logic with deterministic daily reflection
 const REFLECTIONS = [

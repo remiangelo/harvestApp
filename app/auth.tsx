@@ -24,7 +24,9 @@ export default function AuthScreen() {
               borderRadius={50}
               glassTint="rgba(255, 255, 255, 0.95)"
             >
-              <Text style={styles.logoText}>H</Text>
+              <View style={{ zIndex: 10 }}>
+                <Text style={styles.logoText}>H</Text>
+              </View>
             </LiquidGlassView>
             <Text style={styles.appName}>Harvest</Text>
             <Text style={styles.tagline}>Mindful Dating, Real Connections</Text>
@@ -51,13 +53,15 @@ export default function AuthScreen() {
                 borderRadius={30}
                 glassTint="rgba(255, 255, 255, 0.95)"
               >
-                <Ionicons
-                  name="logo-facebook"
-                  size={24}
-                  color="#1877F2"
-                  style={styles.socialIcon}
-                />
-                <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 10 }}>
+                  <Ionicons
+                    name="logo-facebook"
+                    size={24}
+                    color="#1877F2"
+                    style={styles.socialIcon}
+                  />
+                  <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+                </View>
               </LiquidGlassView>
             </TouchableOpacity>
 
@@ -74,8 +78,15 @@ export default function AuthScreen() {
                 borderRadius={30}
                 glassTint="rgba(255, 255, 255, 0.95)"
               >
-                <Ionicons name="logo-google" size={24} color="#EA4335" style={styles.socialIcon} />
-                <Text style={styles.socialButtonText}>Continue with Google</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 10 }}>
+                  <Ionicons
+                    name="logo-google"
+                    size={24}
+                    color="#EA4335"
+                    style={styles.socialIcon}
+                  />
+                  <Text style={styles.socialButtonText}>Continue with Google</Text>
+                </View>
               </LiquidGlassView>
             </TouchableOpacity>
 
@@ -91,13 +102,15 @@ export default function AuthScreen() {
                 borderRadius={30}
                 glassTint="rgba(255, 255, 255, 0.95)"
               >
-                <Ionicons
-                  name="mail"
-                  size={24}
-                  color={theme.colors.primary}
-                  style={styles.socialIcon}
-                />
-                <Text style={styles.socialButtonText}>Continue with Email</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 10 }}>
+                  <Ionicons
+                    name="mail"
+                    size={24}
+                    color={theme.colors.primary}
+                    style={styles.socialIcon}
+                  />
+                  <Text style={styles.socialButtonText}>Continue with Email</Text>
+                </View>
               </LiquidGlassView>
             </TouchableOpacity>
           </View>
@@ -187,8 +200,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   socialButtonGlass: {
-    alignItems: 'center',
-    flexDirection: 'row',
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.md + 2,
   },

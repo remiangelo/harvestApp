@@ -108,6 +108,8 @@ export const useAuthStore = create<AuthState>()(
           const { data, error } = await signIn(email, password);
 
           if (error) {
+            console.error('Login error:', error);
+            console.log('Supabase client status:', supabase ? 'initialized' : 'not initialized');
             set({ isLoading: false });
             return { error };
           }
@@ -175,6 +177,8 @@ export const useAuthStore = create<AuthState>()(
           const { data, error } = await signUp(email, password);
 
           if (error) {
+            console.error('Signup error:', error);
+            console.log('Supabase client status:', supabase ? 'initialized' : 'not initialized');
             set({ isLoading: false });
             return { error };
           }

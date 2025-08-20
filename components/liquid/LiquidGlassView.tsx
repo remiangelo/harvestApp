@@ -52,7 +52,8 @@ export const LiquidGlassView: React.FC<LiquidGlassViewProps> = ({
 
 const styles = StyleSheet.create({
   content: {
-    flex: 1,
+    position: 'relative',
+    zIndex: 10,
   },
   webGlass: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',

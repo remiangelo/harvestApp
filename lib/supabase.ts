@@ -1,15 +1,40 @@
 import 'react-native-url-polyfill/auto';
-import AsyncStorage from './async-storage.web';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
+import Constants from 'expo-constants';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+// Try to get from Expo Constants first (for production builds), then fall back to env vars
+const supabaseUrl =
+  Constants.expoConfig?.extra?.supabaseUrl ||
+  process.env.EXPO_PUBLIC_SUPABASE_URL ||
+  'https://jutzlxdboayvmcuqwodn.supabase.co';
+
+const supabaseAnonKey =
+  Constants.expoConfig?.extra?.supabaseAnonKey ||
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1dHpseGRib2F5dm1jdXF3b2RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5MTg4MTksImV4cCI6MjA2ODQ5NDgxOX0.SpsUKEH_pxCWVqoVYTsVOz9ULS9oAoz40CqMK-WJG4g';
+
+// Debug logging for production
+console.log('Supabase configuration:', {
+  url: supabaseUrl,
+  hasKey: !!supabaseAnonKey,
+  source: Constants.expoConfig?.extra?.supabaseUrl
+    ? 'Constants'
+    : process.env.EXPO_PUBLIC_SUPABASE_URL
+      ? 'env'
+      : 'hardcoded',
+});
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    'Supabase URL and Anon Key are required. ' +
-      'Please create a .env file with EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY'
-  );
+  console.error('Supabase configuration error:', {
+    url: supabaseUrl ? 'present' : 'missing',
+    key: supabaseAnonKey ? 'present' : 'missing',
+    constants: Constants.expoConfig?.extra || 'no extra config',
+    env: {
+      url: process.env.EXPO_PUBLIC_SUPABASE_URL ? 'present' : 'missing',
+      key: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ? 'present' : 'missing',
+    },
+  });
 }
 
 // Create a dummy client if credentials are missing to prevent crashes

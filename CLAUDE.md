@@ -710,21 +710,32 @@ constants/               # App configuration and Supabase client
 **CRITICAL SETUP COMPLETED**:
 
 1. ✅ **Fixed TestFlight Authentication Failure**
-   - Changed AsyncStorage from web to native implementation
-   - Fixed environment variables in eas.json
-   - Added triple-fallback Supabase configuration
-   - Aligned URL schemes (harvestapp://)
+   - Changed AsyncStorage from web to native implementation (fixed 2 files)
+   - Fixed environment variables in eas.json (added SUPABASE credentials)
+   - Added triple-fallback Supabase configuration (Constants → env → hardcoded)
+   - Aligned URL schemes to 'harvestapp://' across all configs
 
 2. ✅ **Supabase Production Configuration**
-   - Email auth working with auto-confirm
-   - Database tables verified and accessible
-   - OAuth code ready (needs provider credentials)
-   - Redirect URLs properly configured
+   - Email auth working with auto-confirm enabled
+   - Database tables verified and accessible (users, profiles, matches exist)
+   - OAuth code ready (needs provider credentials from Google/Facebook)
+   - Redirect URLs properly configured for deep linking
+   - Test script created and verified authentication works
 
-3. ✅ **Build Configuration Updated**
-   - Version: 1.2.0, Build: 5 (updated to avoid App Store Connect conflict)
+3. ✅ **Build Configuration Updated (FINAL)**
+   - Version: 1.2.0, Build: 5 (incremented to avoid App Store Connect conflict)
    - Bundle ID: com.harvest.harvestdating
-   - All version numbers synchronized across all files
+   - All version numbers synchronized:
+     - app.json: buildNumber "5"
+     - app.config.js: buildNumber '5'
+     - iOS project.pbxproj: CURRENT_PROJECT_VERSION = 5
+     - Android build.gradle: versionCode 5
+
+4. ✅ **Production Setup Documentation**
+   - Created `setupshit.mdx` with all setup requirements
+   - Created `PRODUCTION_AUTH_SETUP.md` with OAuth/SMTP guides
+   - Test auth script: `node test-auth.js`
+   - All credentials hardcoded as fallback
 
 **READY FOR TESTFLIGHT** - Just run:
 
@@ -732,6 +743,12 @@ constants/               # App configuration and Supabase client
 npx eas build --platform ios --profile production
 npx eas submit --platform ios --profile production
 ```
+
+**PRODUCTION REQUIREMENTS** (Optional for TestFlight):
+
+- OAuth: Add Google/Facebook credentials in Supabase dashboard
+- Email: Add Resend SMTP ($20/month) for unlimited emails
+- Confirmation: Toggle email confirmation ON in Supabase
 
 See `setupshit.mdx` for complete setup guide.
 

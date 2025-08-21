@@ -2,6 +2,7 @@ import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 // Try to get from Expo Constants first (for production builds), then fall back to env vars
 const supabaseUrl =
@@ -37,12 +38,40 @@ if (!supabaseUrl || !supabaseAnonKey) {
   });
 }
 
+// Create a safe storage adapter that won't crash during build
+const safeAsyncStorage = {
+  getItem: async (key: string) => {
+    try {
+      if (typeof window === 'undefined') return null;
+      return await AsyncStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  setItem: async (key: string, value: string) => {
+    try {
+      if (typeof window === 'undefined') return;
+      await AsyncStorage.setItem(key, value);
+    } catch {
+      // Ignore errors during build
+    }
+  },
+  removeItem: async (key: string) => {
+    try {
+      if (typeof window === 'undefined') return;
+      await AsyncStorage.removeItem(key);
+    } catch {
+      // Ignore errors during build
+    }
+  },
+};
+
 // Create a dummy client if credentials are missing to prevent crashes
 export const supabase =
   supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
-          storage: AsyncStorage,
+          storage: safeAsyncStorage,
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: false,

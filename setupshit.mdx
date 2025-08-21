@@ -1,0 +1,219 @@
+# Setup Shit - Everything You Need To Do
+
+## 🚀 TestFlight Build & Submission
+
+### Build The App
+
+```bash
+# Build for TestFlight
+npx eas build --platform ios --profile production
+
+# After build completes (takes ~15-20 mins)
+npx eas submit --platform ios --profile production
+```
+
+### Current Build Info
+
+- **Version**: 1.2.0
+- **Build Number**: 5
+- **Bundle ID**: com.harvest.harvestdating
+
+---
+
+## 🔐 Supabase Setup (Already Working)
+
+### What's Already Done ✅
+
+- Database tables created
+- Authentication working
+- Email signup/login functional
+- Auto-confirm enabled for testing
+
+### Your Supabase Details
+
+- **URL**: https://jutzlxdboayvmcuqwodn.supabase.co
+- **Project**: Already configured
+- **Tables**: users, profiles, matches, messages all exist
+
+---
+
+## 📧 Production Email Setup (When Ready)
+
+### Quick Option - Keep Current Setup
+
+- **For TestFlight**: Do nothing, it works
+- **Limit**: 3 emails per hour (fine for testing)
+
+### Professional Option - Add Resend ($20/month)
+
+1. Sign up at https://resend.com
+2. Get API key
+3. Go to Supabase Dashboard → Settings → Auth → SMTP
+4. Add:
+   ```
+   Host: smtp.resend.com
+   Port: 465
+   Username: resend
+   Password: [Your Resend API Key]
+   ```
+
+---
+
+## 🔑 OAuth Setup (Optional but Nice)
+
+### Google Login
+
+1. Go to https://console.cloud.google.com
+2. Create project "Harvest Dating App"
+3. APIs & Services → OAuth consent screen → External
+4. Create OAuth client ID
+5. Add redirect: `https://jutzlxdboayvmcuqwodn.supabase.co/auth/v1/callback`
+6. Copy Client ID & Secret
+7. Paste in Supabase → Authentication → Providers → Google
+
+### Facebook Login
+
+1. Go to https://developers.facebook.com
+2. Create app → Consumer type
+3. Add Facebook Login product
+4. Add redirect: `https://jutzlxdboayvmcuqwodn.supabase.co/auth/v1/callback`
+5. Copy App ID & Secret
+6. Paste in Supabase → Authentication → Providers → Facebook
+
+---
+
+## 🏪 App Store Connect Setup
+
+### Before Submission
+
+1. Screenshots (6.5" and 5.5" iPhone)
+2. App description
+3. Keywords
+4. Privacy policy URL
+5. Support URL
+6. Marketing URL (optional)
+
+### TestFlight Info
+
+- **Email**: albinmartens@outlook.com
+- **App ID**: 6749823296
+- **Team ID**: L3P46Q9398
+
+---
+
+## 💰 Costs When You Scale
+
+### Current (TestFlight)
+
+- **Supabase**: Free tier
+- **Email**: Built-in (3/hour limit)
+- **Total**: $0/month
+
+### Production (5-10k users)
+
+- **Supabase**: $25/month (Pro plan)
+- **Resend**: $20/month (10k emails)
+- **Total**: ~$45/month
+
+---
+
+## 🐛 Known Issues & Fixes
+
+### Fixed ✅
+
+- Authentication works on TestFlight
+- Text displays correctly in glass UI
+- AsyncStorage using native (not web)
+- Environment variables embedded in build
+
+### To Monitor
+
+- First user experience after signup
+- Email delivery (if using default Supabase)
+- OAuth redirect handling
+
+---
+
+## 📝 Quick Checklist
+
+### For TestFlight Launch
+
+- [x] Build number updated to 5
+- [x] Authentication working
+- [x] Supabase connected
+- [x] Environment variables in eas.json
+- [ ] Build and submit to TestFlight
+
+### Before App Store
+
+- [ ] Add Resend for emails
+- [ ] Enable email confirmation
+- [ ] Add Google OAuth
+- [ ] Add Facebook OAuth
+- [ ] Create privacy policy
+- [ ] Create terms of service
+- [ ] Take app screenshots
+
+---
+
+## 🧪 Testing Commands
+
+### Test Authentication
+
+```bash
+# Run auth test
+node test-auth.js
+
+# Check Supabase connection
+curl https://jutzlxdboayvmcuqwodn.supabase.co/rest/v1/ \
+  -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+### Local Development
+
+```bash
+# Start dev server
+npm start
+
+# Run on iOS simulator
+npm run ios
+
+# Clear all caches
+./clear-cache.sh
+```
+
+---
+
+## 🔥 Emergency Contacts
+
+### If Shit Breaks
+
+1. **Supabase Status**: https://status.supabase.com
+2. **EAS Build Issues**: https://status.expo.dev
+3. **Your Supabase Dashboard**: https://app.supabase.com/project/jutzlxdboayvmcuqwodn
+
+### Support
+
+- **Supabase Discord**: https://discord.supabase.com
+- **Expo Discord**: https://chat.expo.dev
+- **React Native**: https://reactnative.dev/help
+
+---
+
+## 📱 The Build Command You Actually Need
+
+```bash
+# This is it - run this to build for TestFlight
+npx eas build --platform ios --profile production
+
+# Then submit (after build completes)
+npx eas submit --platform ios --profile production
+```
+
+**That's literally it. The app is ready.**
+
+---
+
+## Status: READY FOR TESTFLIGHT 🎯
+
+Everything is configured. Just run the build command above.

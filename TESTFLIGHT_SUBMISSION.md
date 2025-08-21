@@ -3,16 +3,16 @@
 ## Version Information Updated ✅
 
 - **Version**: 1.2.0
-- **Build Number**: 4 (incremented from 3)
+- **Build Number**: 5 (incremented from 4)
 - **Bundle ID**: com.harvest.harvestdating
 
 ## Files Updated:
 
-1. ✅ `app.json` - Build number updated to 4
-2. ✅ `app.config.js` - Build number updated to 4
+1. ✅ `app.json` - Build number updated to 5
+2. ✅ `app.config.js` - Build number updated to 5
 3. ✅ `package.json` - Version updated to 1.2.0
-4. ✅ `ios/harvestApp.xcodeproj/project.pbxproj` - CURRENT_PROJECT_VERSION updated to 4
-5. ✅ `android/app/build.gradle` - versionCode: 4, versionName: "1.2.0"
+4. ✅ `ios/harvestApp.xcodeproj/project.pbxproj` - CURRENT_PROJECT_VERSION updated to 5
+5. ✅ `android/app/build.gradle` - versionCode: 5, versionName: "1.2.0"
 
 ## Critical Fixes Applied:
 

@@ -185,7 +185,11 @@ export const useAuthStore = create<AuthState>()(
 
           // Create user profile
           if (data.user) {
-            await createProfile(data.user.id, email);
+            const profileResult = await createProfile(data.user.id, email);
+            if (profileResult.error) {
+              console.error('Failed to create profile:', profileResult.error);
+              // Continue anyway - profile will be created on next login
+            }
           }
 
           // Note: Supabase may require email confirmation

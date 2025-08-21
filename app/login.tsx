@@ -121,16 +121,26 @@ export default function LoginScreen() {
     if (error) {
       Alert.alert('Signup Failed', error.message || 'Failed to create account. Please try again.');
     } else {
-      Alert.alert(
-        'Account Created! 🎉',
-        'Your account has been created successfully. Welcome to Harvest!',
-        [
-          {
-            text: 'Continue',
-            onPress: () => router.push('/onboarding'),
-          },
-        ]
-      );
+      // Check if user is authenticated (auto-confirmed email)
+      const authState = useAuthStore.getState();
+      if (authState.isAuthenticated) {
+        // User is logged in, go to onboarding
+        router.push('/onboarding');
+      } else {
+        // Email confirmation required
+        Alert.alert(
+          'Check Your Email 📧',
+          'We sent you a confirmation email. Please check your inbox and click the link to activate your account.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Stay on login screen so they can login after confirming
+              },
+            },
+          ]
+        );
+      }
     }
   };
 

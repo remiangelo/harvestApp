@@ -73,6 +73,15 @@ export const signUp = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      // In production, users will need to confirm their email
+      // This redirect URL is for email confirmation
+      emailRedirectTo: 'harvestapp://auth/callback',
+      data: {
+        // Any additional user metadata can go here
+        app_name: 'Harvest',
+      },
+    },
   });
   return { data, error };
 };
@@ -91,7 +100,13 @@ export const signOut = async () => {
 };
 
 export const signInWithOAuth = async (provider: 'google' | 'facebook') => {
-  const { data, error } = await supabase.auth.signInWithOAuth({ provider });
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: 'harvestapp://auth/callback',
+      skipBrowserRedirect: true, // For mobile apps
+    },
+  });
   return { data, error };
 };
 

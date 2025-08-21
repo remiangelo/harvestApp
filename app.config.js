@@ -5,7 +5,7 @@ export default {
     version: '1.2.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
-    scheme: 'harvest',
+    scheme: 'harvestapp',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     splash: {

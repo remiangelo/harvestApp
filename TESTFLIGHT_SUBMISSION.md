@@ -50,3 +50,13 @@ npx eas submit --platform ios --profile production
 - Supabase URL: https://jutzlxdboayvmcuqwodn.supabase.co
 - All credentials are hardcoded as fallback to ensure they work
 - Debug logging added to help diagnose any issues
+
+## Authentication Status ✅
+
+- **Email/Password Auth**: Working in production mode
+- **Auto-confirm emails**: Enabled (for testing phase)
+- **Deep linking**: Configured with `harvestapp://auth/callback`
+- **OAuth**: Ready (needs provider credentials in Supabase dashboard)
+- **Test verified**: All auth endpoints responding correctly
+
+Run `node test-auth.js` to verify authentication is working.

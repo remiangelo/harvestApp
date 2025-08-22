@@ -188,13 +188,13 @@ export class SafetyAnalysisService {
     try {
       // Get user profiles
       const { data: userProfile } = await supabase
-        .from('profiles')
+        .from('users')
         .select('*')
         .eq('id', userId)
         .single();
 
       const { data: matchProfile } = await supabase
-        .from('profiles')
+        .from('users')
         .select('*')
         .eq('id', matchId)
         .single();
@@ -455,7 +455,7 @@ export class SafetyAnalysisService {
       // Get match names
       const matchIds = Array.from(matchScores.keys());
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('users')
         .select('id, nickname')
         .in('id', matchIds);
 

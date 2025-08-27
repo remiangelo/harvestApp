@@ -38,30 +38,29 @@ if (!supabaseUrl || !supabaseAnonKey) {
   });
 }
 
-// Create a safe storage adapter that won't crash during build
+// Create a safe storage adapter for React Native
 const safeAsyncStorage = {
   getItem: async (key: string) => {
     try {
-      if (typeof window === 'undefined') return null;
-      return await AsyncStorage.getItem(key);
-    } catch {
+      const value = await AsyncStorage.getItem(key);
+      return value;
+    } catch (error) {
+      console.error('AsyncStorage getItem error:', error);
       return null;
     }
   },
   setItem: async (key: string, value: string) => {
     try {
-      if (typeof window === 'undefined') return;
       await AsyncStorage.setItem(key, value);
-    } catch {
-      // Ignore errors during build
+    } catch (error) {
+      console.error('AsyncStorage setItem error:', error);
     }
   },
   removeItem: async (key: string) => {
     try {
-      if (typeof window === 'undefined') return;
       await AsyncStorage.removeItem(key);
-    } catch {
-      // Ignore errors during build
+    } catch (error) {
+      console.error('AsyncStorage removeItem error:', error);
     }
   },
 };

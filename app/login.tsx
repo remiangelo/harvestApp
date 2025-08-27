@@ -273,27 +273,25 @@ export default function LoginScreen() {
               textStyle={styles.switchButtonText}
             />
 
-            {/* Test Mode Button - Only in development */}
-            {__DEV__ && (
-              <>
-                <View style={styles.divider}>
-                  <View style={styles.dividerLine} />
-                  <Text variant="caption" color="secondary" style={styles.dividerText}>
-                    OR
-                  </Text>
-                  <View style={styles.dividerLine} />
-                </View>
+            {/* Test Mode Button - Available for testing */}
+            <>
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text variant="caption" color="secondary" style={styles.dividerText}>
+                  OR
+                </Text>
+                <View style={styles.dividerLine} />
+              </View>
 
-                <Button
-                  title={loading ? 'Entering Test Mode...' : 'Enter Test Mode (No Email Required)'}
-                  onPress={handleTestMode}
-                  variant="outline"
-                  loading={loading}
-                  style={styles.testButton}
-                  icon={<Ionicons name="flask" size={20} color={theme.colors.primary} />}
-                />
-              </>
-            )}
+              <Button
+                title={loading ? 'Entering Test Mode...' : 'Enter Test Mode (No Email Required)'}
+                onPress={handleTestMode}
+                variant="outline"
+                loading={loading}
+                style={styles.testButton}
+                icon={<Ionicons name="flask" size={20} color={theme.colors.primary} />}
+              />
+            </>
           </View>
 
           {/* Info Card for Development */}

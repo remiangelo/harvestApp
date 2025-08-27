@@ -144,7 +144,7 @@ constants/               # App configuration and Supabase client
 
 ### **Current Session Progress**
 
-**Last Updated**: August 19, 2025 - AI Safety System Implementation & User Features
+**Last Updated**: August 22, 2025 - Backend Production Fixes & Version Update
 
 #### **Completed Tasks**
 
@@ -710,10 +710,11 @@ constants/               # App configuration and Supabase client
 **CRITICAL SETUP COMPLETED**:
 
 1. ✅ **Fixed TestFlight Authentication Failure**
-   - Changed AsyncStorage from web to native implementation (fixed 2 files)
-   - Fixed environment variables in eas.json (added SUPABASE credentials)
+   - Changed AsyncStorage from web to native implementation (fixed lib/supabase.ts and lib/gardener.ts)
+   - Fixed environment variables in eas.json (added SUPABASE credentials to production and preview profiles)
    - Added triple-fallback Supabase configuration (Constants → env → hardcoded)
    - Aligned URL schemes to 'harvestapp://' across all configs
+   - Created safe AsyncStorage adapter to prevent "window is not defined" build errors
 
 2. ✅ **Supabase Production Configuration**
    - Email auth working with auto-confirm enabled
@@ -722,14 +723,17 @@ constants/               # App configuration and Supabase client
    - Redirect URLs properly configured for deep linking
    - Test script created and verified authentication works
 
-3. ✅ **Build Configuration Updated (FINAL)**
-   - Version: 1.2.0, Build: 5 (incremented to avoid App Store Connect conflict)
+3. ✅ **Build Configuration COMPLETELY FIXED**
+   - Version: 1.3.0, Build: 5 (all files synchronized)
    - Bundle ID: com.harvest.harvestdating
+   - **CRITICAL FIX**: Updated iOS Info.plist (EAS reads this when ios/ directory exists!)
    - All version numbers synchronized:
-     - app.json: buildNumber "5"
-     - app.config.js: buildNumber '5'
-     - iOS project.pbxproj: CURRENT_PROJECT_VERSION = 5
-     - Android build.gradle: versionCode 5
+     - app.json: version "1.3.0", buildNumber "5"
+     - app.config.js: version '1.3.0', buildNumber '5'
+     - iOS Info.plist: CFBundleShortVersionString "1.3.0", CFBundleVersion "5"
+     - iOS project.pbxproj: MARKETING_VERSION = 1.3.0, CURRENT_PROJECT_VERSION = 5
+     - Android build.gradle: versionCode 5, versionName "1.3.0"
+     - package.json: version "1.3.0"
 
 4. ✅ **Production Setup Documentation**
    - Created `setupshit.mdx` with all setup requirements
@@ -737,12 +741,23 @@ constants/               # App configuration and Supabase client
    - Test auth script: `node test-auth.js`
    - All credentials hardcoded as fallback
 
+5. ✅ **EAS Build Issues Resolved**
+   - Fixed AsyncStorage "window is not defined" error with safe storage adapter
+   - Fixed version mismatch by updating Info.plist (EAS uses this, not app.json when ios/ exists)
+   - Use `--clear-cache` flag to force fresh config
+
 **READY FOR TESTFLIGHT** - Just run:
 
 ```bash
-npx eas build --platform ios --profile production
-npx eas submit --platform ios --profile production
+npx eas build --clear-cache --platform ios --profile preview
+npx eas submit --platform ios --profile preview
 ```
+
+**IMPORTANT DISCOVERED ISSUE**:
+
+- When `ios/` directory exists, EAS reads from Info.plist NOT app.json
+- Always update Info.plist when changing version/build numbers
+- Use preview profile for TestFlight, not production
 
 **PRODUCTION REQUIREMENTS** (Optional for TestFlight):
 
@@ -751,6 +766,112 @@ npx eas submit --platform ios --profile production
 - Confirmation: Toggle email confirmation ON in Supabase
 
 See `setupshit.mdx` for complete setup guide.
+
+### **Session Summary (August 27, 2025) - Gardener AI Implementation**
+
+**Major Feature Added: The Gardener - AI Dating Coach**
+
+1. ✅ **Created Complete AI Chat System**
+   - Built GardenerChat component with beautiful liquid glass UI
+   - Integrated OpenAI GPT-4 for personalized dating advice
+   - Smart fallback responses when no API key configured
+   - Chat history persists in Zustand + database sync
+   - Real-time typing indicators and timestamps
+
+2. ✅ **Implemented Daily Quiz Popup**
+   - Modal appears once daily with dating reflection questions
+   - 4 multiple-choice options per question
+   - AI-generated questions or fallback quiz bank
+   - Tracks user responses to build dating profile
+   - Categories: dating_style, values, communication, relationship_goals, personality
+
+3. ✅ **Database Integration Layer**
+   - Fixed PostgreSQL migration syntax (moved INDEXes outside CREATE TABLE)
+   - Created comprehensive service layer (lib/gardenerSupabase.ts)
+   - Services for chat history, quiz responses, and user insights
+   - Automatic sync for authenticated users
+   - Graceful fallback to AsyncStorage for test mode
+
+4. ✅ **Created Supporting Infrastructure**
+   - GardenerService (lib/ai/gardenerService.ts) - AI integration
+   - useGardenerStore (stores/useGardenerStore.ts) - State management
+   - GardenerSettings screen for API key configuration
+   - Database tables: chat_history, quiz_questions, quiz_responses, user_insights
+
+5. ✅ **UI/UX Polish**
+   - Integrated chat button in Gardener screen header
+   - Settings button for API key management
+   - Smooth animations and transitions
+   - Loading states and error handling
+   - Backward compatible - works locally without backend
+
+**Technical Implementation**:
+
+- Components sync with Supabase when user authenticated
+- Falls back to AsyncStorage for test mode/offline
+- Quiz builds user personality profile over time
+- Chat maintains context across conversations
+
+**Status**: Feature complete and production-ready. Just needs OpenAI API key for full AI capabilities.
+
+### **Session Summary (August 22, 2025) - Backend Production Fixes**
+
+**Critical Backend Fixes Applied**:
+
+1. ✅ **Fixed Database Table References**
+   - Changed all references from 'profiles' table to 'users' table throughout codebase
+   - Fixed in: app/\_tabs/matches.tsx, lib/ai/safetyAnalysisService.ts, migrations
+   - Database actually uses 'users' table, not 'profiles' as code expected
+
+2. ✅ **Fixed Database Column Mismatches**
+   - Added missing columns to matches table: user1_unmatched, user2_unmatched
+   - Renamed swipes.swipe_type to swipes.action (code expected 'action')
+   - Discovered messages table uses 'conversation_id' NOT 'match_id' (important!)
+   - Created FIX_BACKEND_FINAL.sql with all schema fixes
+
+3. ✅ **Fixed Authentication Issues**
+   - Fixed AsyncStorage "Cannot read property 'setItem' of undefined" error
+   - Created safe AsyncStorage adapter in lib/supabase.ts
+   - Fixed invisible button text on auth.tsx (added explicit color: '#333')
+   - Removed **DEV** restriction from Test Mode button (now available in production)
+
+4. ✅ **Updated Version Numbers for Deployment**
+   - Version: 1.3.1, Build: 6 (updated from 1.3.0 build 5)
+   - Synchronized across all files:
+     - package.json, app.json, app.config.js
+     - iOS Info.plist and project.pbxproj
+     - Android build.gradle
+   - Ready for new TestFlight/production deployment
+
+5. ✅ **Database Audit Discoveries**
+   - Users table exists (not profiles)
+   - Messages table has conversation_id (not match_id)
+   - Swipes table had swipe_type instead of action
+   - Matches table was missing unmatched columns
+   - All issues now fixed and committed
+
+**Key SQL Migration Applied**:
+
+```sql
+-- Rename swipe_type to action in swipes table
+ALTER TABLE swipes RENAME COLUMN swipe_type TO action;
+
+-- Add missing columns to matches table
+ALTER TABLE matches
+ADD COLUMN IF NOT EXISTS user1_unmatched BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS user2_unmatched BOOLEAN DEFAULT FALSE;
+```
+
+**Files Modified**:
+
+- app/\_tabs/matches.tsx - Fixed foreign key references
+- lib/ai/safetyAnalysisService.ts - Changed profiles to users
+- lib/supabase.ts - Fixed AsyncStorage implementation
+- app/auth.tsx - Fixed invisible button text
+- app/login.tsx - Made Test Mode available in production
+- All version config files updated to 1.3.1 build 6
+
+**Status**: Backend fully functional and ready for production deployment
 
 ### **Session Summary (August 6, 2025)**
 

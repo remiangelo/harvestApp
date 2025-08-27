@@ -60,7 +60,9 @@ export default function AuthScreen() {
                     color="#1877F2"
                     style={styles.socialIcon}
                   />
-                  <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+                  <Text style={[styles.socialButtonText, { color: '#333' }]}>
+                    Continue with Facebook
+                  </Text>
                 </View>
               </LiquidGlassView>
             </TouchableOpacity>
@@ -85,7 +87,9 @@ export default function AuthScreen() {
                     color="#EA4335"
                     style={styles.socialIcon}
                   />
-                  <Text style={styles.socialButtonText}>Continue with Google</Text>
+                  <Text style={[styles.socialButtonText, { color: '#333' }]}>
+                    Continue with Google
+                  </Text>
                 </View>
               </LiquidGlassView>
             </TouchableOpacity>
@@ -109,7 +113,9 @@ export default function AuthScreen() {
                     color={theme.colors.primary}
                     style={styles.socialIcon}
                   />
-                  <Text style={styles.socialButtonText}>Continue with Email</Text>
+                  <Text style={[styles.socialButtonText, { color: '#333' }]}>
+                    Continue with Email
+                  </Text>
                 </View>
               </LiquidGlassView>
             </TouchableOpacity>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { theme } from '../../constants/theme';
+import { GardenerChat } from '../../components/gardener/GardenerChat';
+import { DailyQuizPopup } from '../../components/gardener/DailyQuizPopup';
+import { useGardenerStore } from '../../stores/useGardenerStore';
+import { useRouter } from 'expo-router';
 
 interface DatingTip {
   id: string;
@@ -113,7 +117,12 @@ export default function GardenerScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedAdvice, setExpandedAdvice] = useState<string | null>(null);
   const [reflection, setReflection] = useState<string>('');
+  const [showChat, setShowChat] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const router = useRouter();
+
+  const { shouldShowDailyQuiz, markQuizShown, addQuizResponse } = useGardenerStore();
 
   React.useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -124,13 +133,24 @@ export default function GardenerScreen() {
   }, [fadeAnim]);
 
   React.useEffect(() => {
-    // Load last reflection or today’s reflection
+    // Load last reflection or today's reflection
     (async () => {
       const last = await getLastReflection();
       if (last) setReflection(last);
       else setReflection(await getDailyReflection());
     })();
   }, []);
+
+  useEffect(() => {
+    // Check if we should show the daily quiz popup
+    const timer = setTimeout(() => {
+      if (shouldShowDailyQuiz()) {
+        setShowQuiz(true);
+      }
+    }, 2000); // Show after 2 seconds on screen
+
+    return () => clearTimeout(timer);
+  }, [shouldShowDailyQuiz]);
 
   const categories = [
     { id: 'all', label: 'All Tips', icon: 'apps' },
@@ -145,6 +165,37 @@ export default function GardenerScreen() {
       ? datingTips
       : datingTips.filter((tip) => tip.category === selectedCategory);
 
+  const handleQuizAnswer = (questionId: string, answer: string) => {
+    const categoryMap: { [key: string]: string } = {
+      emotional: 'dating_style',
+      activities: 'dating_style',
+      intellectual: 'dating_style',
+      physical: 'dating_style',
+      direct: 'communication',
+      process: 'communication',
+      compromise: 'communication',
+      empathy: 'communication',
+      slow: 'relationship_goals',
+      natural: 'relationship_goals',
+      intentional: 'relationship_goals',
+      fast: 'relationship_goals',
+      ambition: 'values',
+      humor: 'values',
+      loyalty: 'values',
+    };
+
+    addQuizResponse({
+      questionId,
+      question: '',
+      answer,
+      category: categoryMap[answer] || 'personality',
+    });
+  };
+
+  if (showChat) {
+    return <GardenerChat onBack={() => setShowChat(false)} />;
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -157,15 +208,33 @@ export default function GardenerScreen() {
               <Text style={styles.headerTitle}>The Gardener</Text>
               <Text style={styles.headerSubtitle}>Your Dating Coach</Text>
             </View>
-            <LiquidGlassView
-              intensity={50}
-              tint="light"
-              style={styles.headerIcon}
-              borderRadius={25}
-              glassTint="rgba(255, 255, 255, 0.2)"
-            >
-              <Ionicons name="leaf" size={28} color="white" />
-            </LiquidGlassView>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity
+                onPress={() => router.push('/gardener-settings')}
+                style={styles.headerButton}
+              >
+                <LiquidGlassView
+                  intensity={50}
+                  tint="light"
+                  style={styles.headerIcon}
+                  borderRadius={25}
+                  glassTint="rgba(255, 255, 255, 0.2)"
+                >
+                  <Ionicons name="settings" size={24} color="white" />
+                </LiquidGlassView>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowChat(true)} style={styles.headerButton}>
+                <LiquidGlassView
+                  intensity={50}
+                  tint="light"
+                  style={styles.headerIcon}
+                  borderRadius={25}
+                  glassTint="rgba(255, 255, 255, 0.2)"
+                >
+                  <Ionicons name="chatbubbles" size={26} color="white" />
+                </LiquidGlassView>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Category Filters */}
@@ -321,6 +390,16 @@ export default function GardenerScreen() {
           </TouchableOpacity>
         </LiquidGlassView>
       </ScrollView>
+
+      {/* Daily Quiz Popup */}
+      <DailyQuizPopup
+        visible={showQuiz}
+        onClose={() => {
+          setShowQuiz(false);
+          markQuizShown();
+        }}
+        onAnswer={handleQuizAnswer}
+      />
     </View>
   );
 }
@@ -395,6 +474,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
   },
+  headerButton: {
+    marginLeft: 8,
+  },
+  headerButtons: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
   headerContent: {
     flex: 1,
   },
@@ -403,9 +489,9 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     alignItems: 'center',
-    height: 50,
+    height: 44,
     justifyContent: 'center',
-    width: 50,
+    width: 44,
   },
   headerSubtitle: {
     color: 'rgba(255, 255, 255, 0.8)',

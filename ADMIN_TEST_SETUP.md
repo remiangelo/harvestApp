@@ -51,12 +51,11 @@ INSERT INTO auth.users (
   ''
 );
 
--- Then create the profile
-INSERT INTO profiles (
+-- Then create the user profile
+INSERT INTO users (
   id,
   nickname,
   email,
-  role,
   onboarding_completed,
   created_at,
   updated_at
@@ -65,7 +64,6 @@ SELECT
   id,
   'Admin User',
   'admin@harvest.com',
-  'admin',
   true,
   now(),
   now()
@@ -101,7 +99,7 @@ INSERT INTO auth.users (
 );
 
 -- Create profile for test user
-INSERT INTO profiles (
+INSERT INTO users (
   id,
   nickname,
   email,

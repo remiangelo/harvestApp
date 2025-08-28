@@ -210,7 +210,7 @@ export default function GardenerScreen() {
             </View>
             <View style={styles.headerButtons}>
               <TouchableOpacity
-                onPress={() => router.push('/gardener-settings')}
+                onPress={() => router.push('/gardener-settings' as any)}
                 style={styles.headerButton}
               >
                 <LiquidGlassView

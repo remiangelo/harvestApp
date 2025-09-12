@@ -14,6 +14,8 @@ import { AuthGuard } from '../components/AuthGuard';
 import { ErrorBoundary as CustomErrorBoundary } from '../components/ErrorBoundary';
 import { notificationService } from '../lib/notifications';
 import * as Notifications from 'expo-notifications';
+import { useGardenerStore } from '../stores/useGardenerStore';
+import { gardenerService } from '../lib/ai/gardenerService';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -52,16 +54,25 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  // Initialize Gardener service with saved API key
+  useEffect(() => {
+    const openAiApiKey = useGardenerStore.getState().openAiApiKey;
+    if (openAiApiKey) {
+      gardenerService.updateApiKey(openAiApiKey);
+    }
+  }, []);
+
   // Set up push notifications
   useEffect(() => {
     // Register for push notifications
     notificationService.registerForPushNotifications();
 
     // Handle notifications when app is in foreground
-    notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
-      console.log('Notification received:', notification);
-      // You can show a custom in-app notification here
-    });
+    notificationListener.current = Notifications.addNotificationReceivedListener(
+      (_notification) => {
+        // You can show a custom in-app notification here
+      }
+    );
 
     // Handle notification response (when user taps notification)
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {

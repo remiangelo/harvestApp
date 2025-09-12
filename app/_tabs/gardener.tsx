@@ -122,7 +122,7 @@ export default function GardenerScreen() {
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const router = useRouter();
 
-  const { shouldShowDailyQuiz, markQuizShown, addQuizResponse } = useGardenerStore();
+  const { shouldShowDailyQuiz, markQuizShown } = useGardenerStore();
 
   React.useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -165,31 +165,10 @@ export default function GardenerScreen() {
       ? datingTips
       : datingTips.filter((tip) => tip.category === selectedCategory);
 
-  const handleQuizAnswer = (questionId: string, answer: string) => {
-    const categoryMap: { [key: string]: string } = {
-      emotional: 'dating_style',
-      activities: 'dating_style',
-      intellectual: 'dating_style',
-      physical: 'dating_style',
-      direct: 'communication',
-      process: 'communication',
-      compromise: 'communication',
-      empathy: 'communication',
-      slow: 'relationship_goals',
-      natural: 'relationship_goals',
-      intentional: 'relationship_goals',
-      fast: 'relationship_goals',
-      ambition: 'values',
-      humor: 'values',
-      loyalty: 'values',
-    };
-
-    addQuizResponse({
-      questionId,
-      question: '',
-      answer,
-      category: categoryMap[answer] || 'personality',
-    });
+  const handleQuizAnswer = (_questionId: string, _answer: string) => {
+    // The answer here is the option ID, not the value
+    // The actual quiz response handling is done in DailyQuizPopup component
+    // This callback is optional and can be used for additional tracking if needed
   };
 
   if (showChat) {

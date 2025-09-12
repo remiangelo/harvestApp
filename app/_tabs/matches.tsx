@@ -43,12 +43,12 @@ export default function MatchesScreen() {
             matched_at,
             user1_id,
             user2_id,
-            user1:profiles!user1_id (
+            user1:users!user1_id (
               id,
               nickname,
               avatar_url
             ),
-            user2:profiles!user2_id (
+            user2:users!user2_id (
               id,
               nickname,
               avatar_url

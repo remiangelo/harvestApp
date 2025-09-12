@@ -427,11 +427,12 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     marginRight: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   categoryIcon: {
-    marginRight: 6,
+    marginRight: 4,
+    marginTop: -1,
   },
   categoryText: {
     color: 'white',

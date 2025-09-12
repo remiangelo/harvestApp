@@ -47,7 +47,7 @@ let openaiClient: OpenAI | null = null;
 
 export const initializeOpenAI = (): OpenAI | null => {
   if (!isAIConfigured()) {
-    console.log('OpenAI API key not configured. AI features will be disabled.');
+    // AI features will use fallback responses
     return null;
   }
 

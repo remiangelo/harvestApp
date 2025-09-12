@@ -242,5 +242,8 @@ Create a fresh question exploring a different aspect of dating preferences or va
   }
 }
 
-export const gardenerService = new GardenerService();
+// Initialize with API key from environment
+const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+
+export const gardenerService = new GardenerService(apiKey ? { apiKey } : undefined);
 export type { QuizQuestion, ChatMessage };

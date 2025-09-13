@@ -6,9 +6,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Safety analysis results table
 CREATE TABLE IF NOT EXISTS safety_analyses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-  match_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  conversation_id UUID REFERENCES matches(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  match_id UUID REFERENCES users(id) ON DELETE CASCADE,
   safety_score INTEGER CHECK (safety_score >= 0 AND safety_score <= 100),
   red_flags JSONB DEFAULT '[]'::jsonb,
   recommendations TEXT[] DEFAULT '{}',
@@ -29,9 +29,9 @@ CREATE INDEX idx_safety_analyses_safety_score ON safety_analyses(safety_score);
 -- Red flag reports table
 CREATE TABLE IF NOT EXISTS red_flag_reports (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  reporter_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-  reported_user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-  conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
+  reporter_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  reported_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  conversation_id UUID REFERENCES matches(id) ON DELETE CASCADE,
   flag_type VARCHAR(50) NOT NULL,
   severity VARCHAR(20) CHECK (severity IN ('low', 'medium', 'high', 'critical')),
   evidence TEXT,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS red_flag_reports (
   user_reported BOOLEAN DEFAULT false,
   reviewed BOOLEAN DEFAULT false,
   action_taken VARCHAR(50),
-  reviewed_by UUID REFERENCES profiles(id),
+  reviewed_by UUID REFERENCES users(id),
   reviewed_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -54,7 +54,7 @@ CREATE INDEX idx_red_flag_reports_created_at ON red_flag_reports(created_at DESC
 
 -- User safety settings table
 CREATE TABLE IF NOT EXISTS user_safety_settings (
-  user_id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   ai_monitoring_enabled BOOLEAN DEFAULT true,
   strict_mode BOOLEAN DEFAULT false,
   auto_blur_sensitive_content BOOLEAN DEFAULT true,
@@ -71,9 +71,9 @@ CREATE INDEX idx_user_safety_settings_updated_at ON user_safety_settings(updated
 -- Ready to move off app tracking
 CREATE TABLE IF NOT EXISTS ready_to_move_checks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-  match_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-  conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  match_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  conversation_id UUID REFERENCES matches(id) ON DELETE CASCADE,
   safety_score INTEGER CHECK (safety_score >= 0 AND safety_score <= 100),
   approved BOOLEAN DEFAULT false,
   contact_shared BOOLEAN DEFAULT false,

@@ -419,29 +419,33 @@ export default function ChatScreen() {
         {/* Input Bar */}
         <View style={styles.inputBar}>
           <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
-          <TouchableOpacity style={styles.attachButton}>
-            <Ionicons name="add-circle" size={28} color="#A0354E" />
-          </TouchableOpacity>
+          <View style={styles.inputContainer}>
+            <TouchableOpacity style={styles.attachButton}>
+              <Ionicons name="add-circle" size={28} color="#A0354E" />
+            </TouchableOpacity>
 
-          <TextInput
-            style={styles.input}
-            value={newMessage}
-            onChangeText={(text) => {
-              setNewMessage(text);
-              handleTyping();
-            }}
-            placeholder="Type a message..."
-            placeholderTextColor="#999"
-            multiline
-          />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                value={newMessage}
+                onChangeText={(text) => {
+                  setNewMessage(text);
+                  handleTyping();
+                }}
+                placeholder="Type a message..."
+                placeholderTextColor="#999"
+                multiline
+              />
+            </View>
 
-          <TouchableOpacity
-            style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
-            onPress={sendMessage}
-            disabled={!newMessage.trim()}
-          >
-            <Ionicons name="send" size={24} color={newMessage.trim() ? '#A0354E' : '#ccc'} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
+              onPress={sendMessage}
+              disabled={!newMessage.trim()}
+            >
+              <Ionicons name="send" size={24} color={newMessage.trim() ? '#A0354E' : '#ccc'} />
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
       {/* Chat menu */}
@@ -451,6 +455,7 @@ export default function ChatScreen() {
         matchName={match.name}
         matchPhoto={match.profileImage}
         isActive={!!match.isOnline}
+        messageCount={messages.length}
         onShareProfile={() => {
           setMenuVisible(false);
           Alert.alert('Share', "Profile sharing isn't configured yet.");
@@ -559,23 +564,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   input: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    borderRadius: 20,
     color: '#333',
-    flex: 1,
     fontSize: 16,
     maxHeight: 100,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
   inputBar: {
-    alignItems: 'flex-end',
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderTopWidth: 0,
-    flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
     position: 'relative',
+  },
+  inputContainer: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+  },
+  inputWrapper: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderColor: 'rgba(160, 53, 78, 0.1)',
+    borderRadius: 20,
+    borderWidth: 1,
+    elevation: 3,
+    flex: 1,
+    marginHorizontal: 8,
+    shadowColor: '#A0354E',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   messageAvatar: {
     borderRadius: 16,

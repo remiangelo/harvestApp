@@ -12,6 +12,7 @@ interface ChatMenuPopupProps {
   matchName: string;
   matchPhoto: string;
   isActive: boolean;
+  messageCount?: number; // Add message count to determine if feature should show
   onShareProfile: () => void;
   onToggleReady: (value: boolean) => void;
   onGardenerAI: () => void;
@@ -25,6 +26,7 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
   matchName,
   matchPhoto,
   isActive,
+  messageCount = 0,
   onShareProfile,
   onToggleReady,
   onGardenerAI,
@@ -33,6 +35,9 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const [isReadyToMoveOff, setIsReadyToMoveOff] = useState(false);
+
+  // Only show "Ready to move off app" toggle after 10+ messages exchanged
+  const showReadyToggle = messageCount >= 10;
 
   const handleToggleReady = (value: boolean) => {
     setIsReadyToMoveOff(value);
@@ -80,21 +85,23 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
                 <Ionicons name="share-outline" size={20} color="#666" />
               </TouchableOpacity>
 
-              {/* Ready to move off the app */}
-              <View style={styles.menuItem}>
-                <View style={styles.readyToMoveContainer}>
-                  <Text style={styles.menuItemText}>Ready to move off the app?</Text>
-                  {isReadyToMoveOff && (
-                    <Text style={styles.readyToMoveSubtext}>You can now share contact info</Text>
-                  )}
+              {/* Ready to move off the app - only show after meaningful conversation */}
+              {showReadyToggle && (
+                <View style={styles.menuItem}>
+                  <View style={styles.readyToMoveContainer}>
+                    <Text style={styles.menuItemText}>Ready to move off the app?</Text>
+                    {isReadyToMoveOff && (
+                      <Text style={styles.readyToMoveSubtext}>You can now share contact info</Text>
+                    )}
+                  </View>
+                  <Switch
+                    value={isReadyToMoveOff}
+                    onValueChange={handleToggleReady}
+                    trackColor={{ false: '#E5E5E5', true: '#A0354E' }}
+                    thumbColor="white"
+                  />
                 </View>
-                <Switch
-                  value={isReadyToMoveOff}
-                  onValueChange={handleToggleReady}
-                  trackColor={{ false: '#E5E5E5', true: '#A0354E' }}
-                  thumbColor="white"
-                />
-              </View>
+              )}
 
               {/* Gardener AI */}
               <TouchableOpacity style={styles.menuItem} onPress={onGardenerAI}>

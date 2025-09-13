@@ -144,25 +144,27 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <LinearGradient colors={['#A0354E', '#8B1E2D', '#701625']} style={styles.header}>
-        <SafeAreaView style={styles.headerSafe}>
-          <View style={styles.headerContent}>
-            <TouchableOpacity onPress={onBack} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
-            <View style={styles.headerInfo}>
-              <Text style={styles.headerTitle}>The Gardener</Text>
-              <Text style={styles.headerSubtitle}>AI Dating Coach</Text>
+      {/* Header - Only show if onBack is provided */}
+      {onBack && (
+        <LinearGradient colors={['#A0354E', '#8B1E2D', '#701625']} style={styles.header}>
+          <SafeAreaView style={styles.headerSafe}>
+            <View style={styles.headerContent}>
+              <TouchableOpacity onPress={onBack} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={24} color="white" />
+              </TouchableOpacity>
+              <View style={styles.headerInfo}>
+                <Text style={styles.headerTitle}>The Gardener</Text>
+                <Text style={styles.headerSubtitle}>AI Dating Coach</Text>
+              </View>
+              <View style={styles.headerAvatar}>
+                <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.avatar}>
+                  <Ionicons name="leaf" size={24} color="white" />
+                </LinearGradient>
+              </View>
             </View>
-            <View style={styles.headerAvatar}>
-              <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.avatar}>
-                <Ionicons name="leaf" size={24} color="white" />
-              </LinearGradient>
-            </View>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
+          </SafeAreaView>
+        </LinearGradient>
+      )}
 
       <KeyboardAvoidingView
         style={styles.chatContainer}

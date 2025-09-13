@@ -180,49 +180,9 @@ interface SafetyDashboard {
 
 ### 7. Database Schema
 
-```sql
--- Safety analysis results
-CREATE TABLE safety_analyses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  conversation_id UUID REFERENCES conversations(id),
-  user_id UUID REFERENCES users(id),
-  match_id UUID REFERENCES users(id),
-  safety_score INTEGER CHECK (safety_score >= 0 AND safety_score <= 100),
-  red_flags JSONB DEFAULT '[]',
-  recommendations TEXT[],
-  allow_contact_sharing BOOLEAN DEFAULT false,
-  created_at TIMESTAMP DEFAULT NOW()
-);
+`
 
--- Red flag reports
-CREATE TABLE red_flag_reports (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  reporter_id UUID REFERENCES users(id),
-  reported_user_id UUID REFERENCES users(id),
-  conversation_id UUID REFERENCES conversations(id),
-  flag_type VARCHAR(50),
-  severity VARCHAR(20) CHECK (severity IN ('low', 'medium', 'high', 'critical')),
-  evidence TEXT,
-  ai_detected BOOLEAN DEFAULT false,
-  user_reported BOOLEAN DEFAULT false,
-  reviewed BOOLEAN DEFAULT false,
-  action_taken VARCHAR(50),
-  created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Safety settings
-CREATE TABLE user_safety_settings (
-  user_id UUID PRIMARY KEY REFERENCES users(id),
-  ai_monitoring_enabled BOOLEAN DEFAULT true,
-  strict_mode BOOLEAN DEFAULT false,
-  auto_blur_sensitive_content BOOLEAN DEFAULT true,
-  require_video_before_sharing BOOLEAN DEFAULT false,
-  min_chat_duration_hours INTEGER DEFAULT 24,
-  emergency_contacts JSONB DEFAULT '[]',
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-```
+````
 
 ### 8. API Endpoints
 
@@ -256,7 +216,7 @@ POST /api/safety/report
 
 // Get safety dashboard
 GET /api/safety/dashboard/:userId
-```
+````
 
 ### 9. Privacy & Ethical Considerations
 

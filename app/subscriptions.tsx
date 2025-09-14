@@ -1,16 +1,9 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../constants/theme';
 import { LiquidGlassView } from '../components/liquid/LiquidGlassView';
 
@@ -88,7 +81,8 @@ const plans: Plan[] = [
 
 export default function SubscriptionsScreen() {
   const router = useRouter();
-  const [selectedPlan] = useState<PlanType>('free');
+  const insets = useSafeAreaInsets();
+  const [,] = useState<PlanType>('free'); // Currently unused but kept for future functionality
   const [currentPlan] = useState<PlanType>('free'); // User's current plan
 
   const handleSubscribe = (planId: PlanType) => {
@@ -114,8 +108,11 @@ export default function SubscriptionsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.header}>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#A0354E', '#8B1E2D']}
+        style={[styles.header, { paddingTop: insets.top + 10 }]} // Add extra padding to ensure full coverage
+      >
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={28} color="white" />
         </TouchableOpacity>
@@ -245,16 +242,16 @@ export default function SubscriptionsScreen() {
           current period. Manage subscriptions in your device settings.
         </Text>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   backButton: {
-    left: 20,
-    position: 'absolute',
-    top: 50,
-    zIndex: 1,
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+    marginLeft: 20,
+    marginTop: 10,
   },
   benefitCard: {
     alignItems: 'center',
@@ -345,7 +342,8 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingBottom: 30,
-    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingTop: 0, // Ensure it starts at the absolute top
   },
   headerSubtitle: {
     color: 'rgba(255, 255, 255, 0.9)',
@@ -356,7 +354,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 28,
     fontWeight: 'bold',
-    marginTop: 10,
   },
   period: {
     color: 'rgba(255, 255, 255, 0.9)',
@@ -405,7 +402,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 110, // Account for tab bar (70px) + extra margin (40px)
     paddingTop: 20,
   },
   subscribeButton: {

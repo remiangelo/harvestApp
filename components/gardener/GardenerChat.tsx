@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     flexDirection: 'row',
     padding: 12,
-    paddingBottom: 20,
+    paddingBottom: 110, // Increased to prevent navbar blocking (70px tab bar + 40px extra padding)
   },
   messageBubble: {
     borderRadius: 16,

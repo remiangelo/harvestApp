@@ -8,7 +8,6 @@ import {
   Image,
   SafeAreaView,
   StatusBar,
-  ActivityIndicator,
   Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -46,12 +45,12 @@ export default function MatchesScreen() {
             user1:users!user1_id (
               id,
               nickname,
-              avatar_url
+              photo_url
             ),
             user2:users!user2_id (
               id,
               nickname,
-              avatar_url
+              photo_url
             )
           `
           )
@@ -72,7 +71,7 @@ export default function MatchesScreen() {
           return {
             id: match.id,
             name: otherUser.nickname || 'Unknown',
-            photo: otherUser.avatar_url,
+            photo: otherUser.photo_url,
             likes: 0, // This would come from a separate likes count query
           };
         });
@@ -297,8 +296,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     flex: 1,
     marginTop: 20,
+    paddingBottom: 90,
     paddingHorizontal: 20,
-    paddingTop: 25,
+    paddingTop: 25, // Add bottom padding for tab bar (70px) + safety margin
   },
   header: {
     alignItems: 'center',

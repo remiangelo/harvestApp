@@ -34,8 +34,14 @@ export default function ProfileScreen() {
   // Animation values for header
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 50, 100],
+    outputRange: [1, 0.8, 0],
+    extrapolate: 'clamp',
+  });
+
+  const headerTranslateY = scrollY.interpolate({
     inputRange: [0, 100],
-    outputRange: [1, 0],
+    outputRange: [0, -50],
     extrapolate: 'clamp',
   });
 
@@ -138,7 +144,14 @@ export default function ProfileScreen() {
       <SafeAreaView style={styles.safeArea}>
         {/* Minimal Header */}
         <Animated.View
-          style={[styles.header, { opacity: headerOpacity, paddingTop: insets.top + 12 }]}
+          style={[
+            styles.header,
+            {
+              opacity: headerOpacity,
+              transform: [{ translateY: headerTranslateY }],
+              paddingTop: insets.top + 12,
+            },
+          ]}
         >
           <TouchableOpacity onPress={() => router.push('/settings' as any)}>
             <Ionicons name="settings-outline" size={24} color="#333" />
@@ -156,9 +169,9 @@ export default function ProfileScreen() {
             useNativeDriver: true,
             listener: (event: any) => {
               const y = event.nativeEvent.contentOffset.y;
-              // Notify tab bar about scroll
+              // Notify tab bar about scroll - but keep tab bar always visible for profile
               if ((global as any).handleTabBarScroll) {
-                (global as any).handleTabBarScroll(y);
+                (global as any).handleTabBarScroll(0); // Always keep tab bar visible
               }
             },
           })}

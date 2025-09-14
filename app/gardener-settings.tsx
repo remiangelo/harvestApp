@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
   ScrollView,
   KeyboardAvoidingView,
@@ -14,6 +13,7 @@ import {
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGardenerStore } from '../stores/useGardenerStore';
 import { gardenerService } from '../lib/ai/gardenerService';
 import { LiquidGlassView } from '../components/liquid/LiquidGlassView';
@@ -21,6 +21,7 @@ import { theme } from '../constants/theme';
 
 export default function GardenerSettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { openAiApiKey, setOpenAiApiKey } = useGardenerStore();
   const [apiKey, setApiKey] = useState(openAiApiKey || '');
   const [showApiKey, setShowApiKey] = useState(false);
@@ -58,16 +59,17 @@ export default function GardenerSettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#A0354E', '#8B1E2D', '#701625']} style={styles.header}>
-        <SafeAreaView>
-          <View style={styles.headerContent}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Gardener Settings</Text>
-            <View style={styles.placeholder} />
-          </View>
-        </SafeAreaView>
+      <LinearGradient
+        colors={['#A0354E', '#8B1E2D', '#701625']}
+        style={[styles.header, { paddingTop: insets.top + 10 }]} // Add extra padding to ensure full coverage
+      >
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Gardener Settings</Text>
+          <View style={styles.placeholder} />
+        </View>
       </LinearGradient>
 
       <KeyboardAvoidingView
@@ -220,7 +222,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   header: {
-    paddingBottom: 10,
+    paddingBottom: 20,
+    paddingTop: 0, // Ensure it starts at the absolute top
   },
   headerContent: {
     alignItems: 'center',

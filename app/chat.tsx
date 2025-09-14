@@ -573,6 +573,7 @@ const styles = StyleSheet.create({
   inputBar: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderTopWidth: 0,
+    paddingBottom: 90, // Add extra bottom padding for tab bar (70px) + safety margin
     paddingHorizontal: 16,
     paddingVertical: 12,
     position: 'relative',

@@ -203,32 +203,30 @@ export default function GardenerScreen() {
 
           {/* Tab Navigation */}
           <View style={styles.tabContainer}>
-            <TouchableOpacity
-              onPress={() => setActiveTab('tips')}
-              style={[styles.tab, activeTab === 'tips' && styles.activeTab]}
-            >
-              <Ionicons
-                name="bulb"
-                size={20}
-                color={activeTab === 'tips' ? 'white' : 'rgba(255, 255, 255, 0.6)'}
-              />
-              <Text style={[styles.tabText, activeTab === 'tips' && styles.activeTabText]}>
-                Tips
-              </Text>
+            <TouchableOpacity onPress={() => setActiveTab('tips')} style={styles.tab}>
+              <View style={[styles.tabBubble, activeTab === 'tips' && styles.activeTabBubble]}>
+                <Ionicons
+                  name="bulb"
+                  size={20}
+                  color={activeTab === 'tips' ? 'white' : 'rgba(255, 255, 255, 0.6)'}
+                />
+                <Text style={[styles.tabText, activeTab === 'tips' && styles.activeTabText]}>
+                  Tips
+                </Text>
+              </View>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => setActiveTab('chat')}
-              style={[styles.tab, activeTab === 'chat' && styles.activeTab]}
-            >
-              <Ionicons
-                name="chatbubbles"
-                size={20}
-                color={activeTab === 'chat' ? 'white' : 'rgba(255, 255, 255, 0.6)'}
-              />
-              <Text style={[styles.tabText, activeTab === 'chat' && styles.activeTabText]}>
-                AI Chat
-              </Text>
+            <TouchableOpacity onPress={() => setActiveTab('chat')} style={styles.tab}>
+              <View style={[styles.tabBubble, activeTab === 'chat' && styles.activeTabBubble]}>
+                <Ionicons
+                  name="chatbubbles"
+                  size={20}
+                  color={activeTab === 'chat' ? 'white' : 'rgba(255, 255, 255, 0.6)'}
+                />
+                <Text style={[styles.tabText, activeTab === 'chat' && styles.activeTabText]}>
+                  AI Chat
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -291,18 +289,21 @@ export default function GardenerScreen() {
                   borderRadius={20}
                   glassTint="rgba(255, 255, 255, 0.92)"
                 >
-                  <LinearGradient
-                    colors={tip.gradient as any}
-                    style={styles.tipIcon}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <Ionicons name={tip.icon as any} size={24} color="white" />
-                  </LinearGradient>
-
                   <View style={styles.tipContent}>
-                    <Text style={styles.tipTitle}>{tip.title}</Text>
-                    <Text style={styles.tipDescription}>{tip.description}</Text>
+                    <View style={styles.tipHeader}>
+                      <LinearGradient
+                        colors={tip.gradient as any}
+                        style={styles.tipIcon}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                      >
+                        <Ionicons name={tip.icon as any} size={24} color="white" />
+                      </LinearGradient>
+                      <View style={styles.tipTextContent}>
+                        <Text style={styles.tipTitle}>{tip.title}</Text>
+                        <Text style={styles.tipDescription}>{tip.description}</Text>
+                      </View>
+                    </View>
 
                     <View style={styles.tipFooter}>
                       <View style={styles.tipCategory}>
@@ -411,10 +412,10 @@ export default function GardenerScreen() {
 }
 
 const styles = StyleSheet.create({
-  activeTab: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderBottomColor: 'white',
-    borderBottomWidth: 2,
+  activeTabBubble: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 1,
   },
   activeTabText: {
     color: 'white',
@@ -456,6 +457,7 @@ const styles = StyleSheet.create({
   categoriesContainer: {
     paddingBottom: 16,
     paddingHorizontal: 16,
+    paddingTop: 16, // Add top spacing to prevent overlap with tabs
   },
   categoryChip: {
     alignItems: 'center',
@@ -537,7 +539,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   reflectionCard: {
-    marginBottom: 100,
+    marginBottom: 20, // Reduced since scrollContent now handles tab bar spacing
     marginHorizontal: 16,
     marginTop: 32,
     padding: 20,
@@ -565,7 +567,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 110, // Account for tab bar (70px) + extra margin (40px)
     paddingTop: 20,
   },
   sectionTitle: {
@@ -576,17 +578,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   tab: {
-    alignItems: 'center',
-    borderBottomColor: 'transparent',
-    borderBottomWidth: 2,
     flex: 1,
+    paddingHorizontal: 8,
+  },
+  tabBubble: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 25,
+    borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingBottom: 12,
-    paddingTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   tabContainer: {
     flexDirection: 'row',
+    marginBottom: 8, // Add bottom margin to separate from category filters
     marginHorizontal: 20,
     marginTop: 10,
   },
@@ -613,7 +621,6 @@ const styles = StyleSheet.create({
   },
   tipContent: {
     flex: 1,
-    marginLeft: 16,
   },
   tipDescription: {
     color: theme.colors.text.secondary,
@@ -628,9 +635,11 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   tipGlass: {
+    padding: 16,
+  },
+  tipHeader: {
     alignItems: 'flex-start',
     flexDirection: 'row',
-    padding: 16,
   },
   tipIcon: {
     alignItems: 'center',
@@ -638,6 +647,10 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: 'center',
     width: 50,
+  },
+  tipTextContent: {
+    flex: 1,
+    marginLeft: 12,
   },
   tipTitle: {
     color: theme.colors.text.primary,

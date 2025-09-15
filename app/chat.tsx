@@ -10,6 +10,7 @@ import {
   ScrollView,
   Image,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,8 +21,9 @@ import { format } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../context/UserContext';
 import { isUuid, ensureConversation } from '../lib/chat';
-import { Animated, Alert } from 'react-native';
+import { Animated } from 'react-native';
 import { ChatMenuPopup } from '../components/ChatMenuPopup';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
@@ -284,6 +286,75 @@ export default function ChatScreen() {
     return format(new Date(timestamp), 'h:mm a');
   };
 
+  // Handle attachment button press
+  const handleAttachPress = () => {
+    // Show action sheet for both platforms using Alert
+    Alert.alert(
+      'Add Attachment',
+      'Choose an option',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Take Photo', onPress: takePhoto },
+        { text: 'Choose from Library', onPress: pickImage },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  // Take a photo with camera
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please grant camera access to take photos');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      await handleImageSelected(result.assets[0].uri);
+    }
+  };
+
+  // Pick image from library
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please grant photo library access');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      await handleImageSelected(result.assets[0].uri);
+    }
+  };
+
+  // Handle selected image
+  const handleImageSelected = async (imageUri: string) => {
+    // For now, just show an alert. In production, you would:
+    // 1. Upload the image to Supabase storage
+    // 2. Send a message with the image URL
+    // 3. Display the image in the chat
+    Alert.alert(
+      'Image Selected',
+      'Image upload functionality will be implemented with backend storage.',
+      [{ text: 'OK' }]
+    );
+    // console.log('Selected image:', imageUri);
+  };
+
   // Handle typing indicator
   const handleTyping = async () => {
     if (!subscriptionRef.current || !currentUser) return;
@@ -430,7 +501,7 @@ export default function ChatScreen() {
         <View style={styles.inputBar}>
           <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
           <View style={styles.inputContainer}>
-            <TouchableOpacity style={styles.attachButton}>
+            <TouchableOpacity style={styles.attachButton} onPress={handleAttachPress}>
               <Ionicons name="add-circle" size={28} color="#A0354E" />
             </TouchableOpacity>
 
@@ -585,7 +656,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     paddingBottom: 90, // Add extra bottom padding for tab bar (70px) + safety margin
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8, // Reduced from 12 to reduce whitespace
     position: 'relative',
   },
   inputContainer: {

@@ -209,18 +209,6 @@ export default function ChatTabScreen() {
           </Animated.View>
         )}
       </ScrollView>
-
-      {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
-        <LinearGradient
-          colors={['#A0354E', '#8B1E2D']}
-          style={styles.fabGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <Ionicons name="create-outline" size={28} color="white" />
-        </LinearGradient>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -294,23 +282,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginTop: 16,
-  },
-  fab: {
-    bottom: 20,
-    elevation: 8,
-    position: 'absolute',
-    right: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  fabGradient: {
-    alignItems: 'center',
-    borderRadius: 28,
-    height: 56,
-    justifyContent: 'center',
-    width: 56,
   },
   header: {
     alignItems: 'center',

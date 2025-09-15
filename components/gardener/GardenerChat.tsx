@@ -65,13 +65,21 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
           setMessages(formattedHistory);
         } else if (chatHistory.length > 0) {
           // Fallback to local store if no DB history
-          setMessages(chatHistory as Message[]);
+          const formattedHistory = chatHistory.map((msg: any) => ({
+            ...msg,
+            timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+          }));
+          setMessages(formattedHistory);
         }
         setIsLoadingHistory(false);
       } else {
         // Use local store for test mode
         if (chatHistory.length > 0) {
-          setMessages(chatHistory as Message[]);
+          const formattedHistory = chatHistory.map((msg: any) => ({
+            ...msg,
+            timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+          }));
+          setMessages(formattedHistory);
         }
         setIsLoadingHistory(false);
       }
@@ -134,12 +142,20 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     }
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
+  const formatTime = (date: Date | string) => {
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      if (!dateObj || isNaN(dateObj.getTime())) {
+        return '';
+      }
+      return dateObj.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
+    } catch (error) {
+      return '';
+    }
   };
 
   return (

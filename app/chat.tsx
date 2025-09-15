@@ -36,8 +36,9 @@ export default function ChatScreen() {
   const subscriptionRef = useRef<any>(null);
   const typingTimeoutRef = useRef<any>(null);
 
-  // Find the match for this chat
-  const match = demoChats.find((c) => c.id === id);
+  // Find the match for this chat - handle both chat- prefixed and direct IDs
+  const chatId = String(id).startsWith('chat-') ? String(id) : `chat-${id}`;
+  const match = demoChats.find((c) => c.id === chatId || c.id === id);
 
   // Load messages when component mounts
   useEffect(() => {
@@ -69,10 +70,10 @@ export default function ChatScreen() {
           // For now, just use demo messages
           const demoMessages = match.messages || [];
           setMessages(
-            demoMessages.map((msg: any, index: number) => ({
-              id: `demo-${index}`,
+            demoMessages.map((msg: any) => ({
+              id: msg.id,
               conversation_id: String(id),
-              sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
+              sender_id: msg.senderId === 'current-user' ? currentUser?.id : msg.senderId,
               content: msg.text,
               created_at: msg.timestamp,
             }))
@@ -93,10 +94,10 @@ export default function ChatScreen() {
           // Fall back to demo messages
           const demoMessages = match.messages || [];
           setMessages(
-            demoMessages.map((msg: any, index: number) => ({
-              id: `demo-${index}`,
+            demoMessages.map((msg: any) => ({
+              id: msg.id,
               conversation_id: String(id),
-              sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
+              sender_id: msg.senderId === 'current-user' ? currentUser?.id : msg.senderId,
               content: msg.text,
               created_at: msg.timestamp,
             }))
@@ -109,10 +110,10 @@ export default function ChatScreen() {
         // Fall back to demo messages
         const demoMessages = match.messages || [];
         setMessages(
-          demoMessages.map((msg: any, index: number) => ({
-            id: `demo-${index}`,
+          demoMessages.map((msg: any) => ({
+            id: msg.id,
             conversation_id: String(id),
-            sender_id: msg.isCurrentUser ? currentUser?.id : match.id,
+            sender_id: msg.senderId === 'current-user' ? currentUser?.id : msg.senderId,
             content: msg.text,
             created_at: msg.timestamp,
           }))
@@ -227,7 +228,7 @@ export default function ChatScreen() {
     // Optimistically add the message to the UI
     const optimisticMessage = {
       id: `temp-${Date.now()}`,
-      conversation_id: isUuid(String(id)) ? String(id) : String(match.id),
+      conversation_id: String(id),
       sender_id: currentUser.id,
       content: messageText,
       created_at: new Date().toISOString(),
@@ -236,13 +237,22 @@ export default function ChatScreen() {
 
     setMessages((current) => [...current, optimisticMessage]);
 
+    // Only save to database if we have a valid UUID conversation
+    if (!isUuid(String(id))) {
+      // For demo chats, just update the local state
+      setMessages((current) =>
+        current.map((msg) => (msg.id === optimisticMessage.id ? { ...msg, sending: false } : msg))
+      );
+      return;
+    }
+
     try {
       // Insert the message into the database
       const { data, error } = await supabase
         .from('messages')
         .insert([
           {
-            conversation_id: isUuid(String(id)) ? String(id) : String(match.id),
+            conversation_id: String(id),
             sender_id: currentUser.id,
             content: messageText,
             created_at: new Date().toISOString(),

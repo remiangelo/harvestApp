@@ -24,9 +24,14 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
     }).start();
   };
 
-  // Listen for scroll events from all screens
+  // Listen for scroll events from all screens - but keep tab bar always visible for now
   useEffect(() => {
     const handleScroll = (scrollY: number) => {
+      // Keep tab bar always visible - don't hide on scroll
+      // This fixes the issue where the tab bar disappears and doesn't come back
+      return;
+
+      /* Original scroll hiding logic - disabled for now
       const diff = scrollY - lastScrollY.current;
 
       if (Math.abs(diff) < 5) return; // Ignore small scroll differences
@@ -42,6 +47,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
       }
 
       lastScrollY.current = scrollY;
+      */
     };
 
     // Export function for screens to call

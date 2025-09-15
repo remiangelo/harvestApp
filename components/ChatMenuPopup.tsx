@@ -36,8 +36,8 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
   const insets = useSafeAreaInsets();
   const [isReadyToMoveOff, setIsReadyToMoveOff] = useState(false);
 
-  // Only show "Ready to move off app" toggle after 10+ messages exchanged
-  const showReadyToggle = messageCount > 10;
+  // Show "Ready to move off app" toggle immediately
+  const showReadyToggle = true;
 
   const handleToggleReady = (value: boolean) => {
     setIsReadyToMoveOff(value);

@@ -127,13 +127,15 @@ export default function HelpCenterScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={28} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Help Center</Text>
-        <Text style={styles.headerSubtitle}>How can we help you today?</Text>
+        <SafeAreaView>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={28} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Help Center</Text>
+          <Text style={styles.headerSubtitle}>How can we help you today?</Text>
+        </SafeAreaView>
       </LinearGradient>
 
       <KeyboardAvoidingView
@@ -351,7 +353,7 @@ export default function HelpCenterScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -463,7 +465,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingBottom: 30,
-    paddingTop: 60,
   },
   headerSubtitle: {
     color: 'rgba(255, 255, 255, 0.9)',

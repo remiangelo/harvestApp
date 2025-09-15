@@ -183,22 +183,6 @@ export default function GardenerScreen() {
               <Text style={styles.headerTitle}>The Gardener</Text>
               <Text style={styles.headerSubtitle}>Your Dating Coach</Text>
             </View>
-            <View style={styles.headerButtons}>
-              <TouchableOpacity
-                onPress={() => router.push('/gardener-settings' as any)}
-                style={styles.headerButton}
-              >
-                <LiquidGlassView
-                  intensity={50}
-                  tint="light"
-                  style={styles.headerIcon}
-                  borderRadius={25}
-                  glassTint="rgba(255, 255, 255, 0.2)"
-                >
-                  <Ionicons name="settings" size={24} color="white" />
-                </LiquidGlassView>
-              </TouchableOpacity>
-            </View>
           </View>
 
           {/* Tab Navigation */}
@@ -495,24 +479,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
   },
-  headerButton: {
-    marginLeft: 8,
-  },
-  headerButtons: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
   headerContent: {
     flex: 1,
   },
   headerGradient: {
     paddingBottom: 8,
-  },
-  headerIcon: {
-    alignItems: 'center',
-    height: 44,
-    justifyContent: 'center',
-    width: 44,
   },
   headerSubtitle: {
     color: 'rgba(255, 255, 255, 0.8)',

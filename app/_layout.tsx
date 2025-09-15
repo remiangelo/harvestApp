@@ -143,7 +143,6 @@ function RootLayoutNav() {
               <Stack.Screen name="filters" options={{ headerShown: false }} />
               <Stack.Screen name="subscriptions" options={{ headerShown: false }} />
               <Stack.Screen name="help-center" options={{ headerShown: false }} />
-              <Stack.Screen name="gardener-settings" options={{ headerShown: false }} />
               <Stack.Screen name="chat" options={{ headerShown: false }} />
             </Stack>
           </ThemeProvider>

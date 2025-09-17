@@ -1,3 +1,9 @@
+/**
+ * @deprecated This file contains demo data only for development.
+ * In production, all user data comes from Supabase.
+ * DO NOT use in beta testing or production.
+ */
+
 export interface DemoUser {
   email: string;
   password: string;

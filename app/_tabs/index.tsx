@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } fr
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HarvestSwipeCard from '../../components/HarvestSwipeCard';
-import { betterDemoProfiles as demoProfiles } from '../../data/betterDemoProfiles';
-import { DemoProfile } from '../../data/demoProfiles';
+import { supabase } from '../../lib/supabase';
 import { theme } from '../../constants/theme';
 import { useRouter } from 'expo-router';
 import useUserStore from '../../stores/useUserStore';
@@ -22,21 +21,58 @@ export default function SwipingScreen() {
   const { user, isTestMode } = useAuthStore();
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [filteredProfiles, setFilteredProfiles] = useState<DemoProfile[]>([]);
+  const [filteredProfiles, setFilteredProfiles] = useState<any[]>([]);
   const [showMatchModal, setShowMatchModal] = useState(false);
-  const [matchedProfile, setMatchedProfile] = useState<DemoProfile | null>(null);
-  const [nextProfiles, setNextProfiles] = useState<DemoProfile[]>([]);
+  const [matchedProfile, setMatchedProfile] = useState<any>(null);
+  const [nextProfiles, setNextProfiles] = useState<any[]>([]);
 
-  // Filter and sort profiles based on user preferences
+  // Fetch real users from the database
   useEffect(() => {
-    // In a real app, this would fetch profiles from the backend
-    setTimeout(() => {
-      const filtered = filterProfiles(demoProfiles || [], currentUser);
-      const sorted = sortProfilesByRelevance(filtered, currentUser);
-      setFilteredProfiles(sorted);
-      setIsLoading(false);
-    }, 1000);
-  }, [currentUser]);
+    const fetchProfiles = async () => {
+      if (!user) {
+        // If no user, show demo mode message
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch users who haven't been swiped on yet
+        const { data: profiles, error } = await supabase
+          .from('users')
+          .select('*')
+          .neq('id', user.id) // Don't show current user
+          .eq('onboarding_completed', true) // Only show users who completed onboarding
+          .limit(50);
+
+        if (error) {
+          console.error('Error fetching profiles:', error);
+          setIsLoading(false);
+          return;
+        }
+
+        // Filter out already swiped profiles
+        const { data: swipes } = await supabase
+          .from('swipes')
+          .select('swiped_id')
+          .eq('swiper_id', user.id);
+
+        const swipedIds = swipes?.map((s) => s.swiped_id) || [];
+        const unseenProfiles = profiles?.filter((p) => !swipedIds.includes(p.id)) || [];
+
+        // Apply user preferences filter
+        const filtered = filterProfiles(unseenProfiles, currentUser);
+        const sorted = sortProfilesByRelevance(filtered, currentUser);
+
+        setFilteredProfiles(sorted);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading profiles:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfiles();
+  }, [currentUser, user]);
 
   // Safety check for profiles array
   const validProfiles = filteredProfiles || [];
@@ -60,7 +96,7 @@ export default function SwipingScreen() {
         // Reset to beginning when we run out of profiles
         setCurrentProfileIndex(0);
         setNextProfiles([]);
-        Alert.alert('No More Profiles! 🔄', "You've seen all the demo profiles. Starting over...", [
+        Alert.alert('No More Profiles! 👋', 'Check back later for new matches!', [
           { text: 'OK', style: 'default' },
         ]);
       }

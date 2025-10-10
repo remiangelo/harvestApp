@@ -156,13 +156,35 @@ function RootLayoutNav() {
     // Check if this is an OAuth callback
     if (url.includes('harvestapp://auth/callback')) {
       try {
-        // Extract the URL params
-        const urlObj = new URL(url.replace('harvestapp://', 'https://'));
-        const accessToken = urlObj.searchParams.get('access_token');
-        const refreshToken = urlObj.searchParams.get('refresh_token');
+        console.log('Processing OAuth callback...');
+
+        // Supabase uses URL hash fragments for OAuth, not query params
+        // Format: harvestapp://auth/callback#access_token=xxx&refresh_token=yyy
+        let accessToken: string | null = null;
+        let refreshToken: string | null = null;
+
+        // Try hash fragment first (most common for OAuth)
+        if (url.includes('#')) {
+          const hashPart = url.split('#')[1];
+          const params = new URLSearchParams(hashPart);
+          accessToken = params.get('access_token');
+          refreshToken = params.get('refresh_token');
+          console.log('Found tokens in hash fragment');
+        }
+
+        // Fallback to query params
+        if (!accessToken) {
+          const urlObj = new URL(url.replace('harvestapp://', 'https://'));
+          accessToken = urlObj.searchParams.get('access_token');
+          refreshToken = urlObj.searchParams.get('refresh_token');
+          console.log('Found tokens in query params');
+        }
+
+        console.log('Has access token:', !!accessToken);
+        console.log('Has refresh token:', !!refreshToken);
 
         if (accessToken && refreshToken) {
-          // Set the session with the tokens from OAuth
+          console.log('Setting session with OAuth tokens...');
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
@@ -170,17 +192,25 @@ function RootLayoutNav() {
 
           if (error) {
             console.error('Error setting session from OAuth:', error);
+            // Reset loading state
+            setSession(null);
           } else if (data.session) {
-            console.log('OAuth session set successfully');
+            console.log('OAuth session set successfully!');
             setSession(data.session);
             if (data.user) {
               setUser(data.user);
               await loadProfile(data.user.id);
             }
           }
+        } else {
+          console.error('No OAuth tokens found in URL');
+          // Reset loading state
+          setSession(null);
         }
       } catch (error) {
         console.error('Error handling OAuth callback:', error);
+        // Reset loading state
+        setSession(null);
       }
     }
   };

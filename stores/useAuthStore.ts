@@ -250,7 +250,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setSession: (session: Session | null) => {
-        set({ session, isAuthenticated: !!session });
+        set({ session, isAuthenticated: !!session, isLoading: false });
       },
 
       setUser: (user: User | null) => {

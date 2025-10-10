@@ -131,8 +131,8 @@ export const signInWithOAuth = async (provider: 'google' | 'facebook') => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: 'harvestapp://auth/callback',
-      skipBrowserRedirect: true, // For mobile apps
+      redirectTo: Platform.OS === 'web' ? window.location.origin : 'harvestapp://auth/callback',
+      // Don't skip browser redirect - we need the browser to open for OAuth
     },
   });
   return { data, error };

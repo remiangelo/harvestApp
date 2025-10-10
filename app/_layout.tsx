@@ -6,10 +6,11 @@ import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import * as Linking from 'expo-linking';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { useAuthStore } from '../stores/useAuthStore';
-import { onAuthStateChange } from '../lib/supabase';
+import { onAuthStateChange, supabase } from '../lib/supabase';
 import { AuthGuard } from '../components/AuthGuard';
 import { ErrorBoundary as CustomErrorBoundary } from '../components/ErrorBoundary';
 import { notificationService } from '../lib/notifications';
@@ -110,7 +111,7 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { initialize, setSession } = useAuthStore();
+  const { initialize, setSession, setUser, loadProfile } = useAuthStore();
 
   useEffect(() => {
     // Initialize auth state
@@ -119,12 +120,70 @@ function RootLayoutNav() {
     // Listen for auth changes
     const { data: authListener } = onAuthStateChange((session) => {
       setSession(session);
+      if (session?.user) {
+        setUser(session.user);
+        loadProfile(session.user.id);
+      }
     });
 
     return () => {
       authListener?.subscription.unsubscribe();
     };
-  }, [initialize, setSession]);
+  }, [initialize, setSession, setUser, loadProfile]);
+
+  // Handle deep links for OAuth callback
+  useEffect(() => {
+    // Handle initial URL if app was opened via deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink(url);
+      }
+    });
+
+    // Listen for deep link events while app is open
+    const subscription = Linking.addEventListener('url', (event) => {
+      handleDeepLink(event.url);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const handleDeepLink = async (url: string) => {
+    console.log('Deep link received:', url);
+
+    // Check if this is an OAuth callback
+    if (url.includes('harvestapp://auth/callback')) {
+      try {
+        // Extract the URL params
+        const urlObj = new URL(url.replace('harvestapp://', 'https://'));
+        const accessToken = urlObj.searchParams.get('access_token');
+        const refreshToken = urlObj.searchParams.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+          // Set the session with the tokens from OAuth
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) {
+            console.error('Error setting session from OAuth:', error);
+          } else if (data.session) {
+            console.log('OAuth session set successfully');
+            setSession(data.session);
+            if (data.user) {
+              setUser(data.user);
+              await loadProfile(data.user.id);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error handling OAuth callback:', error);
+      }
+    }
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -56,8 +56,8 @@ export default function SwipingScreen() {
           .select('swiped_id')
           .eq('swiper_id', user.id);
 
-        const swipedIds = swipes?.map((s) => s.swiped_id) || [];
-        const unseenProfiles = profiles?.filter((p) => !swipedIds.includes(p.id)) || [];
+        const swipedIds = swipes?.map((s: any) => s.swiped_id) || [];
+        const unseenProfiles = profiles?.filter((p: any) => !swipedIds.includes(p.id)) || [];
 
         // Apply user preferences filter
         const filtered = filterProfiles(unseenProfiles, currentUser);
@@ -128,7 +128,7 @@ export default function SwipingScreen() {
         nextProfile();
       } else {
         // Test mode or no user - just simulate
-        console.log('Test mode - simulating like');
+        // Test mode - simulating like
         const isMatch = Math.random() > 0.3; // 70% match rate for demo
         if (isMatch) {
           setMatchedProfile(currentProfile);
@@ -165,7 +165,7 @@ export default function SwipingScreen() {
         nextProfile();
       } else {
         // Test mode or no user - just track locally
-        console.log('Test mode - simulating dislike');
+        // Test mode - simulating dislike
         nextProfile();
       }
     } catch (error) {
@@ -200,7 +200,7 @@ export default function SwipingScreen() {
         nextProfile();
       } else {
         // Test mode or no user - just simulate
-        console.log('Test mode - simulating super like');
+        // Test mode - simulating super like
         // Super likes have higher match rate
         const isMatch = Math.random() > 0.1; // 90% match rate for super likes
         if (isMatch) {

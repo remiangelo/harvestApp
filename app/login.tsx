@@ -17,6 +17,7 @@ import useUserStore from '../stores/useUserStore';
 import { Button, Input, Text, Card } from '../components/ui';
 import { theme } from '../constants/theme';
 import { DemoUser } from '../data/demoUsers';
+import { supabase } from '../lib/supabase';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -37,6 +38,32 @@ export default function LoginScreen() {
 
   const validatePassword = (password: string) => {
     return password.length >= 6;
+  };
+
+  const handleResendVerification = async (emailToVerify: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: emailToVerify,
+        options: {
+          emailRedirectTo: 'harvestapp://auth/callback',
+        },
+      });
+      setLoading(false);
+
+      if (error) {
+        Alert.alert('Error', 'Failed to resend verification email. Please try again.');
+      } else {
+        Alert.alert(
+          'Email Sent',
+          `Verification email has been sent to ${emailToVerify}. Please check your inbox.`
+        );
+      }
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    }
   };
 
   const handleEmailChange = (text: string) => {
@@ -82,7 +109,28 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Login Failed', error.message || 'Invalid email or password. Please try again.');
+      // Check if error is due to unconfirmed email
+      if (
+        error.message?.includes('Email not confirmed') ||
+        error.message?.includes('email_not_confirmed')
+      ) {
+        Alert.alert(
+          'Email Not Verified',
+          'Please check your email and click the verification link before logging in.',
+          [
+            { text: 'OK' },
+            {
+              text: 'Resend Email',
+              onPress: () => handleResendVerification(email),
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Login Failed',
+          error.message || 'Invalid email or password. Please try again.'
+        );
+      }
     } else {
       // Check if user has completed onboarding
       const authState = useAuthStore.getState();
@@ -115,16 +163,27 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
-    const { error } = await register(email, password);
+    const { error, data } = await register(email, password);
     setLoading(false);
 
     if (error) {
       Alert.alert('Signup Failed', error.message || 'Failed to create account. Please try again.');
     } else {
-      // Check if user is authenticated (auto-confirmed email)
+      // Check if email confirmation is required
       const authState = useAuthStore.getState();
-      if (authState.isAuthenticated) {
-        // User is logged in, go to onboarding
+      if (authState.isAuthenticated && data?.user?.email_confirmed_at) {
+        // Auto-confirm is enabled, user can proceed
+        router.push('/onboarding');
+      } else if (data?.user && !data.user.email_confirmed_at) {
+        // Email verification required
+        Alert.alert(
+          'Verify Your Email',
+          `We've sent a verification link to ${email}. Please check your inbox and click the link to activate your account.`,
+          [{ text: 'OK' }]
+        );
+        setIsLogin(true); // Switch to login view
+      } else if (authState.isAuthenticated) {
+        // Fallback for auto-confirmed users
         router.push('/onboarding');
       } else {
         // Email confirmation required

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Linking } from 'react-native';
 import { Session, User } from '@supabase/supabase-js';
 import {
   supabase,
@@ -25,7 +26,7 @@ interface AuthState {
   initialize: () => Promise<void>;
   login: (email: string, password: string) => Promise<{ error: any }>;
   loginWithOAuth: (provider: 'google' | 'facebook') => Promise<{ error: any }>;
-  register: (email: string, password: string) => Promise<{ error: any }>;
+  register: (email: string, password: string) => Promise<{ error: any; data?: any }>;
   logout: () => Promise<void>;
   setSession: (session: Session | null) => void;
   setUser: (user: User | null) => void;
@@ -143,29 +144,27 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
           const { data, error } = await signInWithOAuth(provider);
+
           if (error) {
+            console.error('OAuth error:', error);
             set({ isLoading: false });
             return { error };
           }
 
-          if (data.user && data.session) {
-            const { data: profile } = await getProfile(data.user.id);
-            set({
-              user: data.user,
-              session: data.session,
-              profile,
-              isAuthenticated: true,
-              isLoading: false,
-            });
-            if (profile) {
-              useUserStore.getState().setCurrentUser(profile);
-            }
+          // Open the OAuth URL in browser
+          if (data?.url) {
+            await Linking.openURL(data.url);
+            // Don't set isLoading to false yet - wait for the redirect callback
+            // The session will be picked up by the auth state listener
           } else {
+            console.error('No OAuth URL returned from Supabase');
             set({ isLoading: false });
+            return { error: new Error('No OAuth URL returned') };
           }
 
           return { error: null };
         } catch (error) {
+          console.error('OAuth exception:', error);
           set({ isLoading: false });
           return { error };
         }
@@ -180,7 +179,7 @@ export const useAuthStore = create<AuthState>()(
             console.error('Signup error:', error);
             console.log('Supabase client status:', supabase ? 'initialized' : 'not initialized');
             set({ isLoading: false });
-            return { error };
+            return { error, data };
           }
 
           // Create user profile
@@ -213,10 +212,10 @@ export const useAuthStore = create<AuthState>()(
             set({ isLoading: false });
           }
 
-          return { error: null };
+          return { error: null, data };
         } catch (error) {
           set({ isLoading: false });
-          return { error };
+          return { error, data: null };
         }
       },
 

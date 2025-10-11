@@ -59,14 +59,20 @@ export const saveOnboardingStep = async (userId: string, stepData: Record<string
       }
     });
 
-    // Update the user profile
+    // UPSERT the user profile (update if exists, insert if not)
+    // This ensures we don't crash if the profile wasn't created during signup
     const { data, error } = await supabase
       .from('users')
-      .update({
-        ...processedData,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', userId)
+      .upsert(
+        {
+          id: userId,
+          ...processedData,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'id',
+        }
+      )
       .select()
       .single();
 
@@ -82,13 +88,19 @@ export const saveOnboardingStep = async (userId: string, stepData: Record<string
 // Mark onboarding as complete
 export const completeOnboarding = async (userId: string) => {
   try {
+    // UPSERT to ensure profile exists
     const { data, error } = await supabase
       .from('users')
-      .update({
-        onboarding_completed: true,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', userId)
+      .upsert(
+        {
+          id: userId,
+          onboarding_completed: true,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'id',
+        }
+      )
       .select()
       .single();
 

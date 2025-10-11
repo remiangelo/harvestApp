@@ -182,12 +182,22 @@ export const useAuthStore = create<AuthState>()(
             return { error, data };
           }
 
-          // Create user profile
+          // Create user profile - CRITICAL for onboarding to work
           if (data.user) {
+            console.log('Creating profile for new user:', data.user.id);
             const profileResult = await createProfile(data.user.id, email);
             if (profileResult.error) {
               console.error('Failed to create profile:', profileResult.error);
-              // Continue anyway - profile will be created on next login
+              // Retry once more in case of transient error
+              console.log('Retrying profile creation...');
+              const retryResult = await createProfile(data.user.id, email);
+              if (retryResult.error) {
+                console.error('Profile creation retry also failed:', retryResult.error);
+              } else {
+                console.log('Profile created successfully on retry');
+              }
+            } else {
+              console.log('Profile created successfully');
             }
           }
 

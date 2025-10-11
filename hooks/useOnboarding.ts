@@ -59,14 +59,29 @@ export const useOnboarding = () => {
   // Navigate to next step with optional data saving
   const goToNextStep = useCallback(
     async (currentStep: string, nextStep: string, stepData?: Record<string, any>) => {
-      // Save data if provided
-      if (stepData) {
-        const { success } = await saveStepData(stepData);
-        // Continue even if save fails - user can complete onboarding
-      }
+      try {
+        // Save data if provided
+        if (stepData) {
+          const { success } = await saveStepData(stepData);
+          // Continue even if save fails - user can complete onboarding
+        }
 
-      // Navigate to next step
-      router.push(`/onboarding/${nextStep}` as any);
+        // Navigate to next step
+        router.push(`/onboarding/${nextStep}` as any);
+      } catch (error) {
+        console.error('Error in goToNextStep:', error);
+        // Still try to navigate even if there's an error
+        try {
+          router.push(`/onboarding/${nextStep}` as any);
+        } catch (navError) {
+          console.error('Navigation error:', navError);
+          Alert.alert(
+            'Navigation Error',
+            'There was an error moving to the next step. Please try restarting the app.',
+            [{ text: 'OK' }]
+          );
+        }
+      }
     },
     [router, saveStepData]
   );

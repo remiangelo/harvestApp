@@ -194,11 +194,31 @@ function RootLayoutNav() {
             console.error('Error setting session from OAuth:', error);
             // Reset loading state
             setSession(null);
-          } else if (data.session) {
+          } else if (data.session && data.user) {
             console.log('OAuth session set successfully!');
             setSession(data.session);
-            if (data.user) {
-              setUser(data.user);
+            setUser(data.user);
+
+            // CRITICAL FIX: Check if profile exists, create if not
+            const { getProfile, createProfile } = await import('../lib/profiles');
+            const { data: existingProfile, error: profileError } = await getProfile(data.user.id);
+
+            if (profileError || !existingProfile) {
+              console.log('Profile does not exist, creating new profile for OAuth user...');
+              const email = data.user.email || data.user.user_metadata?.email || 'user@harvest.app';
+              const { data: newProfile, error: createError } = await createProfile(
+                data.user.id,
+                email
+              );
+
+              if (createError) {
+                console.error('Failed to create profile for OAuth user:', createError);
+              } else {
+                console.log('Profile created successfully for OAuth user');
+                await loadProfile(data.user.id);
+              }
+            } else {
+              console.log('Profile already exists, loading...');
               await loadProfile(data.user.id);
             }
           }

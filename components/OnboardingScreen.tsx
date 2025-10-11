@@ -28,7 +28,7 @@ interface OnboardingScreenProps {
   progress: number;
   currentStep: string;
   nextStep: string;
-  onValidate: () => Partial<OnboardingStepData> | null;
+  onValidate: () => Partial<OnboardingStepData> | Promise<Partial<OnboardingStepData>> | null;
   buttonText?: string;
   buttonDisabled?: boolean;
 }
@@ -46,7 +46,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const { goToNextStep, isSaving } = useOnboarding();
 
   const handleContinue = async () => {
-    const data = onValidate();
+    const data = await Promise.resolve(onValidate());
     if (data) {
       await goToNextStep(currentStep, nextStep, data);
     }

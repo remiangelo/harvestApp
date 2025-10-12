@@ -119,7 +119,7 @@ export default function SwipingScreen() {
           // Send match notification
           await notificationService.sendMatchNotification(
             currentProfile.name,
-            currentProfile.photos[0]
+            currentProfile.photos?.[0] || ''
           );
         } else if (!result.success) {
           console.error('Failed to save swipe:', result.error);
@@ -136,7 +136,7 @@ export default function SwipingScreen() {
           // Send match notification
           await notificationService.sendMatchNotification(
             currentProfile.name,
-            currentProfile.photos[0]
+            currentProfile.photos?.[0] || ''
           );
         }
         nextProfile();
@@ -191,7 +191,7 @@ export default function SwipingScreen() {
           // Send match notification
           await notificationService.sendMatchNotification(
             currentProfile.name,
-            currentProfile.photos[0]
+            currentProfile.photos?.[0] || ''
           );
         } else if (!result.success) {
           console.error('Failed to save swipe:', result.error);
@@ -273,7 +273,7 @@ export default function SwipingScreen() {
             }}
             matchProfile={{
               name: matchedProfile.name,
-              photo: matchedProfile.photos[0],
+              photo: matchedProfile.photos?.[0] || '',
             }}
             compatibility={{
               interests: 95,

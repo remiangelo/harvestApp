@@ -42,33 +42,6 @@ export default function AuthScreen() {
           <View style={styles.socialButtons}>
             <TouchableOpacity
               style={styles.socialButton}
-              onPress={() => loginWithOAuth('facebook')}
-              testID="facebook-login"
-              activeOpacity={0.8}
-            >
-              <LiquidGlassView
-                intensity={60}
-                tint="light"
-                style={styles.socialButtonGlass}
-                borderRadius={30}
-                glassTint="rgba(255, 255, 255, 0.95)"
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 10 }}>
-                  <Ionicons
-                    name="logo-facebook"
-                    size={24}
-                    color="#1877F2"
-                    style={styles.socialIcon}
-                  />
-                  <Text style={[styles.socialButtonText, { color: '#333' }]}>
-                    Continue with Facebook
-                  </Text>
-                </View>
-              </LiquidGlassView>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.socialButton}
               onPress={() => loginWithOAuth('google')}
               testID="google-login"
               activeOpacity={0.8}

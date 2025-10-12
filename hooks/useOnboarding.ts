@@ -23,7 +23,7 @@ export const useOnboarding = () => {
       }
 
       if (!user) {
-        console.error('No user found, cannot save onboarding data');
+        console.error('[saveStepData] No user found, cannot save onboarding data');
         return { success: false, error: 'No user session' };
       }
 
@@ -33,19 +33,24 @@ export const useOnboarding = () => {
         // Update local store immediately for responsive UI
         updateOnboardingData(stepData);
 
-        // Save to database
-        const { error } = await saveOnboardingStep(user.id, stepData);
+        console.log('[saveStepData] Saving step data for user:', user.id);
+        console.log('[saveStepData] User email:', user.email);
+
+        // Save to database - pass user email for UPSERT
+        const { error } = await saveOnboardingStep(user.id, stepData, user.email);
 
         if (error) {
+          console.error('[saveStepData] Save error:', error);
           throw error;
         }
 
+        console.log('[saveStepData] Save successful');
         return { success: true, error: null };
       } catch (error) {
-        console.error('Error saving onboarding step:', error);
+        console.error('[saveStepData] Error saving onboarding step:', error);
         Alert.alert(
           'Save Failed',
-          'Your progress could not be saved. You can continue, but your data may be lost if you close the app.',
+          `Your progress could not be saved. Error: ${error instanceof Error ? error.message : 'Unknown error'}. You can continue, but your data may be lost if you close the app.`,
           [{ text: 'OK' }]
         );
         return { success: false, error };
@@ -88,8 +93,11 @@ export const useOnboarding = () => {
 
   // Complete onboarding and navigate to main app
   const finishOnboarding = useCallback(async () => {
+    console.log('[finishOnboarding] Starting onboarding completion');
+
     // In test mode, just update local state
     if (isTestMode) {
+      console.log('[finishOnboarding] Test mode - updating local state');
       // Update the current user to mark onboarding as complete
       const updatedUser = { ...currentUser, onboardingCompleted: true };
       useUserStore.getState().setCurrentUser(updatedUser as DemoUser);
@@ -98,7 +106,7 @@ export const useOnboarding = () => {
       try {
         await AsyncStorage.setItem('harvest-test-user', JSON.stringify(updatedUser));
       } catch (error) {
-        console.error('Error updating test user:', error);
+        console.error('[finishOnboarding] Error updating test user:', error);
       }
 
       // Navigate to main app
@@ -107,6 +115,7 @@ export const useOnboarding = () => {
     }
 
     if (!user) {
+      console.error('[finishOnboarding] No user session found');
       Alert.alert('Error', 'No user session found');
       return { success: false };
     }
@@ -114,26 +123,41 @@ export const useOnboarding = () => {
     setIsSaving(true);
 
     try {
+      console.log('[finishOnboarding] Completing onboarding for user:', user.id);
+
       // Mark onboarding as complete in database
       const { error } = await completeOnboarding(user.id);
 
       if (error) {
+        console.error('[finishOnboarding] Complete onboarding error:', error);
         throw error;
       }
 
-      // Reload profile to update auth state
+      console.log('[finishOnboarding] Onboarding marked complete, reloading profile...');
+
+      // CRITICAL: Wait for profile to load before navigating
+      // This prevents race condition where AuthGuard checks profile before it's updated
       await loadProfile(user.id);
+
+      console.log('[finishOnboarding] Profile reloaded successfully');
 
       // Clear local onboarding data
       useUserStore.getState().clearOnboardingData();
 
+      console.log('[finishOnboarding] Navigating to main app...');
+
       // Navigate to main app
       router.replace('/_tabs');
 
+      console.log('[finishOnboarding] Navigation complete');
       return { success: true };
     } catch (error) {
-      console.error('Error completing onboarding:', error);
-      Alert.alert('Error', 'Failed to complete onboarding. Please try again.', [{ text: 'OK' }]);
+      console.error('[finishOnboarding] Error completing onboarding:', error);
+      Alert.alert(
+        'Error',
+        `Failed to complete onboarding: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
+        [{ text: 'OK' }]
+      );
       return { success: false };
     } finally {
       setIsSaving(false);

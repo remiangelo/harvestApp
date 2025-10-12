@@ -2,8 +2,30 @@ import { supabase } from './supabase';
 import { uploadPhoto } from './profiles';
 
 // Save onboarding data after each step
-export const saveOnboardingStep = async (userId: string, stepData: Record<string, any>) => {
+export const saveOnboardingStep = async (
+  userId: string,
+  stepData: Record<string, any>,
+  userEmail?: string
+) => {
   try {
+    console.log('[saveOnboardingStep] Starting save for user:', userId);
+    console.log('[saveOnboardingStep] Step data:', Object.keys(stepData));
+
+    // CRITICAL: Get user email from auth if not provided
+    let email = userEmail;
+    if (!email) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      email = user?.email;
+      console.log('[saveOnboardingStep] Retrieved email from auth:', email);
+    }
+
+    if (!email) {
+      console.error('[saveOnboardingStep] No email available - this will cause save to fail!');
+      throw new Error('User email is required but not available');
+    }
+
     // Handle special cases for data transformation
     const processedData: Record<string, any> = {};
 
@@ -60,12 +82,13 @@ export const saveOnboardingStep = async (userId: string, stepData: Record<string
     });
 
     // UPSERT the user profile (update if exists, insert if not)
-    // This ensures we don't crash if the profile wasn't created during signup
+    // CRITICAL: Must include email for INSERT to work (email is NOT NULL)
     const { data, error } = await supabase
       .from('users')
       .upsert(
         {
           id: userId,
+          email, // CRITICAL: Include email for NOT NULL constraint
           ...processedData,
           updated_at: new Date().toISOString(),
         },
@@ -76,11 +99,15 @@ export const saveOnboardingStep = async (userId: string, stepData: Record<string
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('[saveOnboardingStep] Database error:', error);
+      throw error;
+    }
 
+    console.log('[saveOnboardingStep] Save successful');
     return { data, error: null };
   } catch (error) {
-    console.error('Error saving onboarding step:', error);
+    console.error('[saveOnboardingStep] Error:', error);
     return { data: null, error };
   }
 };
@@ -88,12 +115,29 @@ export const saveOnboardingStep = async (userId: string, stepData: Record<string
 // Mark onboarding as complete
 export const completeOnboarding = async (userId: string) => {
   try {
+    console.log('[completeOnboarding] Completing onboarding for user:', userId);
+
+    // CRITICAL: Get user email from auth for UPSERT
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const email = user?.email;
+
+    if (!email) {
+      console.error('[completeOnboarding] No email available - cannot complete onboarding!');
+      throw new Error('User email is required to complete onboarding');
+    }
+
+    console.log('[completeOnboarding] Using email:', email);
+
     // UPSERT to ensure profile exists
+    // CRITICAL: Must include email for INSERT to work (email is NOT NULL)
     const { data, error } = await supabase
       .from('users')
       .upsert(
         {
           id: userId,
+          email, // CRITICAL: Include email for NOT NULL constraint
           onboarding_completed: true,
           updated_at: new Date().toISOString(),
         },
@@ -104,11 +148,15 @@ export const completeOnboarding = async (userId: string) => {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('[completeOnboarding] Database error:', error);
+      throw error;
+    }
 
+    console.log('[completeOnboarding] Onboarding completed successfully');
     return { data, error: null };
   } catch (error) {
-    console.error('Error completing onboarding:', error);
+    console.error('[completeOnboarding] Error:', error);
     return { data: null, error };
   }
 };

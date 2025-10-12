@@ -41,18 +41,44 @@ export const useOnboarding = () => {
 
         if (error) {
           console.error('[saveStepData] Save error:', error);
-          throw error;
+
+          // Extract user-friendly error message
+          const errorObj = error as any;
+          const errorMessage =
+            errorObj && typeof errorObj === 'object' && 'message' in errorObj
+              ? errorObj.message
+              : 'Failed to save your information. Please check your internet connection and try again.';
+
+          Alert.alert('Save Failed', errorMessage, [
+            { text: 'Continue Anyway' },
+            {
+              text: 'Retry',
+              onPress: () => saveStepData(stepData),
+            },
+          ]);
+          return { success: false, error };
         }
 
         console.log('[saveStepData] Save successful');
         return { success: true, error: null };
       } catch (error) {
         console.error('[saveStepData] Error saving onboarding step:', error);
-        Alert.alert(
-          'Save Failed',
-          `Your progress could not be saved. Error: ${error instanceof Error ? error.message : 'Unknown error'}. You can continue, but your data may be lost if you close the app.`,
-          [{ text: 'OK' }]
-        );
+
+        // Extract user-friendly error message
+        const errorMessage =
+          typeof error === 'object' && error !== null && 'message' in error
+            ? (error as any).message
+            : error instanceof Error
+              ? error.message
+              : 'Your progress could not be saved. Please check your internet connection and try again.';
+
+        Alert.alert('Save Failed', errorMessage, [
+          { text: 'Continue Anyway' },
+          {
+            text: 'Retry',
+            onPress: () => saveStepData(stepData),
+          },
+        ]);
         return { success: false, error };
       } finally {
         setIsSaving(false);
@@ -130,16 +156,35 @@ export const useOnboarding = () => {
 
       if (error) {
         console.error('[finishOnboarding] Complete onboarding error:', error);
-        throw error;
+
+        // Extract user-friendly error message
+        const errorObj = error as any;
+        const errorMessage =
+          errorObj && typeof errorObj === 'object' && 'message' in errorObj
+            ? errorObj.message
+            : 'Failed to complete onboarding. Please check your internet connection and try again.';
+
+        Alert.alert('Onboarding Failed', errorMessage, [
+          { text: 'Cancel' },
+          {
+            text: 'Try Again',
+            onPress: () => finishOnboarding(),
+          },
+        ]);
+        return { success: false };
       }
 
       console.log('[finishOnboarding] Onboarding marked complete, reloading profile...');
 
       // CRITICAL: Wait for profile to load before navigating
       // This prevents race condition where AuthGuard checks profile before it's updated
-      await loadProfile(user.id);
-
-      console.log('[finishOnboarding] Profile reloaded successfully');
+      try {
+        await loadProfile(user.id);
+        console.log('[finishOnboarding] Profile reloaded successfully');
+      } catch (loadError) {
+        console.error('[finishOnboarding] Failed to load profile (non-fatal):', loadError);
+        // Continue anyway - profile will be loaded later
+      }
 
       // Clear local onboarding data
       useUserStore.getState().clearOnboardingData();
@@ -152,12 +197,22 @@ export const useOnboarding = () => {
       console.log('[finishOnboarding] Navigation complete');
       return { success: true };
     } catch (error) {
-      console.error('[finishOnboarding] Error completing onboarding:', error);
-      Alert.alert(
-        'Error',
-        `Failed to complete onboarding: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
-        [{ text: 'OK' }]
-      );
+      console.error('[finishOnboarding] Unexpected error completing onboarding:', error);
+
+      // Extract user-friendly error message
+      const errorObj = error as any;
+      const errorMessage =
+        errorObj && typeof errorObj === 'object' && 'message' in errorObj
+          ? errorObj.message
+          : 'An unexpected error occurred. Please try again.';
+
+      Alert.alert('Onboarding Failed', errorMessage, [
+        { text: 'Cancel' },
+        {
+          text: 'Try Again',
+          onPress: () => finishOnboarding(),
+        },
+      ]);
       return { success: false };
     } finally {
       setIsSaving(false);

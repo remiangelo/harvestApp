@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { uploadPhoto } from './profiles';
+import { ensureProfileExists } from './profileHelpers';
 
 // Save onboarding data after each step
 export const saveOnboardingStep = async (
@@ -11,19 +12,24 @@ export const saveOnboardingStep = async (
     console.log('[saveOnboardingStep] Starting save for user:', userId);
     console.log('[saveOnboardingStep] Step data:', Object.keys(stepData));
 
-    // CRITICAL: Get user email from auth if not provided
-    let email = userEmail;
-    if (!email) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      email = user?.email;
-      console.log('[saveOnboardingStep] Retrieved email from auth:', email);
-    }
-
-    if (!email) {
-      console.error('[saveOnboardingStep] No email available - this will cause save to fail!');
-      throw new Error('User email is required but not available');
+    // CRITICAL: Ensure profile exists before saving
+    // This will create the profile if it doesn't exist
+    let email: string;
+    try {
+      const result = await ensureProfileExists(userId);
+      email = result.email;
+      console.log('[saveOnboardingStep] Profile confirmed. Email:', email);
+    } catch (profileError) {
+      console.error('[saveOnboardingStep] Profile creation failed:', profileError);
+      return {
+        data: null,
+        error: {
+          message:
+            'Failed to create your profile. Please check your internet connection and try again.',
+          code: 'PROFILE_CREATION_FAILED',
+          details: profileError,
+        },
+      };
     }
 
     // Handle special cases for data transformation
@@ -101,14 +107,41 @@ export const saveOnboardingStep = async (
 
     if (error) {
       console.error('[saveOnboardingStep] Database error:', error);
-      throw error;
+      console.error('[saveOnboardingStep] Error details:', JSON.stringify(error, null, 2));
+
+      // Provide specific error messages based on error code
+      let userMessage = 'Failed to save your information. Please try again.';
+      if (error.code === '23505') {
+        userMessage = 'This profile already exists. Please continue to the next step.';
+      } else if (error.code === 'PGRST301') {
+        userMessage = 'Permission denied. Please sign out and sign in again.';
+      } else if (error.message?.includes('violates row-level security')) {
+        userMessage = 'You do not have permission to update this profile. Please contact support.';
+      }
+
+      return {
+        data: null,
+        error: {
+          message: userMessage,
+          code: error.code || 'DATABASE_ERROR',
+          details: error,
+        },
+      };
     }
 
     console.log('[saveOnboardingStep] Save successful');
     return { data, error: null };
   } catch (error) {
-    console.error('[saveOnboardingStep] Error:', error);
-    return { data: null, error };
+    console.error('[saveOnboardingStep] Unexpected error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return {
+      data: null,
+      error: {
+        message: `An unexpected error occurred: ${errorMessage}`,
+        code: 'UNEXPECTED_ERROR',
+        details: error,
+      },
+    };
   }
 };
 
@@ -117,18 +150,24 @@ export const completeOnboarding = async (userId: string) => {
   try {
     console.log('[completeOnboarding] Completing onboarding for user:', userId);
 
-    // CRITICAL: Get user email from auth for UPSERT
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const email = user?.email;
-
-    if (!email) {
-      console.error('[completeOnboarding] No email available - cannot complete onboarding!');
-      throw new Error('User email is required to complete onboarding');
+    // CRITICAL: Ensure profile exists before completing
+    let email: string;
+    try {
+      const result = await ensureProfileExists(userId);
+      email = result.email;
+      console.log('[completeOnboarding] Profile confirmed. Email:', email);
+    } catch (profileError) {
+      console.error('[completeOnboarding] Profile creation failed:', profileError);
+      return {
+        data: null,
+        error: {
+          message:
+            'Failed to complete onboarding. Please check your internet connection and try again.',
+          code: 'PROFILE_CREATION_FAILED',
+          details: profileError,
+        },
+      };
     }
-
-    console.log('[completeOnboarding] Using email:', email);
 
     // UPSERT to ensure profile exists
     // CRITICAL: Must include email for INSERT to work (email is NOT NULL)
@@ -150,14 +189,39 @@ export const completeOnboarding = async (userId: string) => {
 
     if (error) {
       console.error('[completeOnboarding] Database error:', error);
-      throw error;
+      console.error('[completeOnboarding] Error details:', JSON.stringify(error, null, 2));
+
+      // Provide specific error messages based on error code
+      let userMessage = 'Failed to complete onboarding. Please try again.';
+      if (error.code === 'PGRST301') {
+        userMessage = 'Permission denied. Please sign out and sign in again.';
+      } else if (error.message?.includes('violates row-level security')) {
+        userMessage = 'You do not have permission to update this profile. Please contact support.';
+      }
+
+      return {
+        data: null,
+        error: {
+          message: userMessage,
+          code: error.code || 'DATABASE_ERROR',
+          details: error,
+        },
+      };
     }
 
     console.log('[completeOnboarding] Onboarding completed successfully');
     return { data, error: null };
   } catch (error) {
-    console.error('[completeOnboarding] Error:', error);
-    return { data: null, error };
+    console.error('[completeOnboarding] Unexpected error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return {
+      data: null,
+      error: {
+        message: `An unexpected error occurred: ${errorMessage}`,
+        code: 'UNEXPECTED_ERROR',
+        details: error,
+      },
+    };
   }
 };
 

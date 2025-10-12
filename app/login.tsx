@@ -167,7 +167,26 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Signup Failed', error.message || 'Failed to create account. Please try again.');
+      // Provide specific error messages based on error type
+      let errorTitle = 'Signup Failed';
+      let errorMessage = 'Failed to create account. Please try again.';
+
+      if (
+        error.message?.includes('already registered') ||
+        error.message?.includes('already exists')
+      ) {
+        errorTitle = 'Email Already Registered';
+        errorMessage =
+          'This email is already registered. Please sign in instead or use a different email.';
+      } else if (error.message?.includes('invalid email')) {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (error.message?.includes('password')) {
+        errorMessage = 'Password must be at least 6 characters long.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert(errorTitle, errorMessage);
     } else {
       // Check if email confirmation is required
       const authState = useAuthStore.getState();

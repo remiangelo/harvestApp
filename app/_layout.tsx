@@ -199,27 +199,17 @@ function RootLayoutNav() {
             setSession(data.session);
             setUser(data.user);
 
-            // CRITICAL FIX: Check if profile exists, create if not
-            const { getProfile, createProfile } = await import('../lib/profiles');
-            const { data: existingProfile, error: profileError } = await getProfile(data.user.id);
-
-            if (profileError || !existingProfile) {
-              console.log('Profile does not exist, creating new profile for OAuth user...');
-              const email = data.user.email || data.user.user_metadata?.email || 'user@harvest.app';
-              const { data: newProfile, error: createError } = await createProfile(
-                data.user.id,
-                email
-              );
-
-              if (createError) {
-                console.error('Failed to create profile for OAuth user:', createError);
-              } else {
-                console.log('Profile created successfully for OAuth user');
-                await loadProfile(data.user.id);
-              }
-            } else {
-              console.log('Profile already exists, loading...');
+            // CRITICAL: Ensure profile exists for OAuth user
+            try {
+              console.log('[OAuth Callback] Ensuring profile exists for user:', data.user.id);
+              const { ensureProfileExists } = await import('../lib/profileHelpers');
+              await ensureProfileExists(data.user.id);
+              console.log('[OAuth Callback] Profile confirmed, loading full profile...');
               await loadProfile(data.user.id);
+              console.log('[OAuth Callback] Profile loaded successfully');
+            } catch (error) {
+              console.error('[OAuth Callback] Failed to ensure profile:', error);
+              // Don't block login, but log the error
             }
           }
         } else {

@@ -184,20 +184,15 @@ export const useAuthStore = create<AuthState>()(
 
           // Create user profile - CRITICAL for onboarding to work
           if (data.user) {
-            console.log('Creating profile for new user:', data.user.id);
-            const profileResult = await createProfile(data.user.id, email);
-            if (profileResult.error) {
-              console.error('Failed to create profile:', profileResult.error);
-              // Retry once more in case of transient error
-              console.log('Retrying profile creation...');
-              const retryResult = await createProfile(data.user.id, email);
-              if (retryResult.error) {
-                console.error('Profile creation retry also failed:', retryResult.error);
-              } else {
-                console.log('Profile created successfully on retry');
-              }
-            } else {
-              console.log('Profile created successfully');
+            console.log('[Register] Creating profile for new user:', data.user.id);
+            try {
+              const { ensureProfileExists } = await import('../lib/profileHelpers');
+              await ensureProfileExists(data.user.id);
+              console.log('[Register] Profile created/verified successfully');
+            } catch (profileError) {
+              console.error('[Register] Failed to create profile:', profileError);
+              // Don't fail the signup - let the user continue to onboarding
+              // ensureProfileExists will be called again in onboarding
             }
           }
 

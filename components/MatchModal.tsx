@@ -57,6 +57,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
       animationType="fade"
       onRequestClose={onClose}
       presentationStyle="overFullScreen"
+      statusBarTranslucent
     >
       <ConfettiCannon
         ref={confettiRef}
@@ -278,6 +279,7 @@ const styles = StyleSheet.create({
   },
   rightCard: {
     transform: [{ rotate: '10deg' }],
+    zIndex: 2, // Higher than left card
   },
   secondaryButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',

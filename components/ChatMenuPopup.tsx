@@ -89,7 +89,7 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
               {showReadyToggle && (
                 <View style={styles.menuItem}>
                   <View style={styles.readyToMoveContainer}>
-                    <Text style={styles.menuItemText}>Ready to move off the app?</Text>
+                    <Text style={styles.readyToMoveTitle}>Ready to move off the app?</Text>
                     {isReadyToMoveOff && (
                       <Text style={styles.readyToMoveSubtext}>You can now share contact info</Text>
                     )}
@@ -200,11 +200,17 @@ const styles = StyleSheet.create({
   },
   readyToMoveContainer: {
     flex: 1,
+    marginRight: 12,
   },
   readyToMoveSubtext: {
     color: '#A0354E',
     fontSize: 12,
     marginTop: 4,
+  },
+  readyToMoveTitle: {
+    color: '#1a1a1a',
+    flexWrap: 'wrap',
+    fontSize: 16,
   },
   statusDot: {
     backgroundColor: '#ccc',

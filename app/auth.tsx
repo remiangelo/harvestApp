@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, SafeAreaView, TouchableOpacity, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,6 +10,17 @@ import { Ionicons } from '@expo/vector-icons';
 export default function AuthScreen() {
   const router = useRouter();
   const { loginWithOAuth } = useAuthStore();
+
+  // Memoize decoration positions to prevent recalculation on every render
+  const decorations = useMemo(
+    () =>
+      [...Array(8)].map(() => ({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        rotation: `${Math.random() * 360}deg`,
+      })),
+    []
+  );
 
   return (
     <LinearGradient colors={['#FFFFFF', '#FFF5F7', '#FFE5EA']} style={styles.container}>
@@ -104,15 +115,15 @@ export default function AuthScreen() {
 
           {/* Background Decorations */}
           <View style={styles.decorations}>
-            {[...Array(8)].map((_, i) => (
+            {decorations.map((decoration, i) => (
               <View
                 key={i}
                 style={[
                   styles.decoration,
                   {
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    transform: [{ rotate: `${Math.random() * 360}deg` }],
+                    left: decoration.left as any,
+                    top: decoration.top as any,
+                    transform: [{ rotate: decoration.rotation }] as any,
                   },
                 ]}
               />

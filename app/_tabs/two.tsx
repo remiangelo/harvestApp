@@ -34,14 +34,14 @@ export default function ProfileScreen() {
   // Animation values for header
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 50, 100],
-    outputRange: [1, 0.8, 0],
+    inputRange: [0, 100],
+    outputRange: [1, 0.85], // Never fully transparent
     extrapolate: 'clamp',
   });
 
   const headerTranslateY = scrollY.interpolate({
     inputRange: [0, 100],
-    outputRange: [0, -50],
+    outputRange: [0, -15], // Reduce movement, never off-screen
     extrapolate: 'clamp',
   });
 
@@ -361,13 +361,20 @@ const styles = StyleSheet.create({
   },
   emptyMainPhoto: {
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#e8e8e8',
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+    borderWidth: 2,
     height: '100%',
     justifyContent: 'center',
     width: '100%',
   },
   emptyPhoto: {
     alignItems: 'center',
+    backgroundColor: '#e8e8e8',
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+    borderWidth: 2,
     height: '100%',
     justifyContent: 'center',
     width: '100%',

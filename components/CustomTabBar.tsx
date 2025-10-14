@@ -75,6 +75,17 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
     }
   };
 
+  const getAccessibilityLabel = (routeName: string, isFocused: boolean): string => {
+    const labels: Record<string, string> = {
+      gardener: 'Gardener Dating Coach',
+      matches: 'Matches and Messages',
+      index: 'Discover Profiles',
+      chat: 'Chat Messages',
+      two: 'Your Profile',
+    };
+    return `${labels[routeName] || routeName}${isFocused ? ', selected' : ''}`;
+  };
+
   return (
     <Animated.View
       style={[
@@ -158,9 +169,10 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
           return (
             <TouchableOpacity
               key={route.key}
-              accessibilityRole="button"
+              accessibilityRole="tab"
               accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
+              accessibilityLabel={getAccessibilityLabel(route.name, isFocused)}
+              accessibilityHint={`Navigate to ${route.name} screen`}
               testID={(options as any).tabBarTestID as string | undefined}
               onPress={onPress}
               style={styles.tab}

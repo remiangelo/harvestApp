@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { getOnboardingProgress } from '../../lib/onboarding';
@@ -56,6 +56,8 @@ export default function OnboardingIndex() {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={styles.loadingText}>Preparing your profile...</Text>
+        <Text style={styles.loadingSubtext}>This will only take a moment</Text>
       </View>
     );
   }
@@ -69,5 +71,16 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     flex: 1,
     justifyContent: 'center',
+  },
+  loadingSubtext: {
+    color: theme.colors.text.secondary,
+    fontSize: 14,
+    marginTop: 8,
+  },
+  loadingText: {
+    color: theme.colors.text.primary,
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
   },
 });

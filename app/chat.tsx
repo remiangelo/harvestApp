@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { demoChats } from '../data/demoChats';
@@ -25,9 +26,12 @@ import { Animated } from 'react-native';
 import { ChatMenuPopup } from '../components/ChatMenuPopup';
 import * as ImagePicker from 'expo-image-picker';
 
+const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/A0354E/FFFFFF?text=No+Image';
+
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const { currentUser } = useUser();
+  const insets = useSafeAreaInsets();
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -394,7 +398,10 @@ export default function ChatScreen() {
             </TouchableOpacity>
 
             <View style={styles.headerCenter}>
-              <Image source={{ uri: match.profileImage }} style={styles.headerAvatar} />
+              <Image
+                source={{ uri: match.profileImage || FALLBACK_IMAGE }}
+                style={styles.headerAvatar}
+              />
               <View style={styles.headerInfo}>
                 <Text style={styles.headerName}>{match.name}</Text>
                 <Text style={styles.headerStatus}>{match.isOnline ? 'Active now' : 'Offline'}</Text>
@@ -459,7 +466,10 @@ export default function ChatScreen() {
                   style={[styles.messageRow, isCurrentUser && styles.messageRowRight]}
                 >
                   {!isCurrentUser && (
-                    <Image source={{ uri: match.profileImage }} style={styles.messageAvatar} />
+                    <Image
+                      source={{ uri: match.profileImage || FALLBACK_IMAGE }}
+                      style={styles.messageAvatar}
+                    />
                   )}
 
                   {isCurrentUser ? (
@@ -485,7 +495,10 @@ export default function ChatScreen() {
           {/* Typing Indicator */}
           {otherUserTyping && (
             <View style={styles.typingIndicatorRow}>
-              <Image source={{ uri: match.profileImage }} style={styles.messageAvatar} />
+              <Image
+                source={{ uri: match.profileImage || FALLBACK_IMAGE }}
+                style={styles.messageAvatar}
+              />
               <View style={styles.typingIndicator}>
                 <View style={styles.typingDots}>
                   <Animated.View style={[styles.typingDot, { opacity: 0.4 }]} />
@@ -498,7 +511,7 @@ export default function ChatScreen() {
         </ScrollView>
 
         {/* Input Bar */}
-        <View style={styles.inputBar}>
+        <View style={[styles.inputBar, { paddingBottom: insets.bottom > 0 ? insets.bottom : 8 }]}>
           <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
           <View style={styles.inputContainer}>
             <TouchableOpacity style={styles.attachButton} onPress={handleAttachPress}>
@@ -654,7 +667,6 @@ const styles = StyleSheet.create({
   inputBar: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderTopWidth: 0,
-    paddingBottom: 90, // Add extra bottom padding for tab bar (70px) + safety margin
     paddingHorizontal: 16,
     paddingVertical: 8, // Reduced from 12 to reduce whitespace
     position: 'relative',
@@ -690,15 +702,18 @@ const styles = StyleSheet.create({
   },
   messageTime: {
     color: 'rgba(0, 0, 0, 0.5)',
+    flexShrink: 0, // Prevent shrinking
     fontSize: 12,
     marginTop: 4,
+    minWidth: 60, // Ensure consistent width
   },
   messagesContainer: {
     flex: 1,
   },
   messagesContent: {
+    paddingBottom: 20,
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingTop: 20,
   },
   messagesList: {
     flex: 1,

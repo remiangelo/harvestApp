@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  TouchableOpacity,
+  Platform,
+  StatusBar,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HarvestSwipeCard from '../../components/HarvestSwipeCard';
@@ -243,7 +252,13 @@ export default function SwipingScreen() {
       <View style={styles.container}>
         {/* Filters button in top right */}
         <TouchableOpacity
-          style={[styles.filterButton, { top: insets.top + 10 }]}
+          style={[
+            styles.filterButton,
+            {
+              top:
+                Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 20 : insets.top + 10,
+            },
+          ]}
           onPress={() => router.push('/filters' as any)}
         >
           <Ionicons name="options-outline" size={24} color="white" />

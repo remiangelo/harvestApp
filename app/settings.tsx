@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  useColorScheme,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,6 +23,17 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
   const { currentUser, updateOnboardingData } = useUserStore();
+  const colorScheme = useColorScheme();
+
+  // Prepare switch colors for dark mode compatibility
+  const switchColors = useMemo(
+    () => ({
+      trackColorFalse: colorScheme === 'dark' ? '#555' : '#ccc',
+      trackColorTrue: theme.colors.primary,
+      thumbColor: colorScheme === 'dark' ? '#eee' : '#fff',
+    }),
+    [colorScheme]
+  );
 
   const [notifications, setNotifications] = useState({
     matches: true,
@@ -52,6 +64,13 @@ export default function SettingsScreen() {
     }));
   };
 
+  const scrollContentStyle = useMemo(
+    () => ({
+      paddingBottom: Math.max(insets.bottom + 70 + 30, 100),
+    }),
+    [insets.bottom]
+  );
+
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
@@ -80,10 +99,7 @@ export default function SettingsScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
-      >
+      <ScrollView style={styles.content} contentContainerStyle={scrollContentStyle}>
         {/* Account Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
@@ -135,8 +151,11 @@ export default function SettingsScreen() {
             <Switch
               value={notifications.matches}
               onValueChange={() => handleNotificationToggle('matches')}
-              trackColor={{ false: '#ccc', true: theme.colors.primary }}
-              thumbColor="#fff"
+              trackColor={{
+                false: switchColors.trackColorFalse,
+                true: switchColors.trackColorTrue,
+              }}
+              thumbColor={switchColors.thumbColor}
             />
           </View>
 
@@ -148,8 +167,11 @@ export default function SettingsScreen() {
             <Switch
               value={notifications.messages}
               onValueChange={() => handleNotificationToggle('messages')}
-              trackColor={{ false: '#ccc', true: theme.colors.primary }}
-              thumbColor="#fff"
+              trackColor={{
+                false: switchColors.trackColorFalse,
+                true: switchColors.trackColorTrue,
+              }}
+              thumbColor={switchColors.thumbColor}
             />
           </View>
 
@@ -161,8 +183,11 @@ export default function SettingsScreen() {
             <Switch
               value={notifications.likes}
               onValueChange={() => handleNotificationToggle('likes')}
-              trackColor={{ false: '#ccc', true: theme.colors.primary }}
-              thumbColor="#fff"
+              trackColor={{
+                false: switchColors.trackColorFalse,
+                true: switchColors.trackColorTrue,
+              }}
+              thumbColor={switchColors.thumbColor}
             />
           </View>
 
@@ -174,8 +199,11 @@ export default function SettingsScreen() {
             <Switch
               value={notifications.superLikes}
               onValueChange={() => handleNotificationToggle('superLikes')}
-              trackColor={{ false: '#ccc', true: theme.colors.primary }}
-              thumbColor="#fff"
+              trackColor={{
+                false: switchColors.trackColorFalse,
+                true: switchColors.trackColorTrue,
+              }}
+              thumbColor={switchColors.thumbColor}
             />
           </View>
         </View>
@@ -192,8 +220,11 @@ export default function SettingsScreen() {
             <Switch
               value={privacy.showLocation}
               onValueChange={() => handlePrivacyToggle('showLocation')}
-              trackColor={{ false: '#ccc', true: theme.colors.primary }}
-              thumbColor="#fff"
+              trackColor={{
+                false: switchColors.trackColorFalse,
+                true: switchColors.trackColorTrue,
+              }}
+              thumbColor={switchColors.thumbColor}
             />
           </View>
 
@@ -205,8 +236,11 @@ export default function SettingsScreen() {
             <Switch
               value={privacy.showAge}
               onValueChange={() => handlePrivacyToggle('showAge')}
-              trackColor={{ false: '#ccc', true: theme.colors.primary }}
-              thumbColor="#fff"
+              trackColor={{
+                false: switchColors.trackColorFalse,
+                true: switchColors.trackColorTrue,
+              }}
+              thumbColor={switchColors.thumbColor}
             />
           </View>
 
@@ -218,8 +252,11 @@ export default function SettingsScreen() {
             <Switch
               value={privacy.showActiveStatus}
               onValueChange={() => handlePrivacyToggle('showActiveStatus')}
-              trackColor={{ false: '#ccc', true: theme.colors.primary }}
-              thumbColor="#fff"
+              trackColor={{
+                false: switchColors.trackColorFalse,
+                true: switchColors.trackColorTrue,
+              }}
+              thumbColor={switchColors.thumbColor}
             />
           </View>
         </View>

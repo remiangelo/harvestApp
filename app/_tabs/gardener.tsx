@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { theme } from '../../constants/theme';
 import { GardenerChat } from '../../components/gardener/GardenerChat';
@@ -114,6 +115,7 @@ const quickAdvice: QuickAdvice[] = [
 import { getDailyReflection, getLastReflection } from '../../lib/gardener';
 
 export default function GardenerScreen() {
+  const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedAdvice, setExpandedAdvice] = useState<string | null>(null);
   const [reflection, setReflection] = useState<string>('');
@@ -123,6 +125,14 @@ export default function GardenerScreen() {
   const router = useRouter();
 
   const { shouldShowDailyQuiz, markQuizShown } = useGardenerStore();
+
+  const scrollContentStyle = useMemo(
+    () => ({
+      paddingBottom: insets.bottom + 70 + 40,
+      paddingTop: 20,
+    }),
+    [insets.bottom]
+  );
 
   React.useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -258,7 +268,7 @@ export default function GardenerScreen() {
         <ScrollView
           style={styles.contentContainer}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={scrollContentStyle}
         >
           {/* Dating Tips Section */}
           <Animated.View style={{ opacity: fadeAnim }}>
@@ -439,9 +449,10 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   categoriesContainer: {
+    marginTop: 8, // Additional margin
     paddingBottom: 16,
     paddingHorizontal: 16,
-    paddingTop: 16, // Add top spacing to prevent overlap with tabs
+    paddingTop: 24, // Increased from 16
   },
   categoryChip: {
     alignItems: 'center',
@@ -536,10 +547,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
-  },
-  scrollContent: {
-    paddingBottom: 110, // Account for tab bar (70px) + extra margin (40px)
-    paddingTop: 20,
   },
   sectionTitle: {
     color: theme.colors.text.primary,

@@ -21,6 +21,7 @@ import { theme } from '../constants/theme';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const SWIPE_THRESHOLD = screenWidth * 0.25;
 const SWIPE_OUT_DURATION = 250;
+const FALLBACK_IMAGE = 'https://via.placeholder.com/800x1200/A0354E/FFFFFF?text=No+Image';
 
 interface HarvestSwipeCardProps {
   profile: DemoProfile;
@@ -251,15 +252,17 @@ export default function HarvestSwipeCard({
           )}
 
           <Image
-            source={{ uri: currentPhoto }}
+            source={{ uri: currentPhoto || FALLBACK_IMAGE }}
             style={styles.photo}
             contentFit="cover"
             onLoadStart={() => setImageLoading(true)}
             onLoad={() => setImageLoading(false)}
-            onError={() => {
+            onError={(error) => {
+              console.log('Image load error:', error);
               setImageError(true);
               setImageLoading(false);
             }}
+            placeholder={{ uri: FALLBACK_IMAGE }}
           />
 
           {imageLoading && (
@@ -360,7 +363,10 @@ export default function HarvestSwipeCard({
               'rgba(0,0,0,0.95)',
             ]}
             locations={[0, 0.4, 0.6, 0.8, 1]}
-            style={styles.bottomGradient}
+            style={[
+              styles.bottomGradient,
+              { paddingBottom: Math.max(insets.bottom + 70 + 30, 120) },
+            ]}
           >
             <View style={styles.infoContent}>
               <View style={styles.header}>
@@ -460,7 +466,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     minHeight: 280,
-    paddingBottom: 120, // More space for tab bar and bio visibility
     paddingTop: 60,
     position: 'absolute',
     right: 0,

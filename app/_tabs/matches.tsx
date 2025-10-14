@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { router } from 'expo-router';
 import { demoChats, getUnreadChatCount } from '../../data/demoChats';
@@ -19,9 +20,12 @@ import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 import { useUser } from '../../context/UserContext';
 
+const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/A0354E/FFFFFF?text=No+Image';
+
 // Remove the hardcoded recentMatches array
 
 export default function MatchesScreen() {
+  const insets = useSafeAreaInsets();
   const [recentMatches, setRecentMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [chatsLoading, setChatsLoading] = useState(false); // Set to false to show demo chats immediately
@@ -201,7 +205,10 @@ export default function MatchesScreen() {
                 <Animated.View key={match.id} style={{ opacity: fadeAnim }}>
                   <TouchableOpacity style={styles.matchItem}>
                     <View style={styles.matchImageContainer}>
-                      <Image source={{ uri: match.photo }} style={styles.matchImage} />
+                      <Image
+                        source={{ uri: match.photo || FALLBACK_IMAGE }}
+                        style={styles.matchImage}
+                      />
                       {match.likes > 0 && (
                         <View style={styles.likeBadge}>
                           <Ionicons name="heart" size={16} color="white" />
@@ -227,7 +234,10 @@ export default function MatchesScreen() {
       <LiquidGlassView
         intensity={85}
         tint="light"
-        style={styles.conversationsContainer}
+        style={StyleSheet.flatten([
+          styles.conversationsContainer,
+          { paddingBottom: insets.bottom + 70 + 20 },
+        ])}
         borderRadius={24}
         glassTint="rgba(255, 255, 255, 0.95)"
       >
@@ -263,7 +273,10 @@ export default function MatchesScreen() {
                 onPress={() => router.push(`/chat?id=${chat.id}` as any)}
               >
                 <View style={styles.avatarContainer}>
-                  <Image source={{ uri: chat.profileImage }} style={styles.avatar} />
+                  <Image
+                    source={{ uri: chat.profileImage || FALLBACK_IMAGE }}
+                    style={styles.avatar}
+                  />
                   {chat.isOnline && <View style={styles.onlineDot} />}
                 </View>
 
@@ -343,9 +356,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     flex: 1,
     marginTop: 20,
-    paddingBottom: 90,
     paddingHorizontal: 20,
-    paddingTop: 25, // Add bottom padding for tab bar (70px) + safety margin
+    paddingTop: 25,
   },
   header: {
     alignItems: 'center',

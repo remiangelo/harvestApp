@@ -17,6 +17,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const { currentUser } = useUserStore();
   const [checkingProgress, setCheckingProgress] = useState(false);
   const navigationTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const navigationLockRef = React.useRef<boolean>(false);
+  const lastRouteRef = React.useRef<string>('');
 
   // Cleanup navigation timeout on unmount
   useEffect(() => {
@@ -28,15 +30,30 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     };
   }, []);
 
-  // Safe navigation helper
+  // Safe navigation helper with lock to prevent rapid successive calls
   const safeNavigate = React.useCallback(
     (route: string) => {
+      // Prevent navigation if already navigating to the same route
+      if (navigationLockRef.current || lastRouteRef.current === route) {
+        console.log('[AuthGuard] Navigation locked or same route, skipping:', route);
+        return;
+      }
+
+      console.log('[AuthGuard] Navigating to:', route);
+      navigationLockRef.current = true;
+      lastRouteRef.current = route;
+
       if (navigationTimeoutRef.current) {
         clearTimeout(navigationTimeoutRef.current);
       }
+
       navigationTimeoutRef.current = setTimeout(() => {
         router.replace(route as any);
-      }, 100);
+        // Release lock after navigation completes
+        setTimeout(() => {
+          navigationLockRef.current = false;
+        }, 500);
+      }, 150);
     },
     [router]
   );

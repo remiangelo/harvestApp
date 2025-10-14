@@ -207,6 +207,12 @@ function RootLayoutNav() {
               console.log('[OAuth Callback] Profile confirmed, loading full profile...');
               await loadProfile(data.user.id);
               console.log('[OAuth Callback] Profile loaded successfully');
+
+              // CRITICAL: Wait for state to propagate to AuthGuard
+              // This prevents race condition where AuthGuard checks profile before it's updated
+              console.log('[OAuth Callback] Waiting for state propagation...');
+              await new Promise((resolve) => setTimeout(resolve, 300));
+              console.log('[OAuth Callback] State propagation complete');
             } catch (error) {
               console.error('[OAuth Callback] Failed to ensure profile:', error);
               // Don't block login, but log the error

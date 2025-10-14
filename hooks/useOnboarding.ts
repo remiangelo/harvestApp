@@ -135,6 +135,12 @@ export const useOnboarding = () => {
         console.error('[finishOnboarding] Error updating test user:', error);
       }
 
+      // CRITICAL: Wait for state to propagate before navigating
+      // This prevents race condition where AuthGuard checks state before it's updated
+      console.log('[finishOnboarding] Waiting for state propagation...');
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      console.log('[finishOnboarding] Navigating to main app...');
       // Navigate to main app
       router.replace('/_tabs');
       return { success: true };
@@ -181,6 +187,10 @@ export const useOnboarding = () => {
       try {
         await loadProfile(user.id);
         console.log('[finishOnboarding] Profile reloaded successfully');
+
+        // Wait for state to propagate to AuthGuard
+        console.log('[finishOnboarding] Waiting for state propagation...');
+        await new Promise((resolve) => setTimeout(resolve, 300));
       } catch (loadError) {
         console.error('[finishOnboarding] Failed to load profile (non-fatal):', loadError);
         // Continue anyway - profile will be loaded later

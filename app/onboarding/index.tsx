@@ -9,15 +9,29 @@ import { theme } from '../../constants/theme';
 export default function OnboardingIndex() {
   const [loading, setLoading] = useState(true);
   const [nextStep, setNextStep] = useState<string>('age');
-  const { user } = useAuthStore();
-  const { updateOnboardingData } = useUserStore();
+  const { user, isTestMode } = useAuthStore();
+  const { updateOnboardingData, currentUser } = useUserStore();
 
   useEffect(() => {
     checkProgress();
-  }, [user]);
+  }, [user, isTestMode, currentUser]);
 
   const checkProgress = async () => {
+    console.log('[OnboardingIndex] Checking progress - isTestMode:', isTestMode);
+    console.log('[OnboardingIndex] User:', user ? 'exists' : 'null');
+    console.log('[OnboardingIndex] CurrentUser:', currentUser ? 'exists' : 'null');
+
+    // In test mode, skip database check and start from beginning
+    if (isTestMode) {
+      console.log('[OnboardingIndex] Test mode detected - starting from age step');
+      setNextStep('age');
+      setLoading(false);
+      return;
+    }
+
     if (!user) {
+      console.log('[OnboardingIndex] No user found, starting from age step');
+      setNextStep('age');
       setLoading(false);
       return;
     }
@@ -47,6 +61,8 @@ export default function OnboardingIndex() {
       setNextStep(currentStep);
     } catch (error) {
       console.error('Error checking onboarding progress:', error);
+      // On error, start from the beginning
+      setNextStep('age');
     } finally {
       setLoading(false);
     }

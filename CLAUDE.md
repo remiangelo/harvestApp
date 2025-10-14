@@ -1415,6 +1415,107 @@ Alert.alert('Save Failed', errorMessage, [
 
 ---
 
+### **Session Summary (January 21, 2025 - EVENING) - TEST MODE ONBOARDING CRASH FIXED** ✅
+
+**DEPLOYMENT STATUS**: ✅ CRITICAL FIX COMPLETE - Version 1.3.8, Build 21
+
+**CRITICAL BUG FIXED**:
+
+1. ✅ **Fixed Test Mode Onboarding Crash**
+   - **Problem**: App crashed during onboarding when using Test Mode, preventing any testing without real authentication
+   - **Root Cause**: `/app/onboarding/index.tsx` was checking for `useAuthStore.user` (which is NULL in test mode) instead of checking `isTestMode` flag
+   - **Impact**: Test mode was completely broken, developers couldn't test onboarding flow without Supabase authentication
+   - **Solution**: Updated onboarding index to check `isTestMode` BEFORE attempting database operations
+   - **Files Modified**: `app/onboarding/index.tsx` (lines 12-69)
+   - **Result**: Test mode now works perfectly, onboarding starts correctly from age step without crashes
+
+**Technical Details**:
+
+```typescript
+// BEFORE (BROKEN)
+const checkProgress = async () => {
+  if (!user) {
+    setLoading(false);
+    return;
+  }
+  // ... tries to use user.id → crash in test mode
+};
+
+// AFTER (FIXED)
+const checkProgress = async () => {
+  // In test mode, skip database check and start from beginning
+  if (isTestMode) {
+    console.log('[OnboardingIndex] Test mode detected - starting from age step');
+    setNextStep('age');
+    setLoading(false);
+    return;
+  }
+
+  if (!user) {
+    console.log('[OnboardingIndex] No user found, starting from age step');
+    setNextStep('age');
+    setLoading(false);
+    return;
+  }
+  // ... normal database check for authenticated users
+};
+```
+
+**Why This Bug Existed**:
+
+In Test Mode:
+
+- `useAuthStore.user` is **NULL** (no Supabase authentication)
+- `useAuthStore.isTestMode` is **TRUE**
+- Test user is stored in `useUserStore.currentUser`
+- Old code tried to load from database with null user → crash
+
+**Files Modified**:
+
+1. ✅ `app/onboarding/index.tsx` - Added test mode check before database queries
+2. ✅ `TESTMODE_ONBOARDING_CRASH_FIX.md` - Comprehensive documentation with root cause analysis
+
+**Impact**:
+
+**Before Fix**:
+
+- Test mode crashed immediately on onboarding
+- Developers couldn't test without Supabase setup
+- iOS Simulator testing impossible (OAuth doesn't work there)
+
+**After Fix**:
+
+- Test mode works perfectly for development
+- No database/network calls in test mode
+- Onboarding completes successfully
+- Developers can test entire flow locally
+
+**Testing Verified**:
+
+1. Clear test data: `node clearTestMode.js`
+2. Open app → Login screen
+3. Click "Enter Test Mode"
+4. **EXPECTED**: Age selection screen appears without crash
+5. Complete all onboarding steps
+6. **EXPECTED**: Successfully reach main app
+
+**Console Output**:
+
+```
+[OnboardingIndex] Checking progress - isTestMode: true
+[OnboardingIndex] User: null
+[OnboardingIndex] CurrentUser: exists
+[OnboardingIndex] Test mode detected - starting from age step
+```
+
+**Documentation Created**:
+
+- `TESTMODE_ONBOARDING_CRASH_FIX.md` - Complete technical analysis, fix details, testing guide, and future considerations
+
+**Status**: Test mode fully functional, ready for development testing without authentication
+
+---
+
 ### **Session Summary (January 14, 2025) - PRODUCTION READY WITH ALL FIXES**
 
 **CRITICAL FIXES COMPLETED**:
@@ -1713,7 +1814,16 @@ Update the "Last Updated" timestamp and progress sections to maintain accurate p
 - **Liquid Glass Implementation**: Must match mockups exactly - no creative liberties allowed
 - **Current Build**: Version 1.3.8, Build 19 (January 20, 2025)
 - **Backend Status**: Fully configured for beta testing with real users (January 17, 2025)
-- **Latest Updates (January 20, 2025)**:
+- **Latest Updates (January 21, 2025)**:
+  - ✅ Fixed critical Test Mode onboarding crash
+  - ✅ Updated `/app/onboarding/index.tsx` to check `isTestMode` before database operations
+  - ✅ Test mode now fully functional for development without authentication
+  - ✅ Created comprehensive `TESTMODE_ONBOARDING_CRASH_FIX.md` documentation
+  - ✅ Fixed chat input bar positioning (bottom padding issue)
+  - ✅ Fixed "Ready to Move Off App" text truncation in ChatMenuPopup
+  - ✅ Completed OAuth & onboarding crash analysis (no issues found)
+  - ✅ Build 21 ready for TestFlight deployment
+- **Previous Updates (January 20, 2025)**:
   - ✅ Fixed critical onboarding crash and "Save Failed" errors
   - ✅ Created profile helper system with `ensureProfileExists()`
   - ✅ Fixed race condition in onboarding completion

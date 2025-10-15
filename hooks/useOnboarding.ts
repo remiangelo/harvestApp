@@ -135,14 +135,13 @@ export const useOnboarding = () => {
         console.error('[finishOnboarding] Error updating test user:', error);
       }
 
-      // CRITICAL: Wait for state to propagate before navigating
-      // This prevents race condition where AuthGuard checks state before it's updated
-      console.log('[finishOnboarding] Waiting for state propagation...');
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // CRITICAL: Wait for state to propagate to AuthGuard
+      // AuthGuard will automatically navigate when it detects onboarding is complete
+      console.log('[finishOnboarding] Waiting for state propagation to AuthGuard...');
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      console.log('[finishOnboarding] Navigating to main app...');
-      // Navigate to main app
-      router.replace('/_tabs');
+      console.log('[finishOnboarding] State updated - AuthGuard will handle navigation');
+      // DO NOT navigate here - let AuthGuard handle it to avoid conflicts
       return { success: true };
     }
 
@@ -182,30 +181,33 @@ export const useOnboarding = () => {
 
       console.log('[finishOnboarding] Onboarding marked complete, reloading profile...');
 
-      // CRITICAL: Wait for profile to load before navigating
+      // CRITICAL: Wait for profile to load before AuthGuard navigation
       // This prevents race condition where AuthGuard checks profile before it's updated
       try {
         await loadProfile(user.id);
         console.log('[finishOnboarding] Profile reloaded successfully');
 
+        // Clear local onboarding data
+        useUserStore.getState().clearOnboardingData();
+
         // Wait for state to propagate to AuthGuard
-        console.log('[finishOnboarding] Waiting for state propagation...');
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        // AuthGuard will detect onboarding_completed=true and navigate automatically
+        console.log('[finishOnboarding] Waiting for state propagation to AuthGuard...');
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        console.log('[finishOnboarding] State updated - AuthGuard will handle navigation');
+        // DO NOT navigate here - let AuthGuard handle it to avoid conflicts
+        return { success: true };
       } catch (loadError) {
-        console.error('[finishOnboarding] Failed to load profile (non-fatal):', loadError);
-        // Continue anyway - profile will be loaded later
+        console.error('[finishOnboarding] Failed to load profile:', loadError);
+
+        Alert.alert(
+          'Profile Load Failed',
+          'Your onboarding is complete but we could not load your profile. Please restart the app.',
+          [{ text: 'OK' }]
+        );
+        return { success: false };
       }
-
-      // Clear local onboarding data
-      useUserStore.getState().clearOnboardingData();
-
-      console.log('[finishOnboarding] Navigating to main app...');
-
-      // Navigate to main app
-      router.replace('/_tabs');
-
-      console.log('[finishOnboarding] Navigation complete');
-      return { success: true };
     } catch (error) {
       console.error('[finishOnboarding] Unexpected error completing onboarding:', error);
 

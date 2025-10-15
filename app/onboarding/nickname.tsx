@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { Text, TextInput, StyleSheet } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 export default function OnboardingNickname() {
-  const [nickname, setNickname] = useState('');
+  const [firstName, setFirstName] = useState('');
   const { onboardingData } = useUserStore();
 
   // Pre-fill with restored data if available
   useEffect(() => {
-    if (onboardingData?.nickname) {
-      setNickname(onboardingData.nickname);
+    const storedFirstName = (onboardingData as any)?.first_name;
+    if (storedFirstName) {
+      setFirstName(storedFirstName);
     }
   }, [onboardingData]);
 
   const handleValidate = () => {
-    if (nickname.trim()) {
-      return { nickname: nickname.trim() };
+    const trimmedName = firstName.trim();
+    if (trimmedName && trimmedName.length >= 2) {
+      return { first_name: trimmedName };
     }
     return null;
   };
@@ -27,19 +29,20 @@ export default function OnboardingNickname() {
       currentStep="nickname"
       nextStep="photos"
       onValidate={handleValidate}
-      buttonDisabled={!nickname.trim()}
+      buttonDisabled={!firstName.trim() || firstName.trim().length < 2}
     >
-      <Text style={styles.title}>Your Harvest Name</Text>
+      <Text style={styles.title}>What&apos;s your name?</Text>
       <Text style={styles.subtitle}>
-        Create a unique nickname that represents you. It’s how others will know and remember you.
+        Let us know your first name. This is how others will see you on Harvest.
       </Text>
       <TextInput
         style={styles.input}
-        placeholder="Nickname"
+        placeholder="First Name"
         placeholderTextColor="#888"
-        value={nickname}
-        onChangeText={setNickname}
+        value={firstName}
+        onChangeText={setFirstName}
         maxLength={32}
+        autoCapitalize="words"
       />
     </OnboardingScreen>
   );

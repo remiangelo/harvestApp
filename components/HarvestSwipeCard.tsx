@@ -47,7 +47,7 @@ export default function HarvestSwipeCard({
   const position = useRef(new Animated.ValueXY()).current;
   const likeOpacity = useRef(new Animated.Value(0)).current;
   const nopeOpacity = useRef(new Animated.Value(0)).current;
-  const superLikeOpacity = useRef(new Animated.Value(0)).current;
+  const topPickOpacity = useRef(new Animated.Value(0)).current;
   const cardScale = useRef(new Animated.Value(1)).current;
 
   // Track animation state
@@ -60,7 +60,7 @@ export default function HarvestSwipeCard({
       position.stopAnimation();
       likeOpacity.stopAnimation();
       nopeOpacity.stopAnimation();
-      superLikeOpacity.stopAnimation();
+      topPickOpacity.stopAnimation();
       cardScale.stopAnimation();
     };
   }, []);
@@ -93,13 +93,13 @@ export default function HarvestSwipeCard({
         duration: 150,
         useNativeDriver: false,
       }),
-      Animated.timing(superLikeOpacity, {
+      Animated.timing(topPickOpacity, {
         toValue: 0,
         duration: 150,
         useNativeDriver: false,
       }),
     ]).start();
-  }, [position, cardScale, likeOpacity, nopeOpacity, superLikeOpacity]);
+  }, [position, cardScale, likeOpacity, nopeOpacity, topPickOpacity]);
 
   const swipeComplete = useCallback(
     (direction: 'left' | 'right' | 'up') => {
@@ -123,7 +123,7 @@ export default function HarvestSwipeCard({
         position.setValue({ x: 0, y: 0 });
         likeOpacity.setValue(0);
         nopeOpacity.setValue(0);
-        superLikeOpacity.setValue(0);
+        topPickOpacity.setValue(0);
         cardScale.setValue(1);
         isAnimating.current = false;
       }, SWIPE_OUT_DURATION);
@@ -152,6 +152,14 @@ export default function HarvestSwipeCard({
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => !isAnimating.current,
+        onMoveShouldSetPanResponder: (_, gesture) => {
+          // Only respond if the gesture is predominantly horizontal
+          // This allows vertical scrolling without triggering swipes
+          const isHorizontalSwipe = Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5;
+          const isStrongUpwardSwipe = gesture.dy < -80 && Math.abs(gesture.dx) < 50;
+
+          return !isAnimating.current && (isHorizontalSwipe || isStrongUpwardSwipe);
+        },
         onPanResponderGrant: () => {
           position.setOffset({
             x: (position.x as any)._value,
@@ -166,32 +174,50 @@ export default function HarvestSwipeCard({
           }).start();
         },
         onPanResponderMove: (_, gesture) => {
-          position.setValue({ x: gesture.dx, y: gesture.dy });
+          // Only set position for horizontal movement or strong upward swipe
+          const isHorizontalSwipe = Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5;
+          const isStrongUpwardSwipe = gesture.dy < -80;
 
-          // Update label opacities
-          const likeValue = gesture.dx > 0 ? Math.min(gesture.dx / SWIPE_THRESHOLD, 1) : 0;
-          const nopeValue =
-            gesture.dx < 0 ? Math.min(Math.abs(gesture.dx) / SWIPE_THRESHOLD, 1) : 0;
-          const superValue =
-            gesture.dy < -50 ? Math.min(Math.abs(gesture.dy) / SWIPE_THRESHOLD, 1) : 0;
+          if (isHorizontalSwipe) {
+            // Horizontal swipe - allow left/right
+            position.setValue({ x: gesture.dx, y: 0 });
 
-          likeOpacity.setValue(likeValue);
-          nopeOpacity.setValue(nopeValue);
-          superLikeOpacity.setValue(superValue);
+            const likeValue = gesture.dx > 0 ? Math.min(gesture.dx / SWIPE_THRESHOLD, 1) : 0;
+            const nopeValue =
+              gesture.dx < 0 ? Math.min(Math.abs(gesture.dx) / SWIPE_THRESHOLD, 1) : 0;
 
-          // Haptic feedback at threshold
-          if ((likeValue === 1 || nopeValue === 1 || superValue === 1) && !isAnimating.current) {
-            triggerHaptic();
+            likeOpacity.setValue(likeValue);
+            nopeOpacity.setValue(nopeValue);
+            topPickOpacity.setValue(0);
+
+            if ((likeValue === 1 || nopeValue === 1) && !isAnimating.current) {
+              triggerHaptic();
+            }
+          } else if (isStrongUpwardSwipe && onSuperLike) {
+            // Strong upward swipe for top pick
+            position.setValue({ x: 0, y: gesture.dy });
+            const topPickValue = Math.min(Math.abs(gesture.dy) / SWIPE_THRESHOLD, 1);
+            topPickOpacity.setValue(topPickValue);
+            likeOpacity.setValue(0);
+            nopeOpacity.setValue(0);
+
+            if (topPickValue === 1 && !isAnimating.current) {
+              triggerHaptic();
+            }
           }
         },
         onPanResponderRelease: (_, gesture) => {
           position.flattenOffset();
 
-          if (gesture.dy < -SWIPE_THRESHOLD && onSuperLike) {
+          const isHorizontalSwipe = Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5;
+          const isStrongUpwardSwipe =
+            gesture.dy < -SWIPE_THRESHOLD * 1.2 && Math.abs(gesture.dx) < 50;
+
+          if (isStrongUpwardSwipe && onSuperLike) {
             forceSwipe('up');
-          } else if (gesture.dx > SWIPE_THRESHOLD) {
+          } else if (isHorizontalSwipe && gesture.dx > SWIPE_THRESHOLD) {
             forceSwipe('right');
-          } else if (gesture.dx < -SWIPE_THRESHOLD) {
+          } else if (isHorizontalSwipe && gesture.dx < -SWIPE_THRESHOLD) {
             forceSwipe('left');
           } else {
             resetPosition();
@@ -203,7 +229,7 @@ export default function HarvestSwipeCard({
       cardScale,
       likeOpacity,
       nopeOpacity,
-      superLikeOpacity,
+      topPickOpacity,
       forceSwipe,
       resetPosition,
       triggerHaptic,
@@ -313,9 +339,9 @@ export default function HarvestSwipeCard({
             </View>
           </Animated.View>
 
-          <Animated.View style={[styles.superLikeLabel, { opacity: superLikeOpacity }]}>
+          <Animated.View style={[styles.topPickLabel, { opacity: topPickOpacity }]}>
             <View style={styles.labelContainer}>
-              <Text style={styles.superLikeText}>SUPER LIKE</Text>
+              <Text style={styles.topPickText}>TOP PICK</Text>
             </View>
           </Animated.View>
 
@@ -679,7 +705,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     overflow: 'hidden',
   },
-  superLikeLabel: {
+  topPickLabel: {
     alignItems: 'center',
     left: 0,
     position: 'absolute',
@@ -687,7 +713,7 @@ const styles = StyleSheet.create({
     top: '35%',
     zIndex: 20,
   },
-  superLikeText: {
+  topPickText: {
     color: '#00C9FF',
     fontSize: 32,
     fontWeight: 'bold',

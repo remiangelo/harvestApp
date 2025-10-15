@@ -16,6 +16,7 @@ import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { theme } from '../../constants/theme';
 import { GardenerChat } from '../../components/gardener/GardenerChat';
 import { DailyQuizPopup } from '../../components/gardener/DailyQuizPopup';
+import { ValuesQuestionnaire } from '../../components/gardener/ValuesQuestionnaire';
 import { useGardenerStore } from '../../stores/useGardenerStore';
 import { useRouter } from 'expo-router';
 
@@ -119,7 +120,7 @@ export default function GardenerScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedAdvice, setExpandedAdvice] = useState<string | null>(null);
   const [reflection, setReflection] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'tips' | 'chat'>('tips');
+  const [activeTab, setActiveTab] = useState<'tips' | 'chat' | 'values'>('tips');
   const [showQuiz, setShowQuiz] = useState(false);
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const router = useRouter();
@@ -201,7 +202,7 @@ export default function GardenerScreen() {
               <View style={[styles.tabBubble, activeTab === 'tips' && styles.activeTabBubble]}>
                 <Ionicons
                   name="bulb"
-                  size={20}
+                  size={18}
                   color={activeTab === 'tips' ? 'white' : 'rgba(255, 255, 255, 0.6)'}
                 />
                 <Text style={[styles.tabText, activeTab === 'tips' && styles.activeTabText]}>
@@ -210,11 +211,24 @@ export default function GardenerScreen() {
               </View>
             </TouchableOpacity>
 
+            <TouchableOpacity onPress={() => setActiveTab('values')} style={styles.tab}>
+              <View style={[styles.tabBubble, activeTab === 'values' && styles.activeTabBubble]}>
+                <Ionicons
+                  name="heart-circle"
+                  size={18}
+                  color={activeTab === 'values' ? 'white' : 'rgba(255, 255, 255, 0.6)'}
+                />
+                <Text style={[styles.tabText, activeTab === 'values' && styles.activeTabText]}>
+                  Values
+                </Text>
+              </View>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => setActiveTab('chat')} style={styles.tab}>
               <View style={[styles.tabBubble, activeTab === 'chat' && styles.activeTabBubble]}>
                 <Ionicons
                   name="chatbubbles"
-                  size={20}
+                  size={18}
                   color={activeTab === 'chat' ? 'white' : 'rgba(255, 255, 255, 0.6)'}
                 />
                 <Text style={[styles.tabText, activeTab === 'chat' && styles.activeTabText]}>
@@ -385,6 +399,11 @@ export default function GardenerScreen() {
             </TouchableOpacity>
           </LiquidGlassView>
         </ScrollView>
+      ) : activeTab === 'values' ? (
+        // Values Tab
+        <View style={[styles.chatContainer, { padding: 16 }]}>
+          <ValuesQuestionnaire />
+        </View>
       ) : (
         // AI Chat Tab
         <View style={styles.chatContainer}>

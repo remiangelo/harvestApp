@@ -25,16 +25,22 @@ interface ChatMessage {
 
 class GardenerService {
   private openai: OpenAI | null = null;
-  private systemPrompt = `You are The Gardener, a wise and empathetic dating coach in the Harvest dating app. 
-Your role is to help users cultivate meaningful connections and grow in their dating journey. 
-You provide:
-- Personalized dating advice based on their experiences
-- Tips for creating authentic connections
-- Guidance on communication and relationship skills
-- Support for dating challenges and self-improvement
-- Encouragement that aligns with "Mindful Dating, Real Connections" philosophy
+  private systemPrompt = `You are The Gardener, a wise and empathetic dating coach in the Harvest dating app focused on mindful dating and real connections.
 
-Keep responses warm, supportive, and actionable. Limit responses to 2-3 paragraphs unless more detail is specifically requested.`;
+Your coaching philosophy:
+- Teach principles of empathy, communication, and emotional intelligence
+- Guide users to find their own authentic voice (NEVER suggest specific messages to send)
+- Help users develop self-regulation and self-awareness
+- Focus on understanding underlying emotions and motivations
+- Encourage genuine connection over performance or strategy
+
+Communication style:
+- Keep responses to 2-3 sentences maximum
+- Be warm, supportive, and insightful
+- Ask reflective questions to help users discover their own answers
+- Focus on "why" and "how to think about it" rather than "what to do"
+
+Remember: You're teaching users to be better daters by developing their emotional intelligence, not giving them scripts.`;
 
   private quizSystemPrompt = `You create thoughtful daily quiz questions to help users understand their dating preferences and values.
 Generate questions that:
@@ -74,7 +80,7 @@ Format: Return a JSON object with 'question' and 'options' array (each with 'tex
         model: 'gpt-4-turbo-preview',
         messages: messages as any,
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 200, // Reduced for more concise responses
       });
 
       return response.choices[0]?.message?.content || this.getFallbackResponse(userMessage);
@@ -155,22 +161,26 @@ Create a fresh question exploring a different aspect of dating preferences or va
     const lowerMessage = userMessage.toLowerCase();
 
     if (lowerMessage.includes('nervous') || lowerMessage.includes('anxiety')) {
-      return "It's completely natural to feel nervous about dating! Remember, the other person is likely feeling the same way. Focus on being authentically yourself rather than trying to be perfect. Take deep breaths, prepare a few conversation topics you're genuinely interested in, and remember that each date is simply an opportunity to meet someone new and learn about them. The right person will appreciate you for who you are.";
+      return 'Nervousness often signals you care about connection. What if, instead of trying to eliminate it, you let it remind you to stay present and curious about the other person?';
     }
 
     if (lowerMessage.includes('profile') || lowerMessage.includes('bio')) {
-      return "A great profile shows your authentic self! Use recent photos that show you doing things you enjoy. In your bio, be specific about your interests rather than generic - instead of 'I like music,' try 'I'm learning guitar and love discovering indie bands at small venues.' Include what you're looking for and what makes you unique. Remember, you're not trying to appeal to everyone, just the right person for you.";
+      return 'Your profile works best when it reflects what genuinely excites you, not what you think others want to see. What part of yourself do you most want someone to understand?';
     }
 
     if (lowerMessage.includes('first date') || lowerMessage.includes('meet')) {
-      return 'First dates are about connection, not perfection! Choose an activity that allows for conversation but takes pressure off - coffee, a walk in the park, or visiting a farmers market are great options. Ask open-ended questions and really listen to their answers. Share your genuine interests and experiences. Most importantly, stay present and enjoy getting to know someone new rather than worrying about the outcome.';
+      return 'First dates thrive on genuine curiosity rather than performance. What would help you feel more present and less focused on outcome?';
     }
 
     if (lowerMessage.includes('ghosted') || lowerMessage.includes('rejected')) {
-      return "I understand how disappointing that feels. Remember that dating is a process of finding the right match, and when someone isn't interested, they're doing you a favor by freeing you to find someone who truly values you. Their behavior says more about them than about you. Take time to process your feelings, then refocus on your own growth and the connections that do align with your values.";
+      return 'That disappointment is real, but notice: their choice freed you to find better alignment. What did this experience teach you about what you truly need?';
     }
 
-    return "That's a great question about dating! While everyone's journey is unique, remember that authentic connections come from being genuinely yourself. Focus on clear communication, shared values, and mutual respect. Take things at a pace that feels comfortable for you, and trust your instincts. Is there a specific aspect of dating you'd like to explore further?";
+    if (lowerMessage.includes('what to say') || lowerMessage.includes('message')) {
+      return "I don't give scripts because authentic connection requires your voice, not mine. What feels true to who you are in this moment?";
+    }
+
+    return "Tell me more about what you're experiencing. What feels challenging for you right now in your dating journey?";
   }
 
   private getFallbackQuiz(): QuizQuestion {

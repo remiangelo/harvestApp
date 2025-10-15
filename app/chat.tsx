@@ -25,6 +25,8 @@ import { isUuid, ensureConversation } from '../lib/chat';
 import { Animated } from 'react-native';
 import { ChatMenuPopup } from '../components/ChatMenuPopup';
 import * as ImagePicker from 'expo-image-picker';
+import { MindfulMessageModal } from '../components/MindfulMessageModal';
+import { analyzeMessage, isMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/A0354E/FFFFFF?text=No+Image';
 
@@ -38,6 +40,9 @@ export default function ChatScreen() {
   const [isTyping, setIsTyping] = useState(false);
   const [otherUserTyping, setOtherUserTyping] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [mindfulModalVisible, setMindfulModalVisible] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState('');
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const subscriptionRef = useRef<any>(null);
   const typingTimeoutRef = useRef<any>(null);
@@ -225,10 +230,43 @@ export default function ChatScreen() {
     );
   }
 
-  const sendMessage = async () => {
+  // Analyze message before sending
+  const analyzeThenSend = async () => {
     if (!newMessage.trim() || !currentUser || !match) return;
 
     const messageText = newMessage.trim();
+
+    // Check if mindful messaging is enabled
+    const isEnabled = await isMindfulMessagingEnabled();
+
+    if (!isEnabled) {
+      // Feature disabled, send directly
+      console.log('[Chat] Mindful messaging disabled, sending directly');
+      await actualSendMessage(messageText);
+      return;
+    }
+
+    // Analyze the message with mindful messaging
+    console.log('[Chat] Analyzing message with mindful messaging...');
+    const analysis = await analyzeMessage(messageText);
+
+    if (analysis.needsReview) {
+      // Show warning modal
+      console.log('[Chat] Message needs review, showing modal');
+      setPendingMessage(messageText);
+      setAnalysisResult(analysis);
+      setMindfulModalVisible(true);
+    } else {
+      // Message is fine, send it
+      console.log('[Chat] Message passed analysis, sending');
+      await actualSendMessage(messageText);
+    }
+  };
+
+  // Actually send the message (bypassing analysis)
+  const actualSendMessage = async (messageText: string) => {
+    if (!currentUser || !match) return;
+
     setNewMessage(''); // Clear input immediately for better UX
 
     // Optimistically add the message to the UI
@@ -284,6 +322,28 @@ export default function ChatScreen() {
       // Remove the optimistic message on error
       setMessages((current) => current.filter((m) => m.id !== optimisticMessage.id));
     }
+  };
+
+  // Handle modal actions
+  const handleEditMessage = () => {
+    setMindfulModalVisible(false);
+    // Restore the message to the input for editing
+    setNewMessage(pendingMessage);
+    setPendingMessage('');
+    setAnalysisResult(null);
+  };
+
+  const handleSendAnyway = async () => {
+    setMindfulModalVisible(false);
+    await actualSendMessage(pendingMessage);
+    setPendingMessage('');
+    setAnalysisResult(null);
+  };
+
+  const handleCancelMessage = () => {
+    setMindfulModalVisible(false);
+    setPendingMessage('');
+    setAnalysisResult(null);
   };
 
   const formatMessageTime = (timestamp: string) => {
@@ -529,12 +589,13 @@ export default function ChatScreen() {
                 placeholder="Type a message..."
                 placeholderTextColor="#999"
                 multiline
+                contextMenuHidden={true}
               />
             </View>
 
             <TouchableOpacity
               style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
-              onPress={sendMessage}
+              onPress={analyzeThenSend}
               disabled={!newMessage.trim()}
             >
               <Ionicons name="send" size={24} color={newMessage.trim() ? '#A0354E' : '#ccc'} />
@@ -570,6 +631,19 @@ export default function ChatScreen() {
           Alert.alert('Unmatch', 'Unmatch logic will be implemented with matches table.');
         }}
       />
+
+      {/* Mindful Messaging Modal */}
+      {analysisResult && (
+        <MindfulMessageModal
+          visible={mindfulModalVisible}
+          onClose={handleCancelMessage}
+          onEdit={handleEditMessage}
+          onSendAnyway={handleSendAnyway}
+          reason={analysisResult.reason}
+          growthLesson={analysisResult.growthLesson}
+          severity={analysisResult.severity}
+        />
+      )}
     </View>
   );
 }

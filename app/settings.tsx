@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,12 +17,11 @@ import { theme } from '../constants/theme';
 import { useAuthStore } from '../stores/useAuthStore';
 import useUserStore from '../stores/useUserStore';
 import { LogoutButton } from '../components/LogoutButton';
+import { setMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user } = useAuthStore();
-  const { currentUser, updateOnboardingData } = useUserStore();
   const colorScheme = useColorScheme();
 
   // Prepare switch colors for dark mode compatibility
@@ -50,6 +49,20 @@ export default function SettingsScreen() {
     readReceipts: true,
   });
 
+  const [communication, setCommunication] = useState({
+    mindfulMessaging: true,
+  });
+
+  // Load mindful messaging setting on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      const { isMindfulMessagingEnabled } = await import('../lib/ai/mindfulMessaging');
+      const enabled = await isMindfulMessagingEnabled();
+      setCommunication((prev) => ({ ...prev, mindfulMessaging: enabled }));
+    };
+    loadSettings();
+  }, []);
+
   const handleNotificationToggle = (key: keyof typeof notifications) => {
     setNotifications((prev) => ({
       ...prev,
@@ -62,6 +75,20 @@ export default function SettingsScreen() {
       ...prev,
       [key]: !prev[key],
     }));
+  };
+
+  const handleCommunicationToggle = async (key: keyof typeof communication) => {
+    const newValue = !communication[key];
+
+    setCommunication((prev) => ({
+      ...prev,
+      [key]: newValue,
+    }));
+
+    // Persist mindful messaging setting
+    if (key === 'mindfulMessaging') {
+      await setMindfulMessagingEnabled(newValue);
+    }
   };
 
   const scrollContentStyle = useMemo(
@@ -199,6 +226,32 @@ export default function SettingsScreen() {
             <Switch
               value={notifications.superLikes}
               onValueChange={() => handleNotificationToggle('superLikes')}
+              trackColor={{
+                false: switchColors.trackColorFalse,
+                true: switchColors.trackColorTrue,
+              }}
+              thumbColor={switchColors.thumbColor}
+            />
+          </View>
+        </View>
+
+        {/* Communication Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Communication</Text>
+
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <Ionicons name="heart-circle-outline" size={20} color={theme.colors.text.primary} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.settingText}>Mindful Messaging</Text>
+                <Text style={styles.settingDescription}>
+                  Get gentle reminders to pause before sending potentially harmful messages
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={communication.mindfulMessaging}
+              onValueChange={() => handleCommunicationToggle('mindfulMessaging')}
               trackColor={{
                 false: switchColors.trackColorFalse,
                 true: switchColors.trackColorTrue,
@@ -365,6 +418,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 12,
     textTransform: 'uppercase',
+  },
+  settingDescription: {
+    color: theme.colors.text.tertiary,
+    fontSize: 13,
+    lineHeight: 18,
+    marginLeft: 12,
+    marginTop: 4,
   },
   settingInfo: {
     alignItems: 'center',

@@ -6,18 +6,31 @@ import { OnboardingScreen } from '../../components/OnboardingScreen';
 const GOALS = ['Dating', 'Relationship', 'Marriage'];
 
 export default function OnboardingGoals() {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
   const { onboardingData } = useUserStore();
 
   // Pre-fill with restored data if available
   useEffect(() => {
     if (onboardingData?.goals) {
-      setSelected(onboardingData.goals);
+      // Handle both array and string formats for backward compatibility
+      if (Array.isArray(onboardingData.goals)) {
+        setSelected(onboardingData.goals);
+      } else if (typeof onboardingData.goals === 'string') {
+        setSelected([onboardingData.goals]);
+      }
     }
   }, [onboardingData]);
 
+  const toggleGoal = (goal: string) => {
+    if (selected.includes(goal)) {
+      setSelected(selected.filter((item) => item !== goal));
+    } else {
+      setSelected([...selected, goal]);
+    }
+  };
+
   const handleValidate = () => {
-    if (selected) {
+    if (selected.length > 0) {
       return { goals: selected };
     }
     return null;
@@ -27,25 +40,26 @@ export default function OnboardingGoals() {
     <OnboardingScreen
       progress={100}
       currentStep="goals"
-      nextStep="gender"
+      nextStep="gender-identity"
       onValidate={handleValidate}
-      buttonDisabled={!selected}
+      buttonDisabled={selected.length === 0}
     >
       <Text style={styles.title}>Relationship Goals</Text>
       <Text style={styles.subtitle}>
-        Choose the type of relationship you’re seeking on Harvest!
+        Choose all that interest you. You can select multiple options.
       </Text>
       <View style={styles.optionsContainer}>
         {GOALS.map((goal) => (
           <TouchableOpacity
             key={goal}
-            style={[styles.option, selected === goal && styles.selectedOption]}
-            onPress={() => setSelected(goal)}
+            style={[styles.option, selected.includes(goal) && styles.selectedOption]}
+            onPress={() => toggleGoal(goal)}
             activeOpacity={0.8}
           >
-            <Text style={[styles.optionText, selected === goal && styles.selectedOptionText]}>
+            <Text style={[styles.optionText, selected.includes(goal) && styles.selectedOptionText]}>
               {goal}
             </Text>
+            {selected.includes(goal) && <Text style={styles.checkmark}>✓</Text>}
           </TouchableOpacity>
         ))}
       </View>
@@ -54,6 +68,12 @@ export default function OnboardingGoals() {
 }
 
 const styles = StyleSheet.create({
+  checkmark: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
   option: {
     alignItems: 'center',
     backgroundColor: '#fff',

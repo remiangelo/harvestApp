@@ -1,0 +1,188 @@
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, Alert } from 'react-native';
+import { OnboardingScreen } from '../../components/OnboardingScreen';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+
+export default function TermsScreen() {
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const handleValidate = () => {
+    if (ageConfirmed && termsAccepted) {
+      return {
+        age_confirmed: true,
+        terms_accepted: true,
+      };
+    }
+    return null;
+  };
+
+  const handleNext = () => {
+    router.push('/onboarding/nickname');
+  };
+
+  const openTermsOfService = () => {
+    router.push('/legal/terms-of-service' as any);
+  };
+
+  const openPrivacyPolicy = () => {
+    router.push('/legal/privacy-policy' as any);
+  };
+
+  const openCommunityGuidelines = () => {
+    router.push('/legal/community-guidelines' as any);
+  };
+
+  return (
+    <OnboardingScreen
+      progress={60}
+      currentStep="terms"
+      nextStep="nickname"
+      onValidate={handleValidate}
+      showBackButton={true}
+    >
+      <Text style={styles.title}>Terms & Privacy</Text>
+      <Text style={styles.subtitle}>Before we continue, please confirm:</Text>
+      <View style={styles.container}>
+        <View style={styles.checkboxContainer}>
+          <TouchableOpacity
+            style={styles.checkbox}
+            onPress={() => setAgeConfirmed(!ageConfirmed)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.checkboxBox, ageConfirmed && styles.checkboxBoxChecked]}>
+              {ageConfirmed && <Ionicons name="checkmark" size={20} color="#fff" />}
+            </View>
+            <Text style={styles.checkboxLabel}>I am at least 18 years old</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.checkboxContainer}>
+          <TouchableOpacity
+            style={styles.checkbox}
+            onPress={() => setTermsAccepted(!termsAccepted)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.checkboxBox, termsAccepted && styles.checkboxBoxChecked]}>
+              {termsAccepted && <Ionicons name="checkmark" size={20} color="#fff" />}
+            </View>
+            <View style={styles.checkboxLabelContainer}>
+              <Text style={styles.checkboxLabel}>
+                I agree to the{' '}
+                <Text style={styles.link} onPress={openTermsOfService}>
+                  Terms of Service
+                </Text>{' '}
+                and{' '}
+                <Text style={styles.link} onPress={openPrivacyPolicy}>
+                  Privacy Policy
+                </Text>
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={styles.guidelinesButton} onPress={openCommunityGuidelines}>
+          <Text style={styles.guidelinesButtonText}>View Community Guidelines</Text>
+          <Ionicons name="chevron-forward" size={20} color="#8B1E2D" />
+        </TouchableOpacity>
+
+        <View style={styles.infoBox}>
+          <Ionicons name="information-circle-outline" size={24} color="#8B1E2D" />
+          <Text style={styles.infoText}>
+            By continuing, you acknowledge that you have read and understood our policies.
+          </Text>
+        </View>
+      </View>
+    </OnboardingScreen>
+  );
+}
+
+const styles = StyleSheet.create({
+  checkbox: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  checkboxBox: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(139, 30, 45, 0.3)',
+    borderRadius: 6,
+    borderWidth: 2,
+    height: 28,
+    justifyContent: 'center',
+    width: 28,
+  },
+  checkboxBoxChecked: {
+    backgroundColor: '#8B1E2D',
+    borderColor: '#8B1E2D',
+  },
+  checkboxContainer: {
+    marginBottom: 20,
+    width: '100%',
+  },
+  checkboxLabel: {
+    color: '#333',
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  checkboxLabelContainer: {
+    flex: 1,
+  },
+  container: {
+    gap: 12,
+    width: '100%',
+  },
+  guidelinesButton: {
+    alignItems: 'center',
+    borderColor: '#8B1E2D',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    padding: 16,
+  },
+  guidelinesButtonText: {
+    color: '#8B1E2D',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  infoBox: {
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(139, 30, 45, 0.05)',
+    borderLeftColor: '#8B1E2D',
+    borderLeftWidth: 4,
+    borderRadius: 8,
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+    padding: 16,
+  },
+  infoText: {
+    color: '#666',
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  link: {
+    color: '#8B1E2D',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  subtitle: {
+    color: '#555',
+    fontSize: 16,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  title: {
+    color: '#222',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+});

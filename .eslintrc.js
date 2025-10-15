@@ -38,7 +38,7 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
 
     // General
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': 'off', // Allow console for debugging production issues
     'prettier/prettier': 'error',
   },
   settings: {

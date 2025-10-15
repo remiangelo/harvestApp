@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
+import { ProfileViewModal, ProfileData } from '../../components/ProfileViewModal';
 import { router } from 'expo-router';
 import { demoChats, getUnreadChatCount } from '../../data/demoChats';
 import { format } from 'date-fns';
@@ -29,6 +30,8 @@ export default function MatchesScreen() {
   const [recentMatches, setRecentMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [chatsLoading, setChatsLoading] = useState(false); // Set to false to show demo chats immediately
+  const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const { currentUser } = useUser();
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -160,6 +163,26 @@ export default function MatchesScreen() {
     }
   };
 
+  const handleMatchPress = (match: any) => {
+    // Create profile data from match
+    const profileData: ProfileData = {
+      id: match.id,
+      name: match.name,
+      photos: match.photo ? [match.photo] : [],
+      // Add more fields if available from the match data
+    };
+    setSelectedProfile(profileData);
+    setShowProfileModal(true);
+  };
+
+  const handleSendMessage = () => {
+    // Close modal and navigate to chat
+    setShowProfileModal(false);
+    if (selectedProfile) {
+      router.push(`/chat?id=${selectedProfile.id}` as any);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -203,7 +226,11 @@ export default function MatchesScreen() {
             ) : recentMatches.length > 0 ? (
               recentMatches.map((match) => (
                 <Animated.View key={match.id} style={{ opacity: fadeAnim }}>
-                  <TouchableOpacity style={styles.matchItem}>
+                  <TouchableOpacity
+                    style={styles.matchItem}
+                    onPress={() => handleMatchPress(match)}
+                    activeOpacity={0.7}
+                  >
                     <View style={styles.matchImageContainer}>
                       <Image
                         source={{ uri: match.photo || FALLBACK_IMAGE }}
@@ -308,6 +335,14 @@ export default function MatchesScreen() {
           )}
         </ScrollView>
       </LiquidGlassView>
+
+      {/* Profile View Modal */}
+      <ProfileViewModal
+        visible={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        profile={selectedProfile}
+        onSendMessage={handleSendMessage}
+      />
     </View>
   );
 }

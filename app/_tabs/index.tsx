@@ -184,7 +184,7 @@ export default function SwipingScreen() {
     }
   }, [currentProfile, user, isTestMode, nextProfile]);
 
-  const handleSuperLike = React.useCallback(async () => {
+  const handleTopPick = React.useCallback(async () => {
     try {
       if (!currentProfile) {
         return;
@@ -192,7 +192,7 @@ export default function SwipingScreen() {
 
       if (user && !isTestMode) {
         // Save swipe to database
-        const result = await saveSwipe(user.id, currentProfile.id, 'super_like');
+        const result = await saveSwipe(user.id, currentProfile.id, 'top_pick');
 
         if (result.success && result.isMatch) {
           setMatchedProfile(currentProfile);
@@ -209,9 +209,9 @@ export default function SwipingScreen() {
         nextProfile();
       } else {
         // Test mode or no user - just simulate
-        // Test mode - simulating super like
-        // Super likes have higher match rate
-        const isMatch = Math.random() > 0.1; // 90% match rate for super likes
+        // Test mode - simulating top pick
+        // Top picks have higher match rate
+        const isMatch = Math.random() > 0.1; // 90% match rate for top picks
         if (isMatch) {
           setMatchedProfile(currentProfile);
           setShowMatchModal(true);
@@ -219,8 +219,8 @@ export default function SwipingScreen() {
         nextProfile();
       }
     } catch (error) {
-      console.error('Error in handleSuperLike:', error);
-      Alert.alert('Error', 'Failed to process super like. Please try again.');
+      console.error('Error in handleTopPick:', error);
+      Alert.alert('Error', 'Failed to process top pick. Please try again.');
       nextProfile();
     }
   }, [currentProfile, user, isTestMode, nextProfile]);
@@ -269,7 +269,7 @@ export default function SwipingScreen() {
           nextProfiles={nextProfiles}
           onLike={handleLike}
           onDislike={handleDislike}
-          onSuperLike={handleSuperLike}
+          onSuperLike={handleTopPick}
         />
 
         {matchedProfile && (

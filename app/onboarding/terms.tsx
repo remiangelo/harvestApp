@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,16 +10,11 @@ export default function TermsScreen() {
 
   const handleValidate = () => {
     if (ageConfirmed && termsAccepted) {
-      return {
-        age_confirmed: true,
-        terms_accepted: true,
-      };
+      // These are validation flags only - don't save to database
+      // Just return empty object to allow progression
+      return {};
     }
     return null;
-  };
-
-  const handleNext = () => {
-    router.push('/onboarding/nickname');
   };
 
   const openTermsOfService = () => {
@@ -41,6 +36,7 @@ export default function TermsScreen() {
       nextStep="nickname"
       onValidate={handleValidate}
       showBackButton={true}
+      buttonDisabled={!(ageConfirmed && termsAccepted)}
     >
       <Text style={styles.title}>Terms & Privacy</Text>
       <Text style={styles.subtitle}>Before we continue, please confirm:</Text>
@@ -106,8 +102,8 @@ const styles = StyleSheet.create({
   },
   checkboxBox: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderColor: 'rgba(139, 30, 45, 0.3)',
+    backgroundColor: '#fff',
+    borderColor: '#8B1E2D',
     borderRadius: 6,
     borderWidth: 2,
     height: 28,

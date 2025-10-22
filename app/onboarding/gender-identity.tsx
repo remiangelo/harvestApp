@@ -10,7 +10,7 @@ export default function GenderIdentityScreen() {
 
   const handleValidate = () => {
     if (selected) {
-      return { gender_identity: selected };
+      return { gender: selected }; // Fixed: Database column is 'gender' not 'gender_identity'
     }
     return null;
   };

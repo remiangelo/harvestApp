@@ -10,28 +10,28 @@ export default function InterestedInScreen() {
   const [selected, setSelected] = useState<string[]>([]);
   const { onboardingData } = useOnboarding();
 
-  // Smart defaults based on gender identity and sexual orientation
+  // Smart defaults based on gender and preferences (fixed column names)
   useEffect(() => {
-    const genderIdentity = (onboardingData as any)?.gender_identity;
-    const sexualOrientation = (onboardingData as any)?.sexual_orientation;
+    const gender = onboardingData?.gender;
+    const preferences = onboardingData?.preferences;
 
-    if (selected.length === 0 && genderIdentity && sexualOrientation) {
+    if (selected.length === 0 && gender && preferences) {
       let defaults: string[] = [];
 
-      if (sexualOrientation === 'Straight') {
-        if (genderIdentity === 'Man') {
+      if (preferences === 'Straight') {
+        if (gender === 'Man') {
           defaults = ['Women'];
-        } else if (genderIdentity === 'Woman') {
+        } else if (gender === 'Woman') {
           defaults = ['Men'];
         }
-      } else if (sexualOrientation === 'Gay' && genderIdentity === 'Man') {
+      } else if (preferences === 'Gay' && gender === 'Man') {
         defaults = ['Men'];
-      } else if (sexualOrientation === 'Lesbian' && genderIdentity === 'Woman') {
+      } else if (preferences === 'Lesbian' && gender === 'Woman') {
         defaults = ['Women'];
       } else if (
-        sexualOrientation === 'Bisexual' ||
-        sexualOrientation === 'Pansexual' ||
-        sexualOrientation === 'Queer'
+        preferences === 'Bisexual' ||
+        preferences === 'Pansexual' ||
+        preferences === 'Queer'
       ) {
         defaults = ['Everyone'];
       }
@@ -63,7 +63,10 @@ export default function InterestedInScreen() {
 
   const handleValidate = () => {
     if (selected.length > 0) {
-      return { interested_in: selected };
+      // Note: interested_in doesn't have a database column
+      // This data is used for matching logic but not persisted
+      // Return empty object to allow progression
+      return {};
     }
     return null;
   };

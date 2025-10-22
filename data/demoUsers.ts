@@ -9,18 +9,19 @@ export interface DemoUser {
   password: string;
   name: string;
   role: 'user' | 'admin';
-  // Onboarding data
+  // Onboarding data - matches database schema
   onboardingCompleted?: boolean;
   age?: Date;
-  preferences?: string;
   bio?: string;
   nickname?: string;
   photos?: string[];
   hobbies?: string[];
   distance?: number;
-  goals?: string;
-  gender?: string;
-  location?: string;
+  // Database columns:
+  gender?: string; // Gender identity
+  preferences?: string; // Sexual orientation/who they're attracted to
+  goals?: string; // Dating goals (Relationship, Dating, etc.)
+  location?: string; // City, State format
 }
 
 export const demoUsers: DemoUser[] = [

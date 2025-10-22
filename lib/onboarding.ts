@@ -35,11 +35,25 @@ export const saveOnboardingStep = async (
     // Handle special cases for data transformation
     const processedData: Record<string, any> = {};
 
-    // Convert age Date to actual age number
+    // Convert age Date to actual age number with validation
     if (stepData.age && stepData.age instanceof Date) {
       const birthYear = stepData.age.getFullYear();
       const currentYear = new Date().getFullYear();
-      processedData.age = currentYear - birthYear;
+      const calculatedAge = currentYear - birthYear;
+
+      // Validate age is within acceptable range (18-100)
+      if (calculatedAge < 18 || calculatedAge > 100) {
+        return {
+          data: null,
+          error: {
+            message: 'Age must be between 18 and 100 years old.',
+            code: 'INVALID_AGE',
+            details: { calculatedAge },
+          },
+        };
+      }
+
+      processedData.age = calculatedAge;
     }
 
     // Handle distance preference
@@ -47,21 +61,38 @@ export const saveOnboardingStep = async (
       processedData.distance_preference = stepData.distance;
     }
 
-    // Handle photos array - upload to storage in parallel
+    // Handle photos array - upload to storage in parallel with timeout protection
     if (stepData.photos && Array.isArray(stepData.photos)) {
+      // Timeout wrapper to prevent infinite hangs
+      const uploadWithTimeout = (promise: Promise<any>, timeout: number) => {
+        return Promise.race([
+          promise,
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Upload timeout')), timeout)
+          ),
+        ]);
+      };
+
       const uploadPromises = stepData.photos.map(async (photoUri, i) => {
-        if (photoUri && !photoUri.startsWith('http')) {
-          // This is a local URI, needs to be uploaded
-          const { url, error } = await uploadPhoto(userId, photoUri, i);
-          if (url) {
-            return url;
-          } else {
-            console.error(`Failed to upload photo ${i}:`, error);
-            // Return the local URI as fallback
+        try {
+          if (photoUri && !photoUri.startsWith('http')) {
+            // This is a local URI, needs to be uploaded with 30s timeout
+            const uploadPromise = uploadPhoto(userId, photoUri, i);
+            const { url, error } = (await uploadWithTimeout(uploadPromise, 30000)) as any;
+            if (url) {
+              return url;
+            } else {
+              console.error(`Failed to upload photo ${i}:`, error);
+              // Return the local URI as fallback
+              return photoUri;
+            }
+          } else if (photoUri) {
+            // This is already a URL, keep it
             return photoUri;
           }
-        } else if (photoUri) {
-          // This is already a URL, keep it
+        } catch (timeoutError) {
+          console.error(`Photo ${i} upload timeout after 30s:`, timeoutError);
+          // Return local URI as fallback on timeout
           return photoUri;
         }
         return null;

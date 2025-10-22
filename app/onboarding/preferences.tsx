@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 

@@ -35,13 +35,13 @@ export default function ProfileScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 100],
-    outputRange: [1, 0.85], // Never fully transparent
+    outputRange: [1, 1], // Always fully visible - no fade out
     extrapolate: 'clamp',
   });
 
   const headerTranslateY = scrollY.interpolate({
     inputRange: [0, 100],
-    outputRange: [0, -15], // Reduce movement, never off-screen
+    outputRange: [0, 0], // No movement - always in same position
     extrapolate: 'clamp',
   });
 
@@ -178,7 +178,7 @@ export default function ProfileScreen() {
           scrollEventThrottle={16}
         >
           {/* Compact Profile Header */}
-          <View style={[styles.profileHeader, { paddingTop: insets.top + 35 }]}>
+          <View style={[styles.profileHeader, { paddingTop: insets.top + 60 }]}>
             <View style={styles.profileInfo}>
               <TouchableOpacity
                 style={styles.mainPhotoContainer}
@@ -215,7 +215,7 @@ export default function ProfileScreen() {
             </View>
           </View>
           {/* Bio Section */}
-          <View style={styles.bioSection}>
+          <View style={[styles.bioSection, isEditing && styles.editModeSection]}>
             <Text style={styles.sectionTitle}>About</Text>
             {isEditing ? (
               <TextInput
@@ -234,7 +234,7 @@ export default function ProfileScreen() {
           </View>
 
           {/* Interests */}
-          <View style={styles.hobbiesSection}>
+          <View style={[styles.hobbiesSection, isEditing && styles.editModeSection]}>
             <Text style={styles.sectionTitle}>Interests</Text>
             <View style={styles.hobbiesContainer}>
               {profile.hobbies.map((hobby, index) => (
@@ -246,7 +246,7 @@ export default function ProfileScreen() {
           </View>
 
           {/* Photos Grid */}
-          <View style={styles.photosSection}>
+          <View style={[styles.photosSection, isEditing && styles.editModeSection]}>
             <Text style={styles.sectionTitle}>Photos</Text>
             <View style={styles.photosGrid}>
               {additionalPhotos.map((photo, index) => (
@@ -333,6 +333,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   bioSection: {
+    marginBottom: 4,
     paddingBottom: 20,
     paddingHorizontal: 20,
   },
@@ -347,6 +348,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  editModeSection: {
+    backgroundColor: '#fff',
+    borderColor: theme.colors.primary,
+    borderRadius: 12,
+    borderWidth: 2,
+    marginHorizontal: 16,
+    padding: 16,
   },
   editPhotoOverlay: {
     alignItems: 'center',
@@ -397,6 +406,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   hobbiesSection: {
+    marginBottom: 4,
     paddingBottom: 20,
     paddingHorizontal: 20,
   },
@@ -467,6 +477,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   photosSection: {
+    marginBottom: 4,
     paddingBottom: 20,
     paddingHorizontal: 20,
   },

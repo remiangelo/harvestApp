@@ -185,7 +185,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
       <KeyboardAvoidingView
         style={styles.chatContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={onBack ? 100 : insets.top + 10}
+        keyboardVerticalOffset={onBack ? 100 : 200}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     flexDirection: 'row',
     padding: 12,
-    paddingBottom: 110, // Increased to prevent navbar blocking (70px tab bar + 40px extra padding)
+    paddingBottom: 90, // Reduced from 110 to avoid excessive whitespace (70px tab bar + 20px padding)
   },
   messageBubble: {
     borderRadius: 16,

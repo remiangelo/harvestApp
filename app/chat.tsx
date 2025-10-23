@@ -785,7 +785,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messagesContent: {
-    paddingBottom: 20,
+    paddingBottom: 40, // Increased from 20 to ensure messages don't get cut off
     paddingHorizontal: 16,
     paddingTop: 20,
   },

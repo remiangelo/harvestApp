@@ -210,7 +210,11 @@ export const ValuesQuestionnaire: React.FC = () => {
       </View>
 
       {/* Values List */}
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {Object.entries(groupedValues).map(([category, values]) => (
           <View key={category} style={styles.categorySection}>
             <Text style={styles.categoryTitle}>{category.toUpperCase()}</Text>
@@ -269,8 +273,6 @@ export const ValuesQuestionnaire: React.FC = () => {
             </>
           )}
         </TouchableOpacity>
-
-        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
@@ -354,6 +356,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  scrollContent: {
+    paddingBottom: 110, // 70px tab bar + 40px extra padding
   },
   scrollView: {
     flex: 1,

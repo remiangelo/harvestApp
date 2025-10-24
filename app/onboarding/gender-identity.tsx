@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
-import { router } from 'expo-router';
 
 const GENDER_IDENTITIES = ['Man', 'Woman', 'Non-binary', 'Prefer not to say', 'Other'];
 
@@ -15,16 +14,13 @@ export default function GenderIdentityScreen() {
     return null;
   };
 
-  const handleNext = () => {
-    router.push('/onboarding/sexual-orientation' as any);
-  };
-
   return (
     <OnboardingScreen
       progress={30}
       currentStep="gender-identity"
       nextStep="sexual-orientation"
       onValidate={handleValidate}
+      buttonDisabled={!selected}
     >
       <Text style={styles.title}>Gender Identity</Text>
       <Text style={styles.subtitle}>How do you identify?</Text>
@@ -48,40 +44,66 @@ export default function GenderIdentityScreen() {
 
 const styles = StyleSheet.create({
   option: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 20,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderColor: '#8B1E2D',
+    borderRadius: 28,
+    borderWidth: 2,
+    elevation: 3,
+    height: 56,
+    justifyContent: 'center',
+    marginBottom: 16,
+    minWidth: 280,
+    shadowColor: '#000',
+    shadowOffset: {
+      height: 2,
+      width: 0,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    width: '100%',
   },
   optionSelected: {
-    backgroundColor: 'rgba(160, 53, 78, 0.2)',
-    borderColor: '#A0354E',
+    backgroundColor: '#8B1E2D',
+    borderColor: '#8B1E2D',
     borderWidth: 2,
+    elevation: 6,
+    shadowColor: '#8B1E2D',
+    shadowOffset: {
+      height: 4,
+      width: 0,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   optionText: {
-    color: '#FFF',
+    color: '#8B1E2D',
+    fontFamily: 'System',
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '600',
+    letterSpacing: 0.5,
     textAlign: 'center',
   },
   optionTextSelected: {
-    color: '#A0354E',
-    fontWeight: '600',
+    color: '#fff',
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
   optionsContainer: {
-    gap: 12,
+    alignItems: 'center',
     marginBottom: 32,
     width: '100%',
   },
   subtitle: {
     color: '#555',
+    fontFamily: 'System',
     fontSize: 16,
     marginBottom: 32,
     textAlign: 'center',
   },
   title: {
     color: '#222',
+    fontFamily: 'System',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,

@@ -13,7 +13,11 @@ export default function OnboardingLayout() {
       <Stack.Screen name="distance" options={{ headerShown: false }} />
       <Stack.Screen name="goals" options={{ headerShown: false }} />
       <Stack.Screen name="gender" options={{ headerShown: false }} />
+      <Stack.Screen name="gender-identity" options={{ headerShown: false }} />
+      <Stack.Screen name="sexual-orientation" options={{ headerShown: false }} />
+      <Stack.Screen name="interested-in" options={{ headerShown: false }} />
       <Stack.Screen name="location" options={{ headerShown: false }} />
+      <Stack.Screen name="terms" options={{ headerShown: false }} />
       <Stack.Screen name="complete" options={{ headerShown: false }} />
     </Stack>
   );

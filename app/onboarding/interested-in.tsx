@@ -81,6 +81,7 @@ export default function InterestedInScreen() {
       currentStep="interested-in"
       nextStep="goals"
       onValidate={handleValidate}
+      buttonDisabled={selected.length === 0}
     >
       <Text style={styles.title}>Interested In</Text>
       <Text style={styles.subtitle}>Who would you like to see on Harvest?</Text>
@@ -108,52 +109,78 @@ export default function InterestedInScreen() {
 
 const styles = StyleSheet.create({
   checkmark: {
-    color: '#A0354E',
+    color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
+    marginLeft: 8,
   },
   hint: {
     color: '#666',
     fontSize: 14,
-    marginBottom: 8,
+    marginBottom: 16,
     textAlign: 'center',
   },
   option: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
-    borderWidth: 1,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderColor: '#8B1E2D',
+    borderRadius: 28,
+    borderWidth: 2,
+    elevation: 3,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 20,
+    height: 56,
+    justifyContent: 'center',
+    marginBottom: 16,
+    minWidth: 280,
+    shadowColor: '#000',
+    shadowOffset: {
+      height: 2,
+      width: 0,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    width: '100%',
   },
   optionSelected: {
-    backgroundColor: 'rgba(160, 53, 78, 0.2)',
-    borderColor: '#A0354E',
+    backgroundColor: '#8B1E2D',
+    borderColor: '#8B1E2D',
     borderWidth: 2,
+    elevation: 6,
+    shadowColor: '#8B1E2D',
+    shadowOffset: {
+      height: 4,
+      width: 0,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   optionText: {
-    color: '#FFF',
+    color: '#8B1E2D',
+    fontFamily: 'System',
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   optionTextSelected: {
-    color: '#A0354E',
-    fontWeight: '600',
+    color: '#fff',
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
   optionsContainer: {
-    gap: 12,
+    alignItems: 'center',
     marginBottom: 32,
     width: '100%',
   },
   subtitle: {
     color: '#555',
+    fontFamily: 'System',
     fontSize: 16,
     marginBottom: 32,
     textAlign: 'center',
   },
   title: {
     color: '#222',
+    fontFamily: 'System',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,

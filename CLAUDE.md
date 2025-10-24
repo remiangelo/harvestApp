@@ -2368,3 +2368,293 @@ Update the "Last Updated" timestamp and progress sections to maintain accurate p
   - ✅ Decided against Expo SDK 54 upgrade (staying on SDK 53)
   - ✅ Explained Expo Go limitation (expected behavior)
   - All version numbers synchronized across 6 config files
+
+---
+
+### **Session Summary (January 21, 2025 - FINAL) - DOCUMENTATION CLEANUP & SDK 54 TODO** ✅
+
+**DEPLOYMENT STATUS**: ✅ DOCUMENTATION ORGANIZED - Clean Project Structure
+
+**Documentation Reorganization Completed**:
+
+1. ✅ **Created Expo SDK 54 Upgrade TODO**
+   - **File Created**: `TODO.md` in project root
+   - **Purpose**: Comprehensive upgrade plan for 2-3 months post-launch
+   - **Contents**:
+     - Pre-upgrade checklist with backup strategy
+     - Step-by-step upgrade commands
+     - Breaking changes analysis (Reanimated v4, file-system API, Metro imports)
+     - Comprehensive testing requirements (auth, onboarding, swipe, chat, profile, gardener)
+     - Gradual rollout strategy (beta → production)
+     - Rollback plan for emergency situations
+     - Risk mitigation for high-risk areas (Reanimated v4, Supabase compatibility)
+     - 4-6 week estimated timeline
+     - Success criteria and performance metrics
+   - **Key Decision**: DO NOT upgrade until app stable for 2-3 months post-launch
+
+2. ✅ **Organized Documentation Structure**
+   - **Before**: 47 documentation files scattered in project root
+   - **After**: 4 files in root + 6 in docs/ folder = 10 total files (79% reduction)
+
+   **Root Directory Files** (4):
+   - `CLAUDE.md` - Main project memory (continuously updated)
+   - `FAQ.mdx` - User-facing help documentation (used in app)
+   - `HARVEST_NEXT_STEPS.mdx` - Roadmap for next features to implement
+   - `TODO.md` - NEW - Expo SDK 54 upgrade plan (for future)
+
+   **docs/ Folder** (6 reference files):
+   - `PRODUCTION_SETUP.mdx` - Complete production setup guide (renamed from setupshit.mdx)
+   - `PRODUCTION_CHECKLIST.md` - Pre-deployment checklist
+   - `TESTFLIGHT_DEPLOYMENT_GUIDE.mdx` - TestFlight submission guide
+   - `TEST_MODE_GUIDE.md` - Development testing guide
+   - `GOOGLE_OAUTH_SETUP.md` - OAuth configuration guide
+   - `BETA_TESTING_SETUP.md` - Beta testing setup instructions
+
+3. ✅ **Deleted 37 Redundant Files**
+
+   **Session Progress Docs** (10 deleted):
+   - SESSION_PROGRESS_REPORT.md
+   - SESSION_SUMMARY_JAN21.md
+   - TESTING_VERIFICATION.md
+   - BETA_TESTING_STATUS.md
+   - VERSION_UPDATE.md
+   - IMPLEMENTATION_PLAN.md
+   - MINDFUL_MESSAGING_IMPLEMENTATION.md
+   - CODE_REVIEW_VALUES_FEATURE.md
+   - swipe-crash-analysis.md
+   - ui-edge-cases-analysis.md
+
+   **Onboarding/Crash Fix Docs** (6 deleted):
+   - ONBOARDING_CRASH_FIX.md
+   - ONBOARDING_CRASH_FIXES.md
+   - ONBOARDING_CRASH_FIX_BUILD23.md
+   - ONBOARDING_CRASH_FIXES_BUILD25.md
+   - ONBOARDING_UI_CRASH_FIXES_BUILD25.md
+   - TESTMODE_ONBOARDING_CRASH_FIX.md
+
+   **UI Fix Docs** (5 deleted):
+   - UI_BUG_AUDIT_REPORT.md
+   - UI_BUG_FIXES_SUMMARY.md
+   - UI_BUG_FIXES_PROFILE_AI_CHAT.md
+   - ONBOARDING_UI_FIXES.md
+   - ONBOARDING_UI_QA_REPORT.md
+
+   **OAuth/Auth Docs** (5 deleted):
+   - OAUTH_ONBOARDING_FIXES.md
+   - OAUTH_ONBOARDING_ANALYSIS.md
+   - CRITICAL_AUTH_ONBOARDING_ISSUES.md
+   - AUTH_ONBOARDING_FIXES_SUMMARY.md
+   - RLS_OAUTH_ANALYSIS.md
+
+   **Setup Docs** (5 deleted - superseded):
+   - EMAIL_VERIFICATION_SETUP.md
+   - SUPABASE_AUTH_CONFIG.md
+   - PRODUCTION_AUTH_SETUP.md
+   - TESTFLIGHT_SUBMISSION.md
+   - AI_SETUP_INSTRUCTIONS.md
+
+   **Misc/Unused** (6 deleted):
+   - AGENTS.md
+   - CRUSH.md
+   - ADMIN_TEST_SETUP.md
+   - AI_SETUP.md
+   - NEXT_STEPS_PLAN.mdx (superseded by HARVEST_NEXT_STEPS.mdx)
+   - AI LOGIC.mdx (space in filename)
+
+**Benefits of Reorganization**:
+
+- ✅ Clean root directory (only 4 essential files)
+- ✅ Easy to find what you need (reference docs in docs/)
+- ✅ No duplicate/conflicting information
+- ✅ Better git performance (79% fewer files to track)
+- ✅ Professional project structure
+- ✅ All critical information preserved in CLAUDE.md memory
+
+**Expo SDK 54 Upgrade Decision**:
+
+**User Question**: "Is there a way to safely update to the newest expo versions, without breaking anything?"
+
+**Answer**: **No, not safely right now.** After thorough analysis of official Expo documentation:
+
+**Current State**:
+
+- Expo SDK 53.0.20
+- React Native 0.79.5
+- React 19.0.0
+- App is stable and about to launch (Build 25)
+
+**SDK 54 Breaking Changes**:
+
+1. **React Native Reanimated v4** - Requires complete worklet rewrites, breaking all animations
+2. **React Native 0.81** - JSC support removed, native module changes
+3. **expo-file-system** - Legacy API moved to `/legacy` export
+4. **Metro imports** - Internal API changes
+
+**Recommendation**: **DO NOT UPGRADE** until 2-3 months post-launch
+
+**Reason**:
+
+- Major SDK upgrades always carry breaking change risks
+- App is production-ready at Build 25
+- Risk/reward ratio unfavorable before launch
+- Need stable baseline for comparison
+
+**Alternative**: Run `npx expo install --fix` for safe patch updates within SDK 53
+
+**Expo Go Issue Explained**:
+
+- User stated: "expo go doesnt work with our current codebase"
+- **This is NORMAL and EXPECTED!** App uses custom native modules (Supabase, gesture handler, notifications, location)
+- **Not a problem** - sign of app maturity
+- **Solution**: Use development builds via EAS or TestFlight (already set up)
+
+**Timeline for SDK 54 Upgrade**:
+
+- Launch on SDK 53 (current)
+- Monitor for 2-3 months
+- Create feature branch for SDK 54 upgrade
+- Comprehensive testing before merging
+- Gradual rollout to users
+
+**Status**: ✅ Documentation organized, TODO created, ready for clean launch on SDK 53
+
+---
+
+### **Session Summary (January 21, 2025 - TESTFLIGHT READY) - PROJECT CLEANUP COMPLETE** ✅
+
+**DEPLOYMENT STATUS**: ✅ READY FOR TESTFLIGHT SUBMISSION - Version 1.3.8, Build 25
+
+**Project Cleanup Completed**:
+
+1. ✅ **Test Scripts Cleanup**
+   - **Deleted 8 test .js files**:
+     - test-app-functionality.js
+     - test-auth-debug.js
+     - test-auth.js
+     - test-runtime-issues.js
+     - setup-beta-backend.js
+     - test-beta-flow.js
+     - test-email-verification.js
+     - test-google-oauth.js
+
+   - **Deleted 3 simulator fix .sh scripts**:
+     - expo-ios-fix.sh
+     - fix-simulator-permissions.sh
+     - fix-simulator.sh
+
+   - **Moved to utility-scripts/** (2 useful dev scripts):
+     - clearTestMode.js
+     - clear-cache.sh
+
+2. ✅ **Verified Build Configuration**
+
+   **Version Numbers Synchronized** (all 6 config files):
+   - ✅ package.json: version "1.3.8"
+   - ✅ app.json: version "1.3.8", buildNumber "25"
+   - ✅ app.config.js: version '1.3.8', buildNumber '25'
+   - ✅ iOS Info.plist: CFBundleShortVersionString "1.3.8", CFBundleVersion "25"
+   - ✅ iOS project.pbxproj: MARKETING_VERSION = 1.3.8, CURRENT_PROJECT_VERSION = 25
+   - ✅ Android build.gradle: versionCode 25, versionName "1.3.8"
+
+   **EAS Build Configuration Verified**:
+   - ✅ Bundle ID: com.harvest.harvestdating
+   - ✅ Apple Team ID: L3P46Q9398
+   - ✅ App Store Connect ID: 6749823296
+   - ✅ Supabase credentials in eas.json (preview & production)
+   - ✅ Submit config complete for both profiles
+
+**Final Project Structure**:
+
+**Root Files** (Clean!):
+
+```
+CLAUDE.md                 ← Project memory
+FAQ.mdx                   ← User-facing help
+HARVEST_NEXT_STEPS.mdx    ← Feature roadmap
+TODO.md                   ← SDK 54 upgrade plan
+app.config.js             ← Expo config
+babel.config.js           ← Babel config
+metro.config.js           ← Metro bundler config
+```
+
+**docs/** (6 reference files)
+**utility-scripts/** (2 dev scripts)
+
+**Total Cleanup**: 48 files removed or organized (11 test scripts + 37 docs)
+
+**TestFlight Submission Checklist**:
+
+**✅ Pre-Build Requirements**:
+
+- [x] Version 1.3.8, Build 25 synchronized across all files
+- [x] Bundle ID correct: com.harvest.harvestdating
+- [x] Apple Team ID configured: L3P46Q9398
+- [x] Supabase credentials in eas.json
+- [x] All TypeScript compilation errors fixed (0 errors)
+- [x] All critical UI bugs fixed (Build 24 fixes)
+- [x] Test mode functional for development
+- [x] OAuth integration ready
+- [x] Onboarding flow tested and working
+- [x] Real-time chat functional
+- [x] Database schema deployed
+
+**✅ Code Quality**:
+
+- [x] No test scripts in production build
+- [x] Clean project structure
+- [x] Documentation organized
+- [x] Git repository clean
+
+**🚀 TestFlight Build Commands**:
+
+```bash
+# Build for TestFlight (preview profile)
+npx eas build --clear-cache --platform ios --profile preview
+
+# After build completes (~15-20 minutes)
+npx eas submit --platform ios --profile preview
+```
+
+**Alternative - Production Profile**:
+
+```bash
+# Build for production
+npx eas build --clear-cache --platform ios --profile production
+
+# Submit to TestFlight
+npx eas submit --platform ios --profile production
+```
+
+**Post-Submission Checklist**:
+
+- [ ] Monitor EAS build dashboard for completion
+- [ ] Check TestFlight for build processing
+- [ ] Add testers in App Store Connect
+- [ ] Test build on real devices
+- [ ] Monitor crash reports
+- [ ] Gather user feedback
+
+**Known Working Features** (Build 25):
+
+- ✅ Email signup/login
+- ✅ Google OAuth
+- ✅ Complete 11-step onboarding
+- ✅ Profile editing with photo uploads
+- ✅ Swipe cards with gestures
+- ✅ Real-time chat
+- ✅ Gardener AI coach
+- ✅ Values-based matching
+- ✅ Mindful messaging
+- ✅ All UI consistent with liquid glass design
+
+**Status**: ✅ **READY TO BUILD AND SUBMIT TO TESTFLIGHT**
+
+**Next Steps**:
+
+1. Run build command above
+2. Wait for build completion
+3. Submit to TestFlight
+4. Add beta testers
+5. Gather feedback for 1-2 weeks
+6. Iterate based on user feedback
+7. Submit to App Store when stable

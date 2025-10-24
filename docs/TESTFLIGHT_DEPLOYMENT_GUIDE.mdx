@@ -21,33 +21,30 @@ Ensure your `app.config.js` has the correct iOS configuration:
 ```javascript
 export default {
   expo: {
-    name: "Harvest",
-    slug: "harvest-app",
-    version: "1.0.0",
-    orientation: "portrait",
-    icon: "./assets/icon.png",
-    userInterfaceStyle: "dark",
+    name: 'Harvest',
+    slug: 'harvest-app',
+    version: '1.0.0',
+    orientation: 'portrait',
+    icon: './assets/icon.png',
+    userInterfaceStyle: 'dark',
     splash: {
-      image: "./assets/splash.png",
-      resizeMode: "contain",
-      backgroundColor: "#000000"
+      image: './assets/splash.png',
+      resizeMode: 'contain',
+      backgroundColor: '#000000',
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.yourcompany.harvest", // Change this to your bundle ID
-      buildNumber: "1",
+      bundleIdentifier: 'com.yourcompany.harvest', // Change this to your bundle ID
+      buildNumber: '1',
       infoPlist: {
-        NSCameraUsageDescription: "This app uses the camera to take profile photos.",
-        NSPhotoLibraryUsageDescription: "This app accesses your photo library to select profile photos.",
-        NSLocationWhenInUseUsageDescription: "This app uses location to show nearby matches."
-      }
+        NSCameraUsageDescription: 'This app uses the camera to take profile photos.',
+        NSPhotoLibraryUsageDescription:
+          'This app accesses your photo library to select profile photos.',
+        NSLocationWhenInUseUsageDescription: 'This app uses location to show nearby matches.',
+      },
     },
-    plugins: [
-      "expo-router",
-      "expo-image-picker",
-      "expo-location"
-    ]
-  }
+    plugins: ['expo-router', 'expo-image-picker', 'expo-location'],
+  },
 };
 ```
 
@@ -127,7 +124,6 @@ Ensure your `eas.json` is configured for iOS builds:
 1. **App Information**:
    - Category: Social Networking
    - Content Rights: Check if you have all rights
-   
 2. **Pricing and Availability**:
    - Set to Free (or your preferred pricing)
    - Select availability countries
@@ -147,6 +143,7 @@ eas build --platform ios --profile production
 ```
 
 This will:
+
 - Build your app in the cloud
 - Generate an IPA file
 - Automatically sign it with your certificates
@@ -201,6 +198,7 @@ In App Store Connect → TestFlight:
 ### 6.3 Export Compliance
 
 For most apps, you can select:
+
 - **"No"** for encryption (unless you're using custom encryption)
 - This allows immediate TestFlight distribution
 
@@ -313,12 +311,12 @@ After successful TestFlight deployment:
 
 ## Quick Reference
 
-| Task | Command |
-|------|---------|
-| Build for iOS | `eas build --platform ios --profile production` |
-| Submit to TestFlight | `eas submit --platform ios --latest` |
-| Check build status | `eas build:list` |
-| Update credentials | `eas credentials` |
+| Task                 | Command                                         |
+| -------------------- | ----------------------------------------------- |
+| Build for iOS        | `eas build --platform ios --profile production` |
+| Submit to TestFlight | `eas submit --platform ios --latest`            |
+| Check build status   | `eas build:list`                                |
+| Update credentials   | `eas credentials`                               |
 
 ## Support Resources
 

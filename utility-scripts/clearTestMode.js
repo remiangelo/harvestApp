@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // Simple script to clear test mode data
 // Run with: node clearTestMode.js
 

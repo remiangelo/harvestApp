@@ -22,6 +22,7 @@ export interface UserProfile {
 // Create a new user profile
 export const createProfile = async (userId: string, email: string) => {
   try {
+    console.log('[createProfile] Creating profile for user:', userId, 'email:', email);
     const { data, error } = await supabase
       .from('users')
       .insert([
@@ -34,12 +35,17 @@ export const createProfile = async (userId: string, email: string) => {
         },
       ])
       .select()
-      .single();
+      .maybeSingle(); // Use maybeSingle() to avoid 406 errors
 
-    if (error) throw error;
+    if (error) {
+      console.error('[createProfile] Insert error:', error);
+      throw error;
+    }
+
+    console.log('[createProfile] Profile created successfully');
     return { data, error: null };
   } catch (error) {
-    console.error('Error creating profile:', error);
+    console.error('[createProfile] Error creating profile:', error);
     return { data: null, error };
   }
 };
@@ -93,7 +99,7 @@ export const updateProfile = async (userId: string, updates: Partial<UserProfile
       .update(dbUpdates)
       .eq('id', userId)
       .select()
-      .single();
+      .maybeSingle(); // Use maybeSingle() to avoid 406 errors
 
     if (error) throw error;
     return { data, error: null };
@@ -110,7 +116,7 @@ export const checkOnboardingStatus = async (userId: string) => {
       .from('users')
       .select('bio, age, gender, photos')
       .eq('id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle() to avoid 406 errors
 
     if (error) throw error;
 

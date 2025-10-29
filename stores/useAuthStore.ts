@@ -264,13 +264,25 @@ export const useAuthStore = create<AuthState>()(
 
       loadProfile: async (userId: string) => {
         try {
-          const { data: profile } = await getProfile(userId);
+          console.log('[loadProfile] Loading profile for user:', userId);
+          const { data: profile, error } = await getProfile(userId);
+
+          if (error) {
+            console.error('[loadProfile] Error from getProfile:', error);
+            throw error; // Throw so caller can handle
+          }
+
           if (profile) {
+            console.log('[loadProfile] Profile loaded successfully');
             set({ profile });
             useUserStore.getState().setCurrentUser(profile);
+          } else {
+            console.warn('[loadProfile] No profile data returned');
+            // Profile doesn't exist - this is okay, don't crash
           }
         } catch (error) {
-          console.error('Error loading profile:', error);
+          console.error('[loadProfile] Failed to load profile:', error);
+          throw error; // Re-throw so finishOnboarding can handle it
         }
       },
 

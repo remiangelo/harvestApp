@@ -47,9 +47,19 @@ export const createProfile = async (userId: string, email: string) => {
 // Get user profile
 export const getProfile = async (userId: string) => {
   try {
-    const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
+    // Use maybeSingle() instead of single() to avoid 406 errors
+    // maybeSingle() returns null if no rows match, instead of throwing
+    const { data, error } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('[getProfile] Database error:', error);
+      throw error;
+    }
+
+    if (!data) {
+      console.log('[getProfile] Profile not found for user:', userId);
+    }
+
     return { data, error: null };
   } catch (error) {
     console.error('Error fetching profile:', error);

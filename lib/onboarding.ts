@@ -134,7 +134,7 @@ export const saveOnboardingStep = async (
         }
       )
       .select()
-      .single();
+      .maybeSingle(); // Use maybeSingle() to avoid 406 errors
 
     if (error) {
       console.error('[saveOnboardingStep] Database error:', error);
@@ -216,7 +216,7 @@ export const completeOnboarding = async (userId: string) => {
         }
       )
       .select()
-      .single();
+      .maybeSingle(); // Use maybeSingle() to avoid 406 errors
 
     if (error) {
       console.error('[completeOnboarding] Database error:', error);

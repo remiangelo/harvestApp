@@ -291,9 +291,11 @@ export const getOnboardingProgress = async (userId: string) => {
       } else if (data.location) {
         currentStep = 'complete'; // Location is the last step before complete
       } else if (data.gender) {
-        currentStep = 'location';
+        // After gender identity, proceed to sexual orientation
+        currentStep = 'sexual-orientation';
       } else if (data.goals) {
-        currentStep = 'gender';
+        // After goals, collect gender identity
+        currentStep = 'gender-identity';
       } else if (data.distance_preference !== null && data.distance_preference !== undefined) {
         currentStep = 'goals';
       } else if (data.hobbies && data.hobbies.length > 0) {

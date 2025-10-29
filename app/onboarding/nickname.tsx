@@ -9,16 +9,16 @@ export default function OnboardingNickname() {
 
   // Pre-fill with restored data if available
   useEffect(() => {
-    const storedFirstName = (onboardingData as any)?.first_name;
-    if (storedFirstName) {
-      setFirstName(storedFirstName);
+    const storedNickname = (onboardingData as any)?.nickname;
+    if (storedNickname) {
+      setFirstName(storedNickname);
     }
   }, [onboardingData]);
 
   const handleValidate = () => {
     const trimmedName = firstName.trim();
     if (trimmedName && trimmedName.length >= 2) {
-      return { first_name: trimmedName };
+      return { nickname: trimmedName };
     }
     return null;
   };

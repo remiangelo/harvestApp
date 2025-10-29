@@ -81,6 +81,9 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         } else {
           safeNavigate('/onboarding');
         }
+      } else if (inOnboarding && isOnboardingComplete) {
+        // Finished onboarding while inside onboarding flow -> go to main tabs
+        safeNavigate('/_tabs');
       } else if (inTabs && !isOnboardingComplete) {
         // User trying to access main app without completing onboarding
         safeNavigate('/onboarding');

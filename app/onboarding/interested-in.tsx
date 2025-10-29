@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
-import { router } from 'expo-router';
 import { useOnboarding } from '../../hooks/useOnboarding';
 
 const INTERESTED_IN_OPTIONS = ['Men', 'Women', 'Non-binary people', 'Everyone'];
@@ -70,16 +69,11 @@ export default function InterestedInScreen() {
     }
     return null;
   };
-
-  const handleNext = () => {
-    router.push('/onboarding/goals');
-  };
-
   return (
     <OnboardingScreen
       progress={50}
       currentStep="interested-in"
-      nextStep="goals"
+      nextStep="location"
       onValidate={handleValidate}
       buttonDisabled={selected.length === 0}
     >

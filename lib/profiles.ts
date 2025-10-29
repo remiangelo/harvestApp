@@ -19,13 +19,14 @@ export interface UserProfile {
   onboarding_completed?: boolean;
 }
 
-// Create a new user profile
+// Create a new user profile (or update if exists)
 export const createProfile = async (userId: string, email: string) => {
   try {
-    console.log('[createProfile] Creating profile for user:', userId, 'email:', email);
+    console.log('[createProfile] Creating/updating profile for user:', userId, 'email:', email);
+    // Use UPSERT instead of INSERT to handle existing users (from OAuth)
     const { data, error } = await supabase
       .from('users')
-      .insert([
+      .upsert(
         {
           id: userId,
           email,
@@ -33,16 +34,19 @@ export const createProfile = async (userId: string, email: string) => {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
-      ])
+        {
+          onConflict: 'id', // If ID exists, update instead of failing
+        }
+      )
       .select()
       .maybeSingle(); // Use maybeSingle() to avoid 406 errors
 
     if (error) {
-      console.error('[createProfile] Insert error:', error);
+      console.error('[createProfile] Upsert error:', error);
       throw error;
     }
 
-    console.log('[createProfile] Profile created successfully');
+    console.log('[createProfile] Profile created/updated successfully');
     return { data, error: null };
   } catch (error) {
     console.error('[createProfile] Error creating profile:', error);

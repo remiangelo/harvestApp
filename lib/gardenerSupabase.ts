@@ -63,7 +63,7 @@ export const gardenerChatService = {
           sender,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error saving chat message:', error);
@@ -131,7 +131,7 @@ export const gardenerQuizService = {
         .from('gardener_quiz_questions')
         .select('*')
         .eq('question', question)
-        .single();
+        .maybeSingle();
 
       if (existing && !fetchError) {
         return existing;
@@ -146,7 +146,7 @@ export const gardenerQuizService = {
           category,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error saving quiz question:', error);
@@ -177,7 +177,7 @@ export const gardenerQuizService = {
           selected_value: value,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error saving quiz response:', error);
@@ -222,7 +222,7 @@ export const gardenerQuizService = {
           shown_at: new Date().toISOString(),
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error tracking daily quiz:', error);
@@ -246,7 +246,7 @@ export const gardenerQuizService = {
         .select('id')
         .eq('user_id', userId)
         .eq('quiz_date', today)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         // PGRST116 = no rows found
@@ -293,7 +293,7 @@ export const gardenerInsightsService = {
         .from('gardener_user_insights')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user insights:', error);
@@ -321,7 +321,7 @@ export const gardenerInsightsService = {
           last_updated: new Date().toISOString(),
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating user insights:', error);

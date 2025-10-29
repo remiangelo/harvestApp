@@ -22,7 +22,7 @@ export async function ensureConversation(matchId: string) {
     .from('conversations')
     .insert([{ match_id: matchId }])
     .select('id')
-    .single();
+    .maybeSingle();
   if (createErr) {
     console.warn('ensureConversation: create error', createErr);
     return null;

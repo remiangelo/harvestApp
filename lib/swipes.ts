@@ -28,7 +28,7 @@ export const saveSwipe = async (
         action,
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (swipeError) {
       // Handle duplicate swipe error gracefully
@@ -48,7 +48,7 @@ export const saveSwipe = async (
           user_a: swiperId,
           user_b: swipedId,
         })
-        .single();
+        .maybeSingle();
 
       if (matchData?.is_matched) {
         return {
@@ -108,7 +108,7 @@ export const hasUserSwiped = async (swiperId: string, swipedId: string): Promise
       .select('id')
       .eq('swiper_id', swiperId)
       .eq('swiped_id', swipedId)
-      .single();
+      .maybeSingle();
 
     if (error && error.code !== 'PGRST116') {
       // PGRST116 means no rows found, which is fine

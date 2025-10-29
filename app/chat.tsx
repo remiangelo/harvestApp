@@ -72,7 +72,7 @@ export default function ChatScreen() {
             .from('conversations')
             .select('*')
             .eq('id', conversationId)
-            .single();
+            .maybeSingle();
           conversation = data;
         }
 
@@ -303,7 +303,7 @@ export default function ChatScreen() {
           },
         ])
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error sending message:', error);

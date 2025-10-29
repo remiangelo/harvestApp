@@ -191,13 +191,13 @@ export class SafetyAnalysisService {
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       const { data: matchProfile } = await supabase
         .from('users')
         .select('*')
         .eq('id', matchId)
-        .single();
+        .maybeSingle();
 
       // Get conversation stats
       const { data: messages } = await supabase
@@ -331,7 +331,7 @@ export class SafetyAnalysisService {
         .from('user_safety_settings')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       return data;
     } catch (error) {

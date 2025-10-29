@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Text,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -79,7 +80,13 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
           <View style={[styles.progressBar, { width: `${progress}%` }]} />
         </View>
 
-        {children}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {children}
+        </ScrollView>
 
         <TouchableOpacity
           style={[styles.button, (buttonDisabled || isSaving) && styles.buttonDisabled]}
@@ -145,5 +152,14 @@ const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: '#fff',
     flex: 1,
+  },
+  scrollContent: {
+    alignItems: 'center',
+    paddingBottom: 24,
+    width: '100%',
+  },
+  scrollView: {
+    flex: 1,
+    width: '100%',
   },
 });

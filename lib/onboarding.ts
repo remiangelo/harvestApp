@@ -277,7 +277,7 @@ export const getOnboardingProgress = async (userId: string) => {
       `
       )
       .eq('id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle() to avoid 406 errors
 
     if (error) throw error;
 

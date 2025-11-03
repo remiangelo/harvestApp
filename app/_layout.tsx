@@ -7,6 +7,8 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import * as Linking from 'expo-linking';
+import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
+import { DMSerifDisplay_400Regular } from '@expo-google-fonts/dm-serif-display';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -37,6 +39,10 @@ export default function RootLayout() {
   const responseListener = useRef<any>(null);
 
   const [loaded, error] = useFonts({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_700Bold,
+    DMSerifDisplay_400Regular,
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });

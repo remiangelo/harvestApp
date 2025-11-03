@@ -58,12 +58,15 @@ export const theme = {
   },
 
   typography: {
-    // Font families (using system fonts for now)
+    // Font families - DM Sans for UI/body, DM Serif Display for headings
     fontFamily: {
-      regular: 'System',
-      medium: 'System',
-      semibold: 'System',
-      bold: 'System',
+      // Body text fonts (DM Sans)
+      regular: 'DMSans_400Regular',
+      medium: 'DMSans_500Medium',
+      bold: 'DMSans_700Bold',
+
+      // Display/heading font (DM Serif Display)
+      display: 'DMSerifDisplay_400Regular',
     },
 
     // Font sizes
@@ -97,44 +100,52 @@ export const theme = {
     // Text styles (pre-composed)
     headers: {
       h1: {
+        fontFamily: 'DMSerifDisplay_400Regular',
         fontSize: 28,
-        fontWeight: '700' as const,
+        fontWeight: '400' as const,
         lineHeight: 1.2,
       },
       h2: {
+        fontFamily: 'DMSerifDisplay_400Regular',
         fontSize: 24,
-        fontWeight: '600' as const,
+        fontWeight: '400' as const,
         lineHeight: 1.3,
       },
       h3: {
+        fontFamily: 'DMSerifDisplay_400Regular',
         fontSize: 20,
-        fontWeight: '600' as const,
+        fontWeight: '400' as const,
         lineHeight: 1.4,
       },
       h4: {
+        fontFamily: 'DMSerifDisplay_400Regular',
         fontSize: 18,
-        fontWeight: '600' as const,
+        fontWeight: '400' as const,
         lineHeight: 1.4,
       },
     },
 
     body: {
       large: {
+        fontFamily: 'DMSans_400Regular',
         fontSize: 18,
         fontWeight: '400' as const,
         lineHeight: 1.5,
       },
       regular: {
+        fontFamily: 'DMSans_400Regular',
         fontSize: 16,
         fontWeight: '400' as const,
         lineHeight: 1.5,
       },
       small: {
+        fontFamily: 'DMSans_400Regular',
         fontSize: 14,
         fontWeight: '400' as const,
         lineHeight: 1.5,
       },
       caption: {
+        fontFamily: 'DMSans_400Regular',
         fontSize: 12,
         fontWeight: '400' as const,
         lineHeight: 1.4,

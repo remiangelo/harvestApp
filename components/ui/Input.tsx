@@ -57,7 +57,7 @@ export const Input: React.FC<InputProps> = ({
     rightIcon && styles.inputWithRightIcon,
     !editable && styles.inputDisabled,
     inputStyle,
-  ].filter(Boolean) as any;
+  ].filter(Boolean) as TextStyle[];
 
   return (
     <View style={containerStyles}>
@@ -100,12 +100,14 @@ const styles = StyleSheet.create({
 
   error: {
     color: theme.colors.error,
+    fontFamily: theme.typography.fontFamily.regular,
     fontSize: theme.typography.fontSize.sm,
     marginTop: theme.spacing.xs,
   },
 
   hint: {
     color: theme.colors.text.secondary,
+    fontFamily: theme.typography.fontFamily.regular,
     fontSize: theme.typography.fontSize.sm,
     marginTop: theme.spacing.xs,
   },
@@ -113,6 +115,7 @@ const styles = StyleSheet.create({
   input: {
     color: theme.colors.text.primary,
     flex: 1,
+    fontFamily: theme.typography.fontFamily.regular,
     fontSize: theme.typography.fontSize.base,
     minHeight: 48,
     paddingHorizontal: theme.spacing.md,
@@ -157,6 +160,7 @@ const styles = StyleSheet.create({
 
   label: {
     color: theme.colors.text.primary,
+    fontFamily: theme.typography.fontFamily.medium,
     fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.medium,
     marginBottom: theme.spacing.xs,

@@ -85,6 +85,8 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
+/* eslint-disable react-native/no-unused-styles */
+/* Styles are accessed dynamically via computed keys like styles[variant] */
 const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
@@ -99,42 +101,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
+  disabled: {
+    opacity: 0.6,
+  },
+
+  disabledText: {
+    color: theme.colors.text.tertiary,
+  },
+
   fullWidth: {
     width: '100%',
-  },
-
-  // Variants
-  primary: {
-    backgroundColor: theme.colors.primary,
-    ...theme.shadows.md,
-  },
-
-  secondary: {
-    backgroundColor: theme.colors.secondary,
-    ...theme.shadows.sm,
-  },
-
-  outline: {
-    backgroundColor: 'transparent',
-    borderColor: theme.colors.primary,
-    borderWidth: 2,
   },
 
   ghost: {
     backgroundColor: 'transparent',
   },
 
-  // Sizes
-  small: {
-    minHeight: 36,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
+  ghostDisabled: {
+    opacity: 0.4,
   },
 
-  medium: {
-    minHeight: 48,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
+  ghostText: {
+    color: theme.colors.primary,
+  },
+
+  iconLeft: {
+    marginRight: theme.spacing.sm,
+  },
+
+  iconRight: {
+    marginLeft: theme.spacing.sm,
   },
 
   large: {
@@ -143,70 +139,72 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.lg,
   },
 
-  // Text styles
-  text: {
-    fontWeight: theme.typography.fontWeight.semibold,
+  largeText: {
+    fontSize: theme.typography.fontSize.lg,
   },
 
-  primaryText: {
-    color: theme.colors.text.inverse,
-  },
-
-  secondaryText: {
-    color: theme.colors.text.primary,
-  },
-
-  outlineText: {
-    color: theme.colors.primary,
-  },
-
-  ghostText: {
-    color: theme.colors.primary,
-  },
-
-  smallText: {
-    fontSize: theme.typography.fontSize.sm,
+  medium: {
+    minHeight: 48,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
   },
 
   mediumText: {
     fontSize: theme.typography.fontSize.base,
   },
 
-  largeText: {
-    fontSize: theme.typography.fontSize.lg,
-  },
-
-  // Disabled states
-  disabled: {
-    opacity: 0.6,
-  },
-
-  primaryDisabled: {
-    backgroundColor: theme.colors.primaryLight,
-  },
-
-  secondaryDisabled: {
-    backgroundColor: theme.colors.secondaryLight,
+  outline: {
+    backgroundColor: 'transparent',
+    borderColor: theme.colors.primary,
+    borderWidth: 2,
   },
 
   outlineDisabled: {
     borderColor: theme.colors.border,
   },
 
-  ghostDisabled: {
-    opacity: 0.4,
+  outlineText: {
+    color: theme.colors.primary,
   },
 
-  disabledText: {
-    color: theme.colors.text.tertiary,
+  primary: {
+    backgroundColor: theme.colors.primary,
+    ...theme.shadows.md,
   },
 
-  // Icons
-  iconLeft: {
-    marginRight: theme.spacing.sm,
+  primaryDisabled: {
+    backgroundColor: theme.colors.primaryLight,
   },
 
-  iconRight: {
-    marginLeft: theme.spacing.sm,
+  primaryText: {
+    color: theme.colors.text.inverse,
+  },
+
+  secondary: {
+    backgroundColor: theme.colors.secondary,
+    ...theme.shadows.sm,
+  },
+
+  secondaryDisabled: {
+    backgroundColor: theme.colors.secondaryLight,
+  },
+
+  secondaryText: {
+    color: theme.colors.text.primary,
+  },
+
+  small: {
+    minHeight: 36,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+  },
+
+  smallText: {
+    fontSize: theme.typography.fontSize.sm,
+  },
+
+  text: {
+    fontFamily: theme.typography.fontFamily.medium,
+    fontWeight: theme.typography.fontWeight.medium,
   },
 });

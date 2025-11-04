@@ -1,4 +1,4 @@
-package com.remiangelo.harvestApp
+package com.harvest.app
 
 import android.app.Application
 import android.content.res.Configuration

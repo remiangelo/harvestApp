@@ -1,4 +1,4 @@
-package com.remiangelo.harvestApp
+package com.harvest.app
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

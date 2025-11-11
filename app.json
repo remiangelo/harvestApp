@@ -2,7 +2,7 @@
   "expo": {
     "name": "harvestApp",
     "slug": "harvest",
-    "version": "1.4.5",
+    "version": "1.4.6",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "harvestapp",
@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.harvest.harvestdating",
-      "buildNumber": "32",
+      "buildNumber": "34",
       "appleTeamId": "L3P46Q9398"
     },
     "android": {
@@ -25,8 +25,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "com.remiangelo.harvestApp"
+      "edgeToEdgeEnabled": false,
+      "package": "com.harvest.app"
     },
     "web": {
       "bundler": "metro",

@@ -7,8 +7,9 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Dimensions,
   Animated,
+  useWindowDimensions,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,11 +23,10 @@ import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
 
-const { width: screenWidth } = Dimensions.get('window');
-
 export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
   const [isEditing, setIsEditing] = useState(false);
   const { currentUser, updateOnboardingData } = useUserStore();
   const { user } = useAuthStore();
@@ -163,7 +163,7 @@ export default function ProfileScreen() {
 
         <Animated.ScrollView
           style={styles.content}
-          contentContainerStyle={{ paddingBottom: 80 }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 56 + 20 }}
           showsVerticalScrollIndicator={false}
           onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
             useNativeDriver: true,
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     overflow: 'hidden',
-    width: (screenWidth - 40 - 16) / 3,
+    width: (Dimensions.get('window').width - 40 - 16) / 3,
   },
   photosGrid: {
     flexDirection: 'row',

@@ -255,8 +255,7 @@ export default function SwipingScreen() {
           style={[
             styles.filterButton,
             {
-              top:
-                Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 20 : insets.top + 10,
+              top: insets.top + (Platform.OS === 'android' ? 20 : 10),
             },
           ]}
           onPress={() => router.push('/filters' as any)}

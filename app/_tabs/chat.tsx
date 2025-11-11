@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     width: 14,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 76, // Tab bar (56px) + padding (20px)
     paddingTop: 20,
   },
   searchBar: {

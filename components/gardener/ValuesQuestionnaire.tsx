@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   scrollContent: {
-    paddingBottom: 110, // 70px tab bar + 40px extra padding
+    paddingBottom: 96, // Tab bar (56px) + extra padding (40px)
   },
   scrollView: {
     flex: 1,

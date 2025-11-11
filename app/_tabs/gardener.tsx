@@ -129,7 +129,7 @@ export default function GardenerScreen() {
 
   const scrollContentStyle = useMemo(
     () => ({
-      paddingBottom: insets.bottom + 70 + 40,
+      paddingBottom: insets.bottom + 56 + 40,
       paddingTop: 20,
     }),
     [insets.bottom]

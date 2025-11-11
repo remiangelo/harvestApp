@@ -6,8 +6,10 @@ import {
   Modal,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
   Image,
+  useWindowDimensions,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -16,7 +18,6 @@ import { LiquidGlassView } from './liquid/LiquidGlassView';
 import { theme } from '../constants/theme';
 import { getUserValuesBrought, getUserValuesSought, UserValue } from '../lib/values';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/A0354E/FFFFFF?text=No+Image';
 
 export interface ProfileData {
@@ -44,6 +45,8 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
   onSendMessage,
 }) => {
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [valuesBrought, setValuesBrought] = useState<UserValue[]>([]);
   const [valuesSought, setValuesSought] = useState<UserValue[]>([]);
@@ -115,7 +118,9 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
           <ScrollView
             style={styles.scrollContent}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+            contentContainerStyle={{
+              paddingBottom: Platform.OS === 'android' ? insets.bottom + 80 : insets.bottom + 100,
+            }}
           >
             {/* Photo Section */}
             <View style={styles.photoSection}>
@@ -373,8 +378,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   mainPhoto: {
-    height: screenHeight * 0.55,
-    width: screenWidth,
+    height: Dimensions.get('window').height * 0.55,
+    width: Dimensions.get('window').width,
   },
   modalContainer: {
     backgroundColor: 'rgba(0, 0, 0, 0.3)',

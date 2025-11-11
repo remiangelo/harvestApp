@@ -1,5 +1,8 @@
 import { Dimensions } from 'react-native';
 
+// Note: These are static dimensions at module load time.
+// For dynamic/responsive layouts (Android rotation, split screen, etc.),
+// use the useWindowDimensions() hook directly in your components.
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export const theme = {

@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   scrollContent: {
-    paddingBottom: 110, // Account for tab bar (70px) + extra margin (40px)
+    paddingBottom: 96, // Account for tab bar (56px) + extra margin (40px)
     paddingTop: 20,
   },
   subscribeButton: {

@@ -92,7 +92,12 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
         styles.container,
         {
           transform: [{ translateY }],
-          bottom: insets.bottom > 0 ? insets.bottom : 20,
+          bottom:
+            Platform.OS === 'ios'
+              ? insets.bottom > 0
+                ? insets.bottom
+                : 20
+              : Math.max(insets.bottom, 10),
         },
       ]}
     >
@@ -209,7 +214,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   blurContainer: {
-    backgroundColor: Platform.OS === 'android' ? 'rgba(240, 240, 245, 0.8)' : 'transparent',
+    backgroundColor: Platform.OS === 'android' ? 'rgba(240, 240, 245, 0.95)' : 'transparent',
     borderColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 28,
     borderWidth: 0.5,
@@ -219,6 +224,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
+    ...(Platform.OS === 'android' && {
+      elevation: 8,
+    }),
   },
   blurView: {
     flex: 1,

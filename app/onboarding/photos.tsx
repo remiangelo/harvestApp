@@ -107,7 +107,7 @@ export default function OnboardingPhotos() {
     >
       <KeyboardAvoidingView
         style={{ flex: 1, width: '100%' }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <Text style={styles.title}>Show your Best Self</Text>
         <Text style={styles.subtitle}>

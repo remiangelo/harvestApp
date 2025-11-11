@@ -263,7 +263,7 @@ export default function MatchesScreen() {
         tint="light"
         style={StyleSheet.flatten([
           styles.conversationsContainer,
-          { paddingBottom: insets.bottom + 70 + 20 },
+          { paddingBottom: insets.bottom + 56 + 20 },
         ])}
         borderRadius={24}
         glassTint="rgba(255, 255, 255, 0.95)"
@@ -439,6 +439,7 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
   matchImage: {
+    aspectRatio: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 35,
     borderWidth: 3,
@@ -500,6 +501,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
   },
   skeletonImage: {
+    aspectRatio: 1,
     backgroundColor: '#e0e0e0',
     borderRadius: 35,
     height: 70,

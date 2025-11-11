@@ -93,7 +93,7 @@ export default function SettingsScreen() {
 
   const scrollContentStyle = useMemo(
     () => ({
-      paddingBottom: Math.max(insets.bottom + 70 + 30, 100),
+      paddingBottom: Math.max(insets.bottom + 56 + 30, 100),
     }),
     [insets.bottom]
   );

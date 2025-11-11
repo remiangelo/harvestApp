@@ -3,11 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   TouchableOpacity,
   Animated,
   PanResponder,
   ActivityIndicator,
+  useWindowDimensions,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,9 +19,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DemoProfile } from '../data/demoProfiles';
 import * as Haptics from 'expo-haptics';
 import { theme } from '../constants/theme';
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const SWIPE_THRESHOLD = screenWidth * 0.25;
 const SWIPE_OUT_DURATION = 250;
 const FALLBACK_IMAGE = 'https://via.placeholder.com/800x1200/A0354E/FFFFFF?text=No+Image';
 
@@ -39,6 +38,9 @@ export default function HarvestSwipeCard({
   onSuperLike,
 }: HarvestSwipeCardProps) {
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const SWIPE_THRESHOLD = screenWidth * 0.25;
+
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
@@ -391,7 +393,12 @@ export default function HarvestSwipeCard({
             locations={[0, 0.4, 0.6, 0.8, 1]}
             style={[
               styles.bottomGradient,
-              { paddingBottom: Math.max(insets.bottom + 70 + 30, 120) },
+              {
+                paddingBottom:
+                  Platform.OS === 'android'
+                    ? Math.max(insets.bottom + 56 + 20, 100)
+                    : Math.max(insets.bottom + 56 + 30, 120),
+              },
             ]}
           >
             <View style={styles.infoContent}>
@@ -497,11 +504,11 @@ const styles = StyleSheet.create({
     right: 0,
   },
   card: {
-    height: screenHeight,
+    height: Dimensions.get('window').height,
     left: 0,
     position: 'absolute',
     top: 0,
-    width: screenWidth,
+    width: Dimensions.get('window').width,
   },
   compatibilityBadge: {
     borderRadius: 12,

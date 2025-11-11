@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     flexDirection: 'row',
     padding: 12,
-    paddingBottom: 90, // Reduced from 110 to avoid excessive whitespace (70px tab bar + 20px padding)
+    paddingBottom: 76, // Tab bar (56px) + padding (20px)
   },
   messageBubble: {
     borderRadius: 16,

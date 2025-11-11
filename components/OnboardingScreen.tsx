@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Text,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -69,7 +70,12 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={[styles.container, { paddingTop: insets.top + 40 }]}>
+      <View
+        style={[
+          styles.container,
+          { paddingTop: insets.top + (Platform.OS === 'android' ? 30 : 40) },
+        ]}
+      >
         {showBackButton && (
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#8B1E2D" />

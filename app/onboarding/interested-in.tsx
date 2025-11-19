@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { useOnboarding } from '../../hooks/useOnboarding';
 
-const INTERESTED_IN_OPTIONS = ['Men', 'Women', 'Non-binary people', 'Everyone'];
+const INTERESTED_IN_OPTIONS = ['Men', 'Women', 'Non-binary', 'Everyone'];
 
 export default function InterestedInScreen() {
   const [selected, setSelected] = useState<string[]>([]);

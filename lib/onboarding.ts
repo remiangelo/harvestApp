@@ -105,6 +105,7 @@ export const saveOnboardingStep = async (
     // Copy over other fields directly
     const directFields = [
       'preferences',
+      'sexual_orientation',
       'bio',
       'nickname',
       'hobbies',
@@ -265,6 +266,7 @@ export const getOnboardingProgress = async (userId: string) => {
         `
         age,
         preferences,
+        sexual_orientation,
         bio,
         nickname,
         photos,
@@ -306,10 +308,8 @@ export const getOnboardingProgress = async (userId: string) => {
         currentStep = 'photos';
       } else if (data.bio) {
         currentStep = 'nickname';
-      } else if (data.preferences) {
-        currentStep = 'bio';
       } else if (data.age !== null && data.age !== undefined) {
-        currentStep = 'preferences';
+        currentStep = 'bio';
       }
     }
 

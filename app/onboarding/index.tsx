@@ -46,6 +46,7 @@ export default function OnboardingIndex() {
         // Map database fields to local state
         if (data.age) restoredData.age = data.age;
         if (data.preferences) restoredData.preferences = data.preferences;
+        if (data.sexual_orientation) restoredData.sexual_orientation = data.sexual_orientation;
         if (data.bio) restoredData.bio = data.bio;
         if (data.nickname) restoredData.nickname = data.nickname;
         if (data.photos) restoredData.photos = data.photos;

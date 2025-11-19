@@ -20,14 +20,18 @@ export default function SexualOrientationScreen() {
 
   // Restore progress if user returns to this screen
   useEffect(() => {
-    if (onboardingData?.preferences) {
-      setSelected(onboardingData.preferences);
+    // Try sexual_orientation first (new field), fall back to preferences for backward compatibility
+    const savedOrientation =
+      (onboardingData as any)?.sexual_orientation || onboardingData?.preferences;
+    if (savedOrientation) {
+      setSelected(savedOrientation);
     }
   }, [onboardingData]);
 
   const handleValidate = () => {
     if (selected) {
-      return { preferences: selected }; // Fixed: Database column is 'preferences' not 'sexual_orientation'
+      // Save to both fields for compatibility: sexual_orientation (new) and preferences (for existing code)
+      return { sexual_orientation: selected, preferences: selected };
     }
     return null;
   };

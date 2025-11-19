@@ -35,7 +35,7 @@ export default function OnboardingAge() {
 
   const handleContinue = async () => {
     // Save birthDate and navigate to next step
-    await goToNextStep('age', 'preferences', { age: date });
+    await goToNextStep('age', 'bio', { age: date });
   };
 
   const onChange = (event: any, selectedDate?: Date) => {

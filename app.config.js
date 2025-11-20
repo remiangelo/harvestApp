@@ -16,7 +16,7 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'com.harvest.harvestdating',
-      buildNumber: '36',
+      buildNumber: '34',
       appleTeamId: 'L3P46Q9398',
       config: {
         usesNonExemptEncryption: false,

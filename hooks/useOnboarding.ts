@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
 import { useAuthStore } from '../stores/useAuthStore';
 import useUserStore from '../stores/useUserStore';
 import { saveOnboardingStep, completeOnboarding } from '../lib/onboarding';
@@ -9,6 +9,7 @@ import { DemoUser } from '../data/demoUsers';
 
 export const useOnboarding = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loadProfile, isTestMode } = useAuthStore();
   const { updateOnboardingData, onboardingData, currentUser } = useUserStore();
   const [isSaving, setIsSaving] = useState(false);
@@ -138,10 +139,25 @@ export const useOnboarding = () => {
       // CRITICAL: Wait for state to propagate to AuthGuard
       // AuthGuard will automatically navigate when it detects onboarding is complete
       console.log('[finishOnboarding] Waiting for state propagation to AuthGuard...');
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      console.log('[finishOnboarding] State updated - AuthGuard will handle navigation');
-      // DO NOT navigate here - let AuthGuard handle it to avoid conflicts
+      console.log('[finishOnboarding] State updated - checking if navigation happened');
+
+      // Safety check: If we're still on onboarding/complete after 1s, navigate manually
+      // This is a fallback in case AuthGuard doesn't trigger
+      try {
+        console.log('[finishOnboarding] Current route:', pathname);
+
+        if (pathname && pathname.includes('/onboarding')) {
+          console.log('[finishOnboarding] Still on onboarding - triggering manual navigation');
+          router.replace('/_tabs' as any);
+        }
+      } catch (navError) {
+        console.error('[finishOnboarding] Navigation check failed:', navError);
+        // Try to navigate anyway
+        router.replace('/_tabs' as any);
+      }
+
       return { success: true };
     }
 
@@ -193,20 +209,44 @@ export const useOnboarding = () => {
         // Wait for state to propagate to AuthGuard
         // AuthGuard will detect onboarding_completed=true and navigate automatically
         console.log('[finishOnboarding] Waiting for state propagation to AuthGuard...');
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        console.log('[finishOnboarding] State updated - AuthGuard will handle navigation');
-        // DO NOT navigate here - let AuthGuard handle it to avoid conflicts
+        console.log('[finishOnboarding] State updated - checking if navigation happened');
+
+        // Safety check: If we're still on onboarding/complete after 1s, navigate manually
+        // This is a fallback in case AuthGuard doesn't trigger
+        try {
+          console.log('[finishOnboarding] Current route:', pathname);
+
+          if (pathname && pathname.includes('/onboarding')) {
+            console.log('[finishOnboarding] Still on onboarding - triggering manual navigation');
+            router.replace('/_tabs' as any);
+          }
+        } catch (navError) {
+          console.error('[finishOnboarding] Navigation check failed:', navError);
+          // Try to navigate anyway
+          router.replace('/_tabs' as any);
+        }
+
         return { success: true };
       } catch (loadError) {
         console.error('[finishOnboarding] Failed to load profile:', loadError);
 
+        // Even if profile load failed, try to navigate to main app
+        // The profile will be loaded again by AuthGuard
         Alert.alert(
-          'Profile Load Failed',
-          'Your onboarding is complete but we could not load your profile. Please restart the app.',
-          [{ text: 'OK' }]
+          'Profile Load Issue',
+          'Your onboarding is complete! We had a small issue loading your profile, but you can continue using the app.',
+          [
+            {
+              text: 'Continue to App',
+              onPress: () => {
+                router.replace('/_tabs' as any);
+              },
+            },
+          ]
         );
-        return { success: false };
+        return { success: true }; // Changed from false to allow progression
       }
     } catch (error) {
       console.error('[finishOnboarding] Unexpected error completing onboarding:', error);

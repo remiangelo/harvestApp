@@ -62,8 +62,10 @@ export default function InterestedInScreen() {
 
   const handleValidate = () => {
     if (selected.length > 0) {
+      console.log('[InterestedIn] User selected:', selected);
       // Note: interested_in doesn't have a database column
       // This data is used for matching logic but not persisted
+      // The matching is done via preferences/sexual_orientation fields
       // Return empty object to allow progression
       return {};
     }

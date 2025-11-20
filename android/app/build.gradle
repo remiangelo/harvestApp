@@ -92,7 +92,7 @@ android {
         applicationId 'com.harvest.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 34
+        versionCode 37
         versionName "1.4.8"
     }
     signingConfigs {

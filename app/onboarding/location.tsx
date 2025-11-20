@@ -106,9 +106,9 @@ export default function OnboardingLocation() {
 
   return (
     <OnboardingScreen
-      progress={100}
+      progress={90}
       currentStep="location"
-      nextStep="complete"
+      nextStep="terms"
       onValidate={handleValidate}
       buttonText={locationGranted ? 'Continue' : 'Allow Location'}
     >

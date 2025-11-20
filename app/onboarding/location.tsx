@@ -13,94 +13,105 @@ export default function OnboardingLocation() {
   // Pre-fill with restored data if available
   useEffect(() => {
     // Check if location permission already granted
-    checkLocationPermission();
-  }, [onboardingData]);
+    checkLocationPermission().catch((err) => {
+      console.error('[OnboardingLocation] useEffect error:', err);
+    });
+  }, []);
 
   const checkLocationPermission = async () => {
     try {
       const { status } = await Location.getForegroundPermissionsAsync();
       setLocationGranted(status === 'granted');
     } catch (error) {
-      console.error('Error checking location permission:', error);
+      console.error('[OnboardingLocation] Error checking location permission:', error);
+      // Set to false on error to allow user to continue
+      setLocationGranted(false);
     }
   };
 
   const handleValidate = async () => {
-    // If permission already granted, just proceed
-    if (locationGranted) {
-      const location = onboardingData?.location || 'Location enabled';
-      return { location };
-    }
-
-    // Request location permission
-    setIsRequestingPermission(true);
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status === 'granted') {
-        console.log('Location permission granted');
-        setLocationGranted(true);
-
-        // Try to get actual location
-        try {
-          const location = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          });
-
-          // Reverse geocode to get city name
-          const [address] = await Location.reverseGeocodeAsync({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          });
-
-          const locationString =
-            address.city && address.region
-              ? `${address.city}, ${address.region}`
-              : 'Location enabled';
-
-          console.log('Got location:', locationString);
-          return { location: locationString };
-        } catch (locError) {
-          console.error('Error getting location:', locError);
-          // Permission granted but couldn't get location - that's okay
-          return { location: 'Location enabled' };
-        }
-      } else if (status === 'denied') {
-        // User explicitly denied permission
-        Alert.alert(
-          'Location Permission Required',
-          'Harvest needs location access to show you nearby matches. You can continue without it, but your experience will be limited.',
-          [
-            {
-              text: 'Continue Without Location',
-              onPress: () => {
-                // Allow user to continue with a default location
-                setIsRequestingPermission(false);
-              },
-              style: 'cancel',
-            },
-            {
-              text: 'Open Settings',
-              onPress: async () => {
-                await Location.requestForegroundPermissionsAsync();
-                setIsRequestingPermission(false);
-              },
-            },
-          ]
-        );
-        // Return default location to allow continuing
-        return { location: 'Location not enabled' };
-      } else {
-        // Permission not granted but not explicitly denied
-        console.log('Location permission not granted:', status);
-        return { location: 'Location not enabled' };
+      // If permission already granted, just proceed
+      if (locationGranted) {
+        const location = onboardingData?.location || 'Location enabled';
+        return { location };
       }
-    } catch (error) {
-      console.error('Error requesting location permission:', error);
-      Alert.alert('Error', 'Failed to request location permission. You can continue without it.');
-      return { location: 'Location not enabled' };
-    } finally {
+
+      // Request location permission
+      setIsRequestingPermission(true);
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status === 'granted') {
+          console.log('Location permission granted');
+          setLocationGranted(true);
+
+          // Try to get actual location
+          try {
+            const location = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+            });
+
+            // Reverse geocode to get city name
+            const [address] = await Location.reverseGeocodeAsync({
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            });
+
+            const locationString =
+              address.city && address.region
+                ? `${address.city}, ${address.region}`
+                : 'Location enabled';
+
+            console.log('Got location:', locationString);
+            return { location: locationString };
+          } catch (locError) {
+            console.error('Error getting location:', locError);
+            // Permission granted but couldn't get location - that's okay
+            return { location: 'Location enabled' };
+          }
+        } else if (status === 'denied') {
+          // User explicitly denied permission
+          Alert.alert(
+            'Location Permission Required',
+            'Harvest needs location access to show you nearby matches. You can continue without it, but your experience will be limited.',
+            [
+              {
+                text: 'Continue Without Location',
+                onPress: () => {
+                  // Allow user to continue with a default location
+                  setIsRequestingPermission(false);
+                },
+                style: 'cancel',
+              },
+              {
+                text: 'Open Settings',
+                onPress: async () => {
+                  await Location.requestForegroundPermissionsAsync();
+                  setIsRequestingPermission(false);
+                },
+              },
+            ]
+          );
+          // Return default location to allow continuing
+          return { location: 'Location not enabled' };
+        } else {
+          // Permission not granted but not explicitly denied
+          console.log('Location permission not granted:', status);
+          return { location: 'Location not enabled' };
+        }
+      } catch (error) {
+        console.error('Error requesting location permission:', error);
+        Alert.alert('Error', 'Failed to request location permission. You can continue without it.');
+        return { location: 'Location not enabled' };
+      } finally {
+        setIsRequestingPermission(false);
+      }
+    } catch (outerError) {
+      console.error('[OnboardingLocation] Critical error in handleValidate:', outerError);
+      // Always return a valid object to allow progression
       setIsRequestingPermission(false);
+      return { location: 'Location not enabled' };
     }
   };
 

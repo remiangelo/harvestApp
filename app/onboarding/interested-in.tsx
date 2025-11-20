@@ -66,8 +66,8 @@ export default function InterestedInScreen() {
       // Note: interested_in doesn't have a database column
       // This data is used for matching logic but not persisted
       // The matching is done via preferences/sexual_orientation fields
-      // Return empty object to allow progression
-      return {};
+      // We still save it to local state for potential future use
+      return { interested_in: selected };
     }
     return null;
   };

@@ -10,17 +10,11 @@ export default function OnboardingLocation() {
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const [locationGranted, setLocationGranted] = useState(false);
 
-  // Pre-fill with restored data if available
-  useEffect(() => {
-    // Check if location permission already granted
-    checkLocationPermission().catch((err) => {
-      console.error('[OnboardingLocation] useEffect error:', err);
-    });
-  }, []);
-
   const checkLocationPermission = async () => {
     try {
+      console.log('[OnboardingLocation] Checking location permission');
       const { status } = await Location.getForegroundPermissionsAsync();
+      console.log('[OnboardingLocation] Permission status:', status);
       setLocationGranted(status === 'granted');
     } catch (error) {
       console.error('[OnboardingLocation] Error checking location permission:', error);
@@ -28,6 +22,15 @@ export default function OnboardingLocation() {
       setLocationGranted(false);
     }
   };
+
+  // Pre-fill with restored data if available
+  useEffect(() => {
+    console.log('[OnboardingLocation] Component mounted');
+    // Check if location permission already granted
+    checkLocationPermission().catch((err) => {
+      console.error('[OnboardingLocation] useEffect error:', err);
+    });
+  }, []);
 
   const handleValidate = async () => {
     try {

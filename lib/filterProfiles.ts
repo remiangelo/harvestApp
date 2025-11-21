@@ -1,4 +1,4 @@
-import { DemoProfile } from '../data/demoProfiles';
+import { Profile } from '../types/profile';
 
 interface FilterCriteria {
   ageRange: { min: number; max: number };
@@ -93,9 +93,9 @@ function matchesGenderPreference(profileGender: string, preference: string): boo
  * Filter profiles based on user preferences
  */
 export function filterProfiles(
-  profiles: DemoProfile[],
+  profiles: Profile[],
   currentUser: UserWithPreferences | null
-): DemoProfile[] {
+): Profile[] {
   if (!currentUser) {
     return profiles;
   }
@@ -139,9 +139,9 @@ export function filterProfiles(
  * Sort profiles by relevance (distance, common interests, etc.)
  */
 export function sortProfilesByRelevance(
-  profiles: DemoProfile[],
+  profiles: Profile[],
   currentUser: UserWithPreferences | null
-): DemoProfile[] {
+): Profile[] {
   if (!currentUser) {
     return profiles;
   }

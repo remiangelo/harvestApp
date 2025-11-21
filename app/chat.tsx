@@ -17,11 +17,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { demoChats } from '../data/demoChats';
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../context/UserContext';
-import { isUuid, ensureConversation } from '../lib/chat';
+import { isUuid } from '../lib/chat';
 import { Animated } from 'react-native';
 import { ChatMenuPopup } from '../components/ChatMenuPopup';
 import * as ImagePicker from 'expo-image-picker';
@@ -29,6 +28,12 @@ import { MindfulMessageModal } from '../components/MindfulMessageModal';
 import { analyzeMessage, isMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/A0354E/FFFFFF?text=No+Image';
+
+interface ChatPartner {
+  id: string;
+  name: string;
+  profileImage: string;
+}
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
@@ -43,115 +48,89 @@ export default function ChatScreen() {
   const [mindfulModalVisible, setMindfulModalVisible] = useState(false);
   const [pendingMessage, setPendingMessage] = useState('');
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [chatPartner, setChatPartner] = useState<ChatPartner | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const subscriptionRef = useRef<any>(null);
   const typingTimeoutRef = useRef<any>(null);
 
-  // Find the match for this chat - handle both chat- prefixed and direct IDs
-  const chatId = String(id).startsWith('chat-') ? String(id) : `chat-${id}`;
-  const match = demoChats.find((c) => c.id === chatId || c.id === id);
+  const conversationId = String(id);
 
-  // Load messages when component mounts
+  // Load conversation and messages when component mounts
   useEffect(() => {
-    if (!match) return;
+    const loadConversation = async () => {
+      if (!currentUser?.id || !conversationId) {
+        setLoading(false);
+        return;
+      }
 
-    const loadMessages = async () => {
       try {
-        let conversationId: string | null = null;
-        // If the route id is a real UUID, treat it as a conversation id
-        if (isUuid(String(id))) {
-          conversationId = String(id);
-        } else {
-          // Otherwise, try resolving via match id if it looks like UUID
-          conversationId = await ensureConversation(String(match.id));
-        }
+        // Fetch conversation details
+        const { data: conversation, error: convError } = await supabase
+          .from('conversations')
+          .select(
+            `
+            id,
+            user1_id,
+            user2_id,
+            user1:users!user1_id (id, nickname, photos),
+            user2:users!user2_id (id, nickname, photos)
+          `
+          )
+          .eq('id', conversationId)
+          .maybeSingle();
 
-        let conversation: any = null;
-        if (conversationId) {
-          const { data } = await supabase
-            .from('conversations')
-            .select('*')
-            .eq('id', conversationId)
-            .maybeSingle();
-          conversation = data;
-        }
-
-        // If no conversation exists, create one (for demo purposes)
-        if (!conversation) {
-          // For now, just use demo messages
-          const demoMessages = match.messages || [];
-          setMessages(
-            demoMessages.map((msg: any) => ({
-              id: msg.id,
-              conversation_id: String(id),
-              sender_id: msg.senderId === 'current-user' ? currentUser?.id : msg.senderId,
-              content: msg.text,
-              created_at: msg.timestamp,
-            }))
-          );
+        if (convError || !conversation) {
+          console.error('Error fetching conversation:', convError);
           setLoading(false);
           return;
         }
 
-        // Load real messages from database
-        const { data, error } = await supabase
+        // Get the other user's info
+        const otherUser =
+          conversation.user1_id === currentUser.id ? conversation.user2 : conversation.user1;
+
+        setChatPartner({
+          id: otherUser?.id || '',
+          name: otherUser?.nickname || 'Unknown',
+          profileImage: otherUser?.photos?.[0] || '',
+        });
+
+        // Load messages
+        const { data: messagesData, error: msgError } = await supabase
           .from('messages')
           .select('*')
-          .eq('conversation_id', conversationId as string)
+          .eq('conversation_id', conversationId)
           .order('created_at', { ascending: true });
 
-        if (error) {
-          console.error('Error loading messages:', error);
-          // Fall back to demo messages
-          const demoMessages = match.messages || [];
-          setMessages(
-            demoMessages.map((msg: any) => ({
-              id: msg.id,
-              conversation_id: String(id),
-              sender_id: msg.senderId === 'current-user' ? currentUser?.id : msg.senderId,
-              content: msg.text,
-              created_at: msg.timestamp,
-            }))
-          );
+        if (msgError) {
+          console.error('Error loading messages:', msgError);
         } else {
-          setMessages(data || []);
+          setMessages(messagesData || []);
         }
       } catch (error) {
-        console.error('Error in loadMessages:', error);
-        // Fall back to demo messages
-        const demoMessages = match.messages || [];
-        setMessages(
-          demoMessages.map((msg: any) => ({
-            id: msg.id,
-            conversation_id: String(id),
-            sender_id: msg.senderId === 'current-user' ? currentUser?.id : msg.senderId,
-            content: msg.text,
-            created_at: msg.timestamp,
-          }))
-        );
+        console.error('Error in loadConversation:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadMessages();
-  }, [match, currentUser]);
+    loadConversation();
+  }, [conversationId, currentUser]);
 
   // Set up real-time subscription for new messages and typing indicators
   useEffect(() => {
-    if (!match || !currentUser) return;
+    if (!chatPartner || !currentUser) return;
 
     // Create a channel for real-time messages and presence
-    const conversationKey = isUuid(String(id)) ? String(id) : String(match.id);
     const channel = supabase
-      .channel(`chat:${match.id}`)
+      .channel(`chat:${conversationId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `conversation_id=eq.${conversationKey}`,
+          filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload: any) => {
           const newMessage = payload.new as any;
@@ -165,12 +144,12 @@ export default function ChatScreen() {
           }, 100);
 
           // Send notification if message is from other user
-          if (newMessage.sender_id !== currentUser.id) {
+          if (newMessage.sender_id !== currentUser.id && chatPartner) {
             const { notificationService } = await import('../lib/notifications');
             await notificationService.sendMessageNotification(
-              match.name,
+              chatPartner.name,
               newMessage.content,
-              match.id
+              conversationId
             );
           }
         }
@@ -210,7 +189,7 @@ export default function ChatScreen() {
         supabase.removeChannel(subscriptionRef.current);
       }
     };
-  }, [match, currentUser]);
+  }, [chatPartner, currentUser, conversationId]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -221,8 +200,8 @@ export default function ChatScreen() {
     }
   }, [messages]);
 
-  // Early return if match not found (after all hooks)
-  if (!match) {
+  // Early return if chat partner not found (after all hooks)
+  if (!chatPartner && !loading) {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.errorText}>Chat not found</Text>
@@ -232,7 +211,7 @@ export default function ChatScreen() {
 
   // Analyze message before sending
   const analyzeThenSend = async () => {
-    if (!newMessage.trim() || !currentUser || !match) return;
+    if (!newMessage.trim() || !currentUser || !chatPartner) return;
 
     const messageText = newMessage.trim();
 
@@ -265,7 +244,7 @@ export default function ChatScreen() {
 
   // Actually send the message (bypassing analysis)
   const actualSendMessage = async (messageText: string) => {
-    if (!currentUser || !match) return;
+    if (!currentUser || !chatPartner) return;
 
     setNewMessage(''); // Clear input immediately for better UX
 
@@ -459,12 +438,12 @@ export default function ChatScreen() {
 
             <View style={styles.headerCenter}>
               <Image
-                source={{ uri: match.profileImage || FALLBACK_IMAGE }}
+                source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
                 style={styles.headerAvatar}
               />
               <View style={styles.headerInfo}>
-                <Text style={styles.headerName}>{match.name}</Text>
-                <Text style={styles.headerStatus}>{match.isOnline ? 'Active now' : 'Offline'}</Text>
+                <Text style={styles.headerName}>{chatPartner?.name}</Text>
+                <Text style={styles.headerStatus}>Offline</Text>
               </View>
             </View>
 
@@ -527,7 +506,7 @@ export default function ChatScreen() {
                 >
                   {!isCurrentUser && (
                     <Image
-                      source={{ uri: match.profileImage || FALLBACK_IMAGE }}
+                      source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
                       style={styles.messageAvatar}
                     />
                   )}
@@ -556,7 +535,7 @@ export default function ChatScreen() {
           {otherUserTyping && (
             <View style={styles.typingIndicatorRow}>
               <Image
-                source={{ uri: match.profileImage || FALLBACK_IMAGE }}
+                source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
                 style={styles.messageAvatar}
               />
               <View style={styles.typingIndicator}>
@@ -607,9 +586,9 @@ export default function ChatScreen() {
       <ChatMenuPopup
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
-        matchName={match.name}
-        matchPhoto={match.profileImage}
-        isActive={!!match.isOnline}
+        matchName={chatPartner?.name || 'Unknown'}
+        matchPhoto={chatPartner?.profileImage || ''}
+        isActive={false}
         messageCount={messages.length}
         onShareProfile={() => {
           setMenuVisible(false);

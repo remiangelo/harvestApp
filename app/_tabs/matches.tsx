@@ -16,7 +16,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { ProfileViewModal, ProfileData } from '../../components/ProfileViewModal';
 import { router } from 'expo-router';
-import { demoChats, getUnreadChatCount } from '../../data/demoChats';
 import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 import { useUser } from '../../context/UserContext';
@@ -29,48 +28,15 @@ export default function MatchesScreen() {
   const insets = useSafeAreaInsets();
   const [recentMatches, setRecentMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [chatsLoading, setChatsLoading] = useState(false); // Set to false to show demo chats immediately
+  const [chatsLoading, setChatsLoading] = useState(true);
+  const [conversations, setConversations] = useState<any[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { currentUser } = useUser();
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // For demo purposes, always show some matches
-    const demoMatches = [
-      {
-        id: 'match-maya-24',
-        name: 'Maya',
-        photo:
-          'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=400&h=400&fit=crop&crop=face',
-        likes: 3,
-      },
-      {
-        id: 'match-sophie-26',
-        name: 'Sophie',
-        photo:
-          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
-        likes: 0,
-      },
-      {
-        id: 'match-elena-28',
-        name: 'Elena',
-        photo:
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face',
-        likes: 2,
-      },
-      {
-        id: 'match-aria-25',
-        name: 'Aria',
-        photo:
-          'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face',
-        likes: 0,
-      },
-    ];
-
     if (!currentUser || !currentUser.id) {
-      // If no user, just show demo data
-      setRecentMatches(demoMatches);
       setLoading(false);
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -114,30 +80,20 @@ export default function MatchesScreen() {
 
         // Format matches data
         const formattedMatches = data.map((match: any) => {
-          // Determine which profile is the other user
           const otherUser = match.user1_id === currentUser?.id ? match.user2 : match.user1;
-
           return {
             id: match.id,
             name: otherUser.nickname || 'Unknown',
             photo: otherUser.photos?.[0] || '',
-            likes: 0, // This would come from a separate likes count query
+            likes: 0,
           };
         });
 
-        // If we got real matches, use them, otherwise use demo matches
-        if (formattedMatches.length > 0) {
-          setRecentMatches(formattedMatches);
-        } else {
-          setRecentMatches(demoMatches);
-        }
+        setRecentMatches(formattedMatches);
       } catch (error) {
         console.error('Error in fetchMatches:', error);
-        // Fallback to demo matches on error
-        setRecentMatches(demoMatches);
       } finally {
         setLoading(false);
-        // Animate in content
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
@@ -147,6 +103,53 @@ export default function MatchesScreen() {
     };
 
     fetchMatches();
+
+    // Fetch conversations
+    const fetchConversations = async () => {
+      if (!currentUser?.id) {
+        setChatsLoading(false);
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from('conversations')
+          .select(
+            `
+            id,
+            last_message,
+            last_message_time,
+            user1_id,
+            user2_id,
+            user1:users!user1_id (id, nickname, photos),
+            user2:users!user2_id (id, nickname, photos)
+          `
+          )
+          .or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`)
+          .order('last_message_time', { ascending: false });
+
+        if (!error && data) {
+          const formattedConversations = data.map((conv: any) => {
+            const otherUser = conv.user1_id === currentUser.id ? conv.user2 : conv.user1;
+            return {
+              id: conv.id,
+              name: otherUser?.nickname || 'Unknown',
+              profileImage: otherUser?.photos?.[0] || '',
+              lastMessage: conv.last_message || '',
+              lastMessageTime: conv.last_message_time || new Date().toISOString(),
+              unreadCount: 0,
+              isOnline: false,
+            };
+          });
+          setConversations(formattedConversations);
+        }
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+      } finally {
+        setChatsLoading(false);
+      }
+    };
+
+    fetchConversations();
   }, [currentUser, fadeAnim]);
 
   const formatMessageTime = (timestamp: string) => {
@@ -195,13 +198,7 @@ export default function MatchesScreen() {
               <Ionicons name="chevron-back" size={28} color="white" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Matches</Text>
-            <View style={styles.headerRight}>
-              {getUnreadChatCount() > 0 && (
-                <View style={styles.unreadBadge}>
-                  <Text style={styles.unreadBadgeText}>{getUnreadChatCount()}</Text>
-                </View>
-              )}
-            </View>
+            <View style={styles.headerRight} />
           </View>
         </SafeAreaView>
 
@@ -292,11 +289,19 @@ export default function MatchesScreen() {
                 </View>
               ))}
             </>
+          ) : conversations.length === 0 ? (
+            <View style={styles.noConversationsContainer}>
+              <Text style={styles.noConversationsText}>No conversations yet</Text>
+              <Text style={styles.noConversationsSubtext}>Start chatting with your matches!</Text>
+            </View>
           ) : (
-            demoChats.map((chat, index) => (
+            conversations.map((chat, index) => (
               <TouchableOpacity
                 key={chat.id}
-                style={[styles.conversationItem, index === demoChats.length - 1 && styles.lastItem]}
+                style={[
+                  styles.conversationItem,
+                  index === conversations.length - 1 && styles.lastItem,
+                ]}
                 onPress={() => router.push(`/chat?id=${chat.id}` as any)}
               >
                 <View style={styles.avatarContainer}>
@@ -462,6 +467,21 @@ const styles = StyleSheet.create({
   matchesScroll: {
     paddingRight: 20,
   },
+  noConversationsContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    paddingVertical: 40,
+  },
+  noConversationsSubtext: {
+    color: '#999',
+    fontSize: 14,
+    marginTop: 4,
+  },
+  noConversationsText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   noMatchesContainer: {
     alignItems: 'center',
     paddingHorizontal: 40,
@@ -514,19 +534,6 @@ const styles = StyleSheet.create({
   timestamp: {
     color: '#999',
     fontSize: 12,
-  },
-  unreadBadge: {
-    alignItems: 'center',
-    backgroundColor: '#FF3B5C',
-    borderRadius: 10,
-    minWidth: 20,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  unreadBadgeText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
   },
   unreadCountBadge: {
     alignItems: 'center',

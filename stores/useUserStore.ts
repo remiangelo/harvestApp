@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DemoUser } from '../data/demoUsers';
+import { User } from '../types/profile';
 
 interface UserState {
-  currentUser: (DemoUser & { id?: string }) | null;
-  onboardingData: Partial<DemoUser>;
-  setCurrentUser: (user: (DemoUser & { id?: string }) | null) => void;
-  updateOnboardingData: (data: Partial<DemoUser>) => void;
+  currentUser: (User & { id?: string }) | null;
+  onboardingData: Partial<User>;
+  setCurrentUser: (user: (User & { id?: string }) | null) => void;
+  updateOnboardingData: (data: Partial<User>) => void;
   clearOnboardingData: () => void;
   logout: () => void;
 }

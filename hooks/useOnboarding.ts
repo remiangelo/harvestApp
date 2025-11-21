@@ -5,7 +5,7 @@ import useUserStore from '../stores/useUserStore';
 import { saveOnboardingStep, completeOnboarding } from '../lib/onboarding';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DemoUser } from '../data/demoUsers';
+import { User } from '../types/profile';
 
 export const useOnboarding = () => {
   const router = useRouter();
@@ -127,7 +127,7 @@ export const useOnboarding = () => {
       console.log('[finishOnboarding] Test mode - updating local state');
       // Update the current user to mark onboarding as complete
       const updatedUser = { ...currentUser, onboardingCompleted: true };
-      useUserStore.getState().setCurrentUser(updatedUser as DemoUser);
+      useUserStore.getState().setCurrentUser(updatedUser as User);
 
       // Update AsyncStorage
       try {

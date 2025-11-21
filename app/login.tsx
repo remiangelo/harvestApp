@@ -16,7 +16,6 @@ import { useAuthStore } from '../stores/useAuthStore';
 import useUserStore from '../stores/useUserStore';
 import { Button, Input, Text, Card } from '../components/ui';
 import { theme } from '../constants/theme';
-import { DemoUser } from '../data/demoUsers';
 import { supabase } from '../lib/supabase';
 
 export default function LoginScreen() {
@@ -227,7 +226,7 @@ export default function LoginScreen() {
     setLoading(true);
 
     // Create a mock user for testing without Supabase
-    const mockUser: DemoUser = {
+    const mockUser = {
       email: 'testuser@harvest.com',
       password: 'testpass', // Not used in test mode
       name: 'Test User',

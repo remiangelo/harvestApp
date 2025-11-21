@@ -16,15 +16,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DemoProfile } from '../data/demoProfiles';
+import { Profile } from '../types/profile';
 import * as Haptics from 'expo-haptics';
 import { theme } from '../constants/theme';
 const SWIPE_OUT_DURATION = 250;
 const FALLBACK_IMAGE = 'https://via.placeholder.com/800x1200/A0354E/FFFFFF?text=No+Image';
 
 interface HarvestSwipeCardProps {
-  profile: DemoProfile;
-  nextProfiles?: DemoProfile[];
+  profile: Profile;
+  nextProfiles?: Profile[];
   onLike: () => void;
   onDislike: () => void;
   onSuperLike?: () => void;

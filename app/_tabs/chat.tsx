@@ -15,29 +15,88 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { router } from 'expo-router';
-import { demoChats } from '../../data/demoChats';
 import { format } from 'date-fns';
 import { theme } from '../../constants/theme';
+import { supabase } from '../../lib/supabase';
+import { useAuthStore } from '../../stores/useAuthStore';
+
+interface Conversation {
+  id: string;
+  name: string;
+  profileImage: string;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
+  isOnline: boolean;
+}
 
 export default function ChatTabScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [chatsLoading, setChatsLoading] = useState(true);
-  const [conversations] = useState(demoChats);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const { user } = useAuthStore();
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Simulate loading and animate content
-    const timer = setTimeout(() => {
-      setChatsLoading(false);
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }, 500);
+    const fetchConversations = async () => {
+      if (!user) {
+        setChatsLoading(false);
+        return;
+      }
 
-    return () => clearTimeout(timer);
-  }, [fadeAnim]);
+      try {
+        // Fetch conversations for the current user
+        const { data, error } = await supabase
+          .from('conversations')
+          .select(
+            `
+            id,
+            last_message,
+            last_message_time,
+            user1_id,
+            user2_id,
+            user1:users!user1_id (id, nickname, photos),
+            user2:users!user2_id (id, nickname, photos)
+          `
+          )
+          .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
+          .order('last_message_time', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching conversations:', error);
+          setChatsLoading(false);
+          return;
+        }
+
+        // Format conversations
+        const formattedConversations: Conversation[] = (data || []).map((conv: any) => {
+          const otherUser = conv.user1_id === user.id ? conv.user2 : conv.user1;
+          return {
+            id: conv.id,
+            name: otherUser?.nickname || 'Unknown',
+            profileImage: otherUser?.photos?.[0] || '',
+            lastMessage: conv.last_message || '',
+            lastMessageTime: conv.last_message_time || new Date().toISOString(),
+            unreadCount: 0,
+            isOnline: false,
+          };
+        });
+
+        setConversations(formattedConversations);
+      } catch (error) {
+        console.error('Error loading conversations:', error);
+      } finally {
+        setChatsLoading(false);
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }
+    };
+
+    fetchConversations();
+  }, [user, fadeAnim]);
 
   const formatMessageTime = (timestamp: string) => {
     const date = new Date(timestamp);

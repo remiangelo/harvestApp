@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import useUserStore from '../../stores/useUserStore';
@@ -9,26 +9,38 @@ export default function OnboardingLocation() {
   const { onboardingData } = useUserStore();
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const [locationGranted, setLocationGranted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const checkLocationPermission = async () => {
     try {
       console.log('[OnboardingLocation] Checking location permission');
+      console.log('[OnboardingLocation] Platform:', Platform.OS);
+
+      // Add a small delay to ensure Location module is ready
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       const { status } = await Location.getForegroundPermissionsAsync();
       console.log('[OnboardingLocation] Permission status:', status);
       setLocationGranted(status === 'granted');
+      setIsLoading(false);
     } catch (error) {
       console.error('[OnboardingLocation] Error checking location permission:', error);
+      console.error('[OnboardingLocation] Error details:', JSON.stringify(error, null, 2));
       // Set to false on error to allow user to continue
       setLocationGranted(false);
+      setIsLoading(false);
     }
   };
 
   // Pre-fill with restored data if available
   useEffect(() => {
     console.log('[OnboardingLocation] Component mounted');
+    console.log('[OnboardingLocation] onboardingData:', onboardingData);
+
     // Check if location permission already granted
     checkLocationPermission().catch((err) => {
       console.error('[OnboardingLocation] useEffect error:', err);
+      setIsLoading(false);
     });
   }, []);
 
@@ -118,6 +130,23 @@ export default function OnboardingLocation() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <OnboardingScreen
+        progress={90}
+        currentStep="location"
+        nextStep="terms"
+        onValidate={() => ({ location: 'Loading...' })}
+        buttonDisabled={true}
+      >
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#8B1E2D" />
+          <Text style={styles.loadingText}>Loading location settings...</Text>
+        </View>
+      </OnboardingScreen>
+    );
+  }
+
   return (
     <OnboardingScreen
       progress={90}
@@ -150,6 +179,19 @@ const styles = StyleSheet.create({
   iconContainer: {
     marginBottom: 32,
     marginTop: 16,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 48,
+    marginTop: 48,
+  },
+  loadingText: {
+    color: '#666',
+    fontFamily: 'System',
+    fontSize: 16,
+    marginTop: 16,
+    textAlign: 'center',
   },
   requestingText: {
     color: '#8B1E2D',

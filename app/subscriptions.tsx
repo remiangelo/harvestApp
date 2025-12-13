@@ -40,7 +40,7 @@ const plans: Plan[] = [
       { text: 'Rewind last swipe', included: false },
       { text: 'Priority support', included: false },
     ],
-    gradient: ['#666', '#999'],
+    gradient: [theme.colors.primary, '#999'],
   },
   {
     id: 'premium',
@@ -58,7 +58,7 @@ const plans: Plan[] = [
       { text: 'Read receipts', included: true },
       { text: 'Message before matching', included: false },
     ],
-    gradient: ['#A0354E', '#8B1E2D'],
+    gradient: [theme.colors.primary, theme.colors.primaryDark],
   },
   {
     id: 'gold',
@@ -75,7 +75,7 @@ const plans: Plan[] = [
       { text: 'Priority support', included: true },
       { text: 'Early access to features', included: true },
     ],
-    gradient: ['#FFD700', '#FFA500'],
+    gradient: [theme.colors.primary, '#FFA500'],
   },
 ];
 
@@ -110,7 +110,7 @@ export default function SubscriptionsScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#A0354E', '#8B1E2D']}
+        colors={[theme.colors.primary, theme.colors.primaryDark]}
         style={[styles.header, { paddingTop: insets.top + 10 }]} // Add extra padding to ensure full coverage
       >
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -124,7 +124,7 @@ export default function SubscriptionsScreen() {
         {/* Current Plan Badge */}
         {currentPlan !== 'free' && (
           <View style={styles.currentPlanBadge}>
-            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+            <Ionicons name="checkmark-circle" size={20} color={theme.colors.primary} />
             <Text style={styles.currentPlanText}>
               Current Plan: {plans.find((p) => p.id === currentPlan)?.name}
             </Text>
@@ -142,7 +142,10 @@ export default function SubscriptionsScreen() {
               glassTint="rgba(255, 255, 255, 0.92)"
             >
               {plan.popular && (
-                <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.popularBadge}>
+                <LinearGradient
+                  colors={[theme.colors.primary, theme.colors.primaryDark]}
+                  style={styles.popularBadge}
+                >
                   <Text style={styles.popularText}>MOST POPULAR</Text>
                 </LinearGradient>
               )}
@@ -161,7 +164,7 @@ export default function SubscriptionsScreen() {
                     <Ionicons
                       name={feature.included ? 'checkmark-circle' : 'close-circle'}
                       size={20}
-                      color={feature.included ? '#4CAF50' : '#999'}
+                      color={feature.included ? theme.colors.primary : '#999'}
                     />
                     <Text
                       style={[styles.featureText, !feature.included && styles.featureTextDisabled]}
@@ -178,7 +181,9 @@ export default function SubscriptionsScreen() {
                   onPress={() => handleSubscribe(plan.id)}
                 >
                   <LinearGradient
-                    colors={(plan.id === 'free' ? ['#999', '#666'] : plan.gradient) as any}
+                    colors={
+                      (plan.id === 'free' ? [theme.colors.primary, '#666'] : plan.gradient) as any
+                    }
                     style={styles.subscribeGradient}
                   >
                     <Text style={styles.subscribeText}>
@@ -202,7 +207,10 @@ export default function SubscriptionsScreen() {
           <Text style={styles.benefitsTitle}>Why Go Premium?</Text>
 
           <View style={styles.benefitCard}>
-            <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.benefitIcon}>
+            <LinearGradient
+              colors={[theme.colors.primary, theme.colors.primaryDark]}
+              style={styles.benefitIcon}
+            >
               <Ionicons name="heart" size={24} color="white" />
             </LinearGradient>
             <View style={styles.benefitContent}>
@@ -214,7 +222,7 @@ export default function SubscriptionsScreen() {
           </View>
 
           <View style={styles.benefitCard}>
-            <LinearGradient colors={['#4CAF50', '#45a049']} style={styles.benefitIcon}>
+            <LinearGradient colors={[theme.colors.primary, '#45a049']} style={styles.benefitIcon}>
               <Ionicons name="eye" size={24} color="white" />
             </LinearGradient>
             <View style={styles.benefitContent}>
@@ -226,7 +234,7 @@ export default function SubscriptionsScreen() {
           </View>
 
           <View style={styles.benefitCard}>
-            <LinearGradient colors={['#2196F3', '#1976D2']} style={styles.benefitIcon}>
+            <LinearGradient colors={[theme.colors.primary, '#1976D2']} style={styles.benefitIcon}>
               <Ionicons name="flash" size={24} color="white" />
             </LinearGradient>
             <View style={styles.benefitContent}>
@@ -290,7 +298,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   container: {
-    backgroundColor: '#F8F8F8',
+    backgroundColor: theme.colors.primary,
     flex: 1,
   },
   currentIndicator: {
@@ -333,7 +341,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   featureTextDisabled: {
-    color: '#999',
+    color: theme.colors.primary,
     textDecorationLine: 'line-through',
   },
   featuresContainer: {
@@ -422,7 +430,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   terms: {
-    color: '#999',
+    color: theme.colors.primary,
     fontSize: 12,
     marginHorizontal: 20,
     marginTop: 30,

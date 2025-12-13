@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { RedFlag } from '../../lib/ai/openaiService';
 import { getSafetyColor } from '../../lib/ai/safetyConfig';
+import { theme } from '../../constants/theme';
 
 interface SafetyWarningProps {
   visible: boolean;
@@ -147,7 +148,7 @@ export const SafetyWarning: React.FC<SafetyWarningProps> = ({
 const styles = StyleSheet.create({
   actionButton: {
     alignItems: 'center',
-    backgroundColor: '#A0354E',
+    backgroundColor: theme.colors.primary,
     borderRadius: 10,
     padding: 15,
   },

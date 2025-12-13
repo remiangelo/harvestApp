@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../stores/useAuthStore';
 import { Button } from './ui';
+import { theme } from '../constants/theme';
 
 interface LogoutButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -40,7 +41,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
       onPress={handleLogout}
       variant={variant}
       fullWidth={fullWidth}
-      icon={<Ionicons name="log-out-outline" size={20} color="#A0354E" />}
+      icon={<Ionicons name="log-out-outline" size={20} color={theme.colors.primary} />}
     />
   );
 };

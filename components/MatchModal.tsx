@@ -4,6 +4,7 @@ import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView, LiquidGlassButton, LiquidGlassBadge } from './liquid';
 import * as Haptics from 'expo-haptics';
+import { theme } from '../constants/theme';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -111,7 +112,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
               <LiquidGlassBadge
                 label="Interests"
                 value={`${compatibility.interests}%`}
-                color="#A0354E"
+                color={theme.colors.primary}
                 size="large"
               />
               <LiquidGlassBadge
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   matchTitle: {
-    color: '#A0354E',
+    color: theme.colors.primary,
     fontSize: 32,
     fontWeight: '800',
     marginBottom: 10,
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   primaryButton: {
-    backgroundColor: '#A0354E',
+    backgroundColor: theme.colors.primary,
     borderRadius: 30,
     marginBottom: 15,
     paddingHorizontal: 60,

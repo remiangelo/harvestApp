@@ -125,7 +125,10 @@ export default function ChatTabScreen() {
       <StatusBar barStyle="light-content" />
 
       {/* Header with gradient background */}
-      <LinearGradient colors={['#A0354E', '#8B1E2D', '#701625']} style={styles.headerGradient}>
+      <LinearGradient
+        colors={[theme.colors.primary, theme.colors.primaryDark, '#701625']}
+        style={styles.headerGradient}
+      >
         <SafeAreaView>
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Messages</Text>

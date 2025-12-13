@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../../constants/theme';
 
 export default function TermsScreen() {
   const [ageConfirmed, setAgeConfirmed] = useState(false);
@@ -80,11 +81,11 @@ export default function TermsScreen() {
 
         <TouchableOpacity style={styles.guidelinesButton} onPress={openCommunityGuidelines}>
           <Text style={styles.guidelinesButtonText}>View Community Guidelines</Text>
-          <Ionicons name="chevron-forward" size={20} color="#8B1E2D" />
+          <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
 
         <View style={styles.infoBox}>
-          <Ionicons name="information-circle-outline" size={24} color="#8B1E2D" />
+          <Ionicons name="information-circle-outline" size={24} color={theme.colors.primary} />
           <Text style={styles.infoText}>
             By continuing, you acknowledge that you have read and understood our policies.
           </Text>
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
   checkboxBox: {
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderColor: '#8B1E2D',
+    borderColor: theme.colors.primary,
     borderRadius: 6,
     borderWidth: 2,
     height: 28,
@@ -111,8 +112,8 @@ const styles = StyleSheet.create({
     width: 28,
   },
   checkboxBoxChecked: {
-    backgroundColor: '#8B1E2D',
-    borderColor: '#8B1E2D',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   checkboxContainer: {
     marginBottom: 20,
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
   },
   guidelinesButton: {
     alignItems: 'center',
-    borderColor: '#8B1E2D',
+    borderColor: theme.colors.primary,
     borderRadius: 12,
     borderWidth: 1,
     flexDirection: 'row',
@@ -142,14 +143,14 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   guidelinesButtonText: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontSize: 16,
     fontWeight: '600',
   },
   infoBox: {
     alignItems: 'flex-start',
-    backgroundColor: 'rgba(139, 30, 45, 0.05)',
-    borderLeftColor: '#8B1E2D',
+    backgroundColor: theme.colors.primarySoft,
+    borderLeftColor: theme.colors.primary,
     borderLeftWidth: 4,
     borderRadius: 8,
     flexDirection: 'row',
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   link: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontWeight: '600',
     textDecorationLine: 'underline',
   },

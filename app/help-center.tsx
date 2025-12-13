@@ -128,7 +128,10 @@ export default function HelpCenterScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.header}>
+      <LinearGradient
+        colors={[theme.colors.primary, theme.colors.primaryDark]}
+        style={styles.header}
+      >
         <SafeAreaView>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={28} color="white" />
@@ -152,7 +155,10 @@ export default function HelpCenterScreen() {
               style={styles.quickActionButton}
               onPress={() => setShowTicketForm(true)}
             >
-              <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.quickActionGradient}>
+              <LinearGradient
+                colors={[theme.colors.primary, theme.colors.primaryDark]}
+                style={styles.quickActionGradient}
+              >
                 <Ionicons name="mail" size={24} color="white" />
                 <Text style={styles.quickActionText}>Contact Support</Text>
               </LinearGradient>
@@ -217,7 +223,7 @@ export default function HelpCenterScreen() {
                     <Ionicons
                       name={expandedFAQ === faq.id ? 'chevron-up' : 'chevron-down'}
                       size={20}
-                      color="#999"
+                      color={theme.colors.primary}
                     />
                   </View>
                   {expandedFAQ === faq.id && (
@@ -245,7 +251,7 @@ export default function HelpCenterScreen() {
               <View style={styles.ticketHeader}>
                 <Text style={styles.ticketTitle}>Submit a Support Ticket</Text>
                 <TouchableOpacity onPress={() => setShowTicketForm(false)}>
-                  <Ionicons name="close" size={24} color="#999" />
+                  <Ionicons name="close" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
               </View>
 
@@ -304,7 +310,10 @@ export default function HelpCenterScreen() {
                 onPress={handleSubmitTicket}
                 disabled={submitting}
               >
-                <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.submitGradient}>
+                <LinearGradient
+                  colors={[theme.colors.primary, theme.colors.primaryDark]}
+                  style={styles.submitGradient}
+                >
                   {submitting ? (
                     <Text style={styles.submitText}>Sending...</Text>
                   ) : (
@@ -330,7 +339,7 @@ export default function HelpCenterScreen() {
                 <Text style={styles.resourceTitle}>Safety Guidelines</Text>
                 <Text style={styles.resourceDescription}>Learn how to stay safe while dating</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#999" />
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.resourceCard}>
@@ -339,7 +348,7 @@ export default function HelpCenterScreen() {
                 <Text style={styles.resourceTitle}>Terms of Service</Text>
                 <Text style={styles.resourceDescription}>Read our terms and conditions</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#999" />
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.resourceCard}>
@@ -348,7 +357,7 @@ export default function HelpCenterScreen() {
                 <Text style={styles.resourceTitle}>Privacy Policy</Text>
                 <Text style={styles.resourceDescription}>Learn how we protect your data</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#999" />
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -426,7 +435,7 @@ const styles = StyleSheet.create({
   },
   faqCategory: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(160, 53, 78, 0.1)',
+    backgroundColor: theme.colors.primarySoft,
     borderRadius: 12,
     marginTop: 10,
     paddingHorizontal: 10,

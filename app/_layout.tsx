@@ -44,6 +44,7 @@ export default function RootLayout() {
     DMSans_700Bold,
     DMSerifDisplay_400Regular,
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    OrangeSquash: require('../assets/fonts/OrangeSquash.ttf'),
     ...FontAwesome.font,
   });
 

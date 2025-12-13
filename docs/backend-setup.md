@@ -29,34 +29,40 @@ The app uses only the anon key at runtime. The optional service key can be provi
 
 ## Database Setup
 
-1) Apply migrations in order:
+1. Apply migrations in order:
+
 - 001_initial_schema.sql
 - 002_swipes_and_matches.sql (preferred)
 - 003_users_table_updates.sql
 - 004_add_push_token.sql
 
 Notes:
+
 - There are two migration files with prefix 002. Use only one:
   - 002_swipes_and_matches.sql: references auth.users and provides a cleaner minimal set
   - 002_matching_system.sql: references users table and includes additional fields
 - Recommended: 002_swipes_and_matches.sql to align with common Supabase patterns and avoid cross-schema confusion.
 
-2) If you have previously applied 002_matching_system.sql:
+2. If you have previously applied 002_matching_system.sql:
+
 - Keep it, or migrate to 002_swipes_and_matches.sql carefully:
   - Ensure swipes and matches schemas align with app code
   - Ensure get_match_status RPC signature returns is_matched and match_id
   - Reconcile differences in matches fields (user1_unmatched/user2_unmatched vs is_active)
   - Test with the preflight script and app flows before production use
 
-3) Extra helper SQL provided (optional):
+3. Extra helper SQL provided (optional):
+
 - SIMPLE_RLS_FIX.sql, COMPLETE_RLS_FIX.sql, DISABLE_RLS.sql, fix_schema.sql: run only if you encounter RLS or schema errors during onboarding. Prefer to keep RLS enabled for production.
 
 ## Storage Buckets
 
 Create a public bucket profile-photos:
+
 - In Supabase Dashboard → Storage → Create bucket → name: profile-photos → Public: true
 
 Recommended policies:
+
 - Public read for images
 - Authenticated users can write/delete only their own files (path-based)
   - You can later refine with path prefix like userId/...
@@ -70,6 +76,7 @@ A backend preflight script validates keys, connection, tables, RPCs, and storage
   - npm run preflight:backend
 
 What it checks:
+
 - EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY present
 - Supabase connectivity (auth.getSession)
 - Migrations present; warns if duplicate prefixes exist (e.g., 002)
@@ -94,6 +101,7 @@ If you provide SUPABASE_SERVICE_ROLE_KEY the script can list buckets via admin S
 ## Test Modes
 
 The app contains a Test Mode to bypass auth and demo the UI. Production flows require:
+
 - Valid Supabase credentials in .env
 - Migrations applied
 - Storage bucket created
@@ -111,10 +119,10 @@ The app contains a Test Mode to bypass auth and demo the UI. Production flows re
 
 ## Verification Steps (CI-friendly)
 
-1) npm run type-check
-2) npm run lint
-3) npm run preflight:backend
-4) Launch app and confirm:
+1. npm run type-check
+2. npm run lint
+3. npm run preflight:backend
+4. Launch app and confirm:
    - Auth works (sign up/in/out)
    - Swipes insert rows and auto-matching works
    - Messages insert and read

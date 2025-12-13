@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../constants/theme';
 
 interface OnboardingStepData {
   age?: Date;
@@ -78,7 +79,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
       >
         {showBackButton && (
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#8B1E2D" />
+            <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
           </TouchableOpacity>
         )}
 
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: 'center',
-    backgroundColor: '#8B1E2D',
+    backgroundColor: theme.colors.primary,
     borderRadius: 24,
     height: 48,
     justifyContent: 'center',
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   progressBar: {
-    backgroundColor: '#8B1E2D',
+    backgroundColor: theme.colors.primary,
     borderRadius: 4,
     height: 8,
   },

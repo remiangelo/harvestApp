@@ -137,9 +137,9 @@ export default function AuthScreen() {
 
 const styles = StyleSheet.create({
   appName: {
-    color: theme.colors.text.primary,
-    fontSize: 36,
-    fontWeight: 'bold',
+    color: theme.colors.primary, // Rose red for logo name
+    fontFamily: theme.typography.fontFamily.logo, // Orange Squash font
+    fontSize: 42,
     marginTop: theme.spacing.md,
   },
   container: {
@@ -179,9 +179,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xxl,
   },
   logoText: {
-    color: theme.colors.primary,
+    color: theme.colors.primary, // Rose red
+    fontFamily: theme.typography.fontFamily.logo, // Orange Squash font
     fontSize: 52,
-    fontWeight: 'bold',
   },
   safeArea: {
     flex: 1,

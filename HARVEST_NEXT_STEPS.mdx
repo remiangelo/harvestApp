@@ -1,12 +1,12 @@
 # Harvest App - Next Steps Implementation Guide
 
 <Alert type="info">
-**Current Status**: Alpha showcase ready with iOS 26 glassmorphism UI  
-**Priority**: Launch preparation for 5-10k users  
-**Timeline**: 4-6 weeks to production
+  **Current Status**: Alpha showcase ready with iOS 26 glassmorphism UI **Priority**: Launch
+  preparation for 5-10k users **Timeline**: 4-6 weeks to production
 </Alert>
 
 ## Table of Contents
+
 1. [Immediate Priorities](#immediate-priorities)
 2. [Database Integration](#database-integration)
 3. [Matching System](#matching-system)
@@ -26,14 +26,18 @@
 npm run lint -- --fix
 
 # Run type checks
+
 npm run type-check
 
 # Test on physical devices
+
 npm run ios -- --device
 npm run android -- --variant release
+
 </CodeBlock>
 
 #### ESLint Fixes Required:
+
 - Remove unused imports in `_layout.tsx`, `_tabs/_layout.tsx`
 - Fix unescaped entities in `+not-found.tsx`
 - Remove unused `likedProfiles` and `dislikedProfiles` state variables
@@ -49,6 +53,7 @@ const [dislikedProfiles, setDislikedProfiles] = useState<string[]>([]);
 ### 2. Polish UI/UX for Alpha (Week 1, Days 2-3)
 
 #### Critical UI Fixes:
+
 1. **Swipe Card Loading States**
    - Add skeleton loaders for images
    - Smooth transitions between profiles
@@ -65,8 +70,7 @@ const [dislikedProfiles, setDislikedProfiles] = useState<string[]>([]);
    - Add FastImage for profile photos
 
 <CodeBlock language="bash">
-# Install performance dependencies
-npm install expo-image react-native-fast-image
+  # Install performance dependencies npm install expo-image react-native-fast-image
 </CodeBlock>
 
 ---
@@ -97,12 +101,13 @@ CREATE INDEX idx_swipes_action ON swipes(action);
 ALTER TABLE swipes ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can insert their own swipes"
-  ON swipes FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+ON swipes FOR INSERT
+WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can view their own swipes"
-  ON swipes FOR SELECT
-  USING (auth.uid() = user_id);
+ON swipes FOR SELECT
+USING (auth.uid() = user_id);
+
 </CodeBlock>
 
 #### 2. Update Swipe Functions
@@ -152,34 +157,36 @@ export async function saveSwipe(
     }
 
     return { success: true, isMatch: false };
-  } catch (error) {
-    console.error('Error saving swipe:', error);
-    return { 
-      success: false, 
-      isMatch: false, 
-      error: error.message 
-    };
-  }
+
+} catch (error) {
+console.error('Error saving swipe:', error);
+return {
+success: false,
+isMatch: false,
+error: error.message
+};
+}
 }
 
 // Get profiles user hasn't swiped on
 export async function getUnswipedProfiles(userId: string) {
-  const { data: swipedUserIds } = await supabase
-    .from('swipes')
-    .select('swiped_user_id')
-    .eq('user_id', userId);
+const { data: swipedUserIds } = await supabase
+.from('swipes')
+.select('swiped_user_id')
+.eq('user_id', userId);
 
-  const swipedIds = swipedUserIds?.map(s => s.swiped_user_id) || [];
+const swipedIds = swipedUserIds?.map(s => s.swiped_user_id) || [];
 
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('*')
-    .neq('id', userId)
-    .not('id', 'in', `(${swipedIds.join(',')})`)
-    .limit(50);
+const { data: profiles } = await supabase
+.from('profiles')
+.select('\*')
+.neq('id', userId)
+.not('id', 'in', `(${swipedIds.join(',')})`)
+.limit(50);
 
-  return profiles || [];
+return profiles || [];
 }
+
 </CodeBlock>
 
 ---
@@ -214,8 +221,9 @@ CREATE INDEX idx_matches_active ON matches(is_active);
 ALTER TABLE matches ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view their matches"
-  ON matches FOR SELECT
-  USING (auth.uid() = user1_id OR auth.uid() = user2_id);
+ON matches FOR SELECT
+USING (auth.uid() = user1_id OR auth.uid() = user2_id);
+
 </CodeBlock>
 
 #### 2. Match Creation Function
@@ -230,15 +238,15 @@ export async function createMatch(userId1: string, userId2: string) {
     ? [userId1, userId2] 
     : [userId2, userId1];
 
-  try {
-    const { data, error } = await supabase
-      .from('matches')
-      .insert({
-        user1_id,
-        user2_id
-      })
-      .select()
-      .single();
+try {
+const { data, error } = await supabase
+.from('matches')
+.insert({
+user1_id,
+user2_id
+})
+.select()
+.single();
 
     if (error) throw error;
 
@@ -246,10 +254,11 @@ export async function createMatch(userId1: string, userId2: string) {
     // await sendMatchNotification(userId1, userId2);
 
     return { success: true, match: data };
-  } catch (error) {
-    console.error('Error creating match:', error);
-    return { success: false, error: error.message };
-  }
+
+} catch (error) {
+console.error('Error creating match:', error);
+return { success: false, error: error.message };
+}
 }
 
 export async function getUserMatches(userId: string) {
@@ -264,17 +273,18 @@ export async function getUserMatches(userId: string) {
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+if (error) throw error;
 
-  // Format matches to always have the other user as 'match'
-  return data?.map(match => ({
-    ...match,
-    match: match.user1_id === userId ? match.user2 : match.user1,
-    unreadCount: match.user1_id === userId 
-      ? match.user1_unread_count 
-      : match.user2_unread_count
-  }));
+// Format matches to always have the other user as 'match'
+return data?.map(match => ({
+...match,
+match: match.user1_id === userId ? match.user2 : match.user1,
+unreadCount: match.user1_id === userId
+? match.user1_unread_count
+: match.user2_unread_count
+}));
 }
+
 </CodeBlock>
 
 #### 3. Update Matches Screen
@@ -289,25 +299,26 @@ export default function MatchesScreen() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      loadMatches();
-    }
-  }, [user]);
-
-  const loadMatches = async () => {
-    try {
-      const userMatches = await getUserMatches(user.id);
-      setMatches(userMatches);
-    } catch (error) {
-      console.error('Error loading matches:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Render matches with real data...
+useEffect(() => {
+if (user) {
+loadMatches();
 }
+}, [user]);
+
+const loadMatches = async () => {
+try {
+const userMatches = await getUserMatches(user.id);
+setMatches(userMatches);
+} catch (error) {
+console.error('Error loading matches:', error);
+} finally {
+setLoading(false);
+}
+};
+
+// Render matches with real data...
+}
+
 </CodeBlock>
 
 ---
@@ -340,25 +351,26 @@ CREATE INDEX idx_messages_created_at ON messages(created_at);
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view messages in their matches"
-  ON messages FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM matches 
-      WHERE matches.id = messages.match_id 
-      AND (matches.user1_id = auth.uid() OR matches.user2_id = auth.uid())
-    )
-  );
+ON messages FOR SELECT
+USING (
+EXISTS (
+SELECT 1 FROM matches
+WHERE matches.id = messages.match_id
+AND (matches.user1_id = auth.uid() OR matches.user2_id = auth.uid())
+)
+);
 
 CREATE POLICY "Users can send messages to their matches"
-  ON messages FOR INSERT
-  WITH CHECK (
-    sender_id = auth.uid() AND
-    EXISTS (
-      SELECT 1 FROM matches 
-      WHERE matches.id = match_id 
-      AND (matches.user1_id = auth.uid() OR matches.user2_id = auth.uid())
-    )
-  );
+ON messages FOR INSERT
+WITH CHECK (
+sender_id = auth.uid() AND
+EXISTS (
+SELECT 1 FROM matches
+WHERE matches.id = match_id
+AND (matches.user1_id = auth.uid() OR matches.user2_id = auth.uid())
+)
+);
+
 </CodeBlock>
 
 #### 2. Real-time Chat Implementation
@@ -371,16 +383,16 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 export class ChatService {
   private channel: RealtimeChannel | null = null;
 
-  async sendMessage(matchId: string, senderId: string, content: string) {
-    const { data, error } = await supabase
-      .from('messages')
-      .insert({
-        match_id: matchId,
-        sender_id: senderId,
-        content
-      })
-      .select()
-      .single();
+async sendMessage(matchId: string, senderId: string, content: string) {
+const { data, error } = await supabase
+.from('messages')
+.insert({
+match_id: matchId,
+sender_id: senderId,
+content
+})
+.select()
+.single();
 
     if (error) throw error;
 
@@ -391,52 +403,55 @@ export class ChatService {
       .eq('id', matchId);
 
     return data;
-  }
 
-  subscribeToMessages(matchId: string, onMessage: (message: any) => void) {
-    this.channel = supabase
-      .channel(`messages:${matchId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `match_id=eq.${matchId}`
-        },
-        (payload) => {
-          onMessage(payload.new);
-        }
-      )
-      .subscribe();
+}
+
+subscribeToMessages(matchId: string, onMessage: (message: any) => void) {
+this.channel = supabase
+.channel(`messages:${matchId}`)
+.on(
+'postgres_changes',
+{
+event: 'INSERT',
+schema: 'public',
+table: 'messages',
+filter: `match_id=eq.${matchId}`
+},
+(payload) => {
+onMessage(payload.new);
+}
+)
+.subscribe();
 
     return () => {
       if (this.channel) {
         supabase.removeChannel(this.channel);
       }
     };
-  }
 
-  async getMessages(matchId: string, limit = 50) {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*, sender:sender_id(id, nickname, photos)')
-      .eq('match_id', matchId)
-      .order('created_at', { ascending: false })
-      .limit(limit);
+}
+
+async getMessages(matchId: string, limit = 50) {
+const { data, error } = await supabase
+.from('messages')
+.select('\*, sender:sender_id(id, nickname, photos)')
+.eq('match_id', matchId)
+.order('created_at', { ascending: false })
+.limit(limit);
 
     if (error) throw error;
     return data?.reverse() || [];
-  }
 
-  async markAsRead(matchId: string, userId: string) {
-    await supabase
-      .from('messages')
-      .update({ read_at: new Date().toISOString() })
-      .eq('match_id', matchId)
-      .neq('sender_id', userId)
-      .is('read_at', null);
-  }
+}
+
+async markAsRead(matchId: string, userId: string) {
+await supabase
+.from('messages')
+.update({ read_at: new Date().toISOString() })
+.eq('match_id', matchId)
+.neq('sender_id', userId)
+.is('read_at', null);
+}
 }
 
 export const chatService = new ChatService();
@@ -463,9 +478,9 @@ export function ChatScreen({ matchId, userId }) {
   const [loading, setLoading] = useState(true);
   const flatListRef = useRef(null);
 
-  useEffect(() => {
-    loadMessages();
-    
+useEffect(() => {
+loadMessages();
+
     // Subscribe to real-time messages
     const unsubscribe = chatService.subscribeToMessages(matchId, (newMessage) => {
       setMessages(prev => [...prev, newMessage]);
@@ -476,21 +491,22 @@ export function ChatScreen({ matchId, userId }) {
     chatService.markAsRead(matchId, userId);
 
     return unsubscribe;
-  }, [matchId]);
 
-  const loadMessages = async () => {
-    try {
-      const data = await chatService.getMessages(matchId);
-      setMessages(data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-      setLoading(false);
-    }
-  };
+}, [matchId]);
 
-  const sendMessage = async () => {
-    if (!inputText.trim()) return;
+const loadMessages = async () => {
+try {
+const data = await chatService.getMessages(matchId);
+setMessages(data);
+setLoading(false);
+} catch (error) {
+console.error('Error loading messages:', error);
+setLoading(false);
+}
+};
+
+const sendMessage = async () => {
+if (!inputText.trim()) return;
 
     try {
       await chatService.sendMessage(matchId, userId, inputText.trim());
@@ -498,26 +514,27 @@ export function ChatScreen({ matchId, userId }) {
     } catch (error) {
       console.error('Error sending message:', error);
     }
-  };
 
-  return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <MessageBubble 
-            message={item} 
-            isOwn={item.sender_id === userId} 
-          />
-        )}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-      />
-      
+};
+
+return (
+
+<KeyboardAvoidingView
+style={{ flex: 1 }}
+behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
+<FlatList
+ref={flatListRef}
+data={messages}
+keyExtractor={item => item.id}
+renderItem={({ item }) => (
+<MessageBubble
+message={item}
+isOwn={item.sender_id === userId}
+/>
+)}
+onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+/>
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -531,8 +548,10 @@ export function ChatScreen({ matchId, userId }) {
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
-  );
+
+);
 }
+
 </CodeBlock>
 
 ---
@@ -609,36 +628,33 @@ export const matchAnimation = {
 export class ErrorBoundary extends React.Component {
   state = { hasError: false, error: null };
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
+static getDerivedStateFromError(error) {
+return { hasError: true, error };
+}
 
-  componentDidCatch(error, errorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
-    // Send to error tracking service
-  }
+componentDidCatch(error, errorInfo) {
+console.error('Error caught by boundary:', error, errorInfo);
+// Send to error tracking service
+}
 
-  render() {
-    if (this.state.hasError) {
-      return (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
-          <Text style={styles.errorMessage}>
-            We're having trouble loading this screen
-          </Text>
-          <TouchableOpacity 
-            style={styles.retryButton}
-            onPress={() => this.setState({ hasError: false })}
-          >
-            <Text style={styles.retryText}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
+render() {
+if (this.state.hasError) {
+return (
+
+<View style={styles.errorContainer}>
+  <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
+  <Text style={styles.errorMessage}>We're having trouble loading this screen</Text>
+  <TouchableOpacity style={styles.retryButton} onPress={() => this.setState({ hasError: false })}>
+    <Text style={styles.retryText}>Try Again</Text>
+  </TouchableOpacity>
+</View>
+); }
 
     return this.props.children;
-  }
+
 }
+}
+
 </CodeBlock>
 
 ---
@@ -650,8 +666,7 @@ export class ErrorBoundary extends React.Component {
 #### 1. Setup Expo Notifications
 
 <CodeBlock language="bash">
-# Install dependencies
-npm install expo-notifications expo-device
+  # Install dependencies npm install expo-notifications expo-device
 </CodeBlock>
 
 #### 2. Notification Service
@@ -664,11 +679,11 @@ import { Platform } from 'react-native';
 import { supabase } from './supabase';
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
+handleNotification: async () => ({
+shouldShowAlert: true,
+shouldPlaySound: true,
+shouldSetBadge: true,
+}),
 });
 
 export class NotificationService {
@@ -692,7 +707,7 @@ export class NotificationService {
     }
 
     const token = (await Notifications.getExpoPushTokenAsync()).data;
-    
+
     // Save token to user profile
     await this.saveTokenToDatabase(token);
 
@@ -706,28 +721,30 @@ export class NotificationService {
     }
 
     return token;
-  }
 
-  async saveTokenToDatabase(token: string) {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ push_token: token })
-      .eq('id', supabase.auth.user()?.id);
+}
+
+async saveTokenToDatabase(token: string) {
+const { error } = await supabase
+.from('profiles')
+.update({ push_token: token })
+.eq('id', supabase.auth.user()?.id);
 
     if (error) {
       console.error('Error saving push token:', error);
     }
-  }
 
-  async sendMatchNotification(userId: string, matchName: string) {
-    // This would be called from a Supabase Edge Function
-    const message = {
-      to: userId, // Would be their push token
-      sound: 'default',
-      title: "It's a match! 💖",
-      body: `You and ${matchName} liked each other!`,
-      data: { type: 'match', matchName },
-    };
+}
+
+async sendMatchNotification(userId: string, matchName: string) {
+// This would be called from a Supabase Edge Function
+const message = {
+to: userId, // Would be their push token
+sound: 'default',
+title: "It's a match! 💖",
+body: `You and ${matchName} liked each other!`,
+data: { type: 'match', matchName },
+};
 
     // Send via Expo Push Notification service
     await fetch('https://exp.host/--/api/v2/push/send', {
@@ -738,19 +755,21 @@ export class NotificationService {
       },
       body: JSON.stringify(message),
     });
-  }
 
-  async sendMessageNotification(userId: string, senderName: string, message: string) {
-    const notification = {
-      to: userId,
-      sound: 'default',
-      title: senderName,
-      body: message,
-      data: { type: 'message', senderName },
-    };
+}
+
+async sendMessageNotification(userId: string, senderName: string, message: string) {
+const notification = {
+to: userId,
+sound: 'default',
+title: senderName,
+body: message,
+data: { type: 'message', senderName },
+};
 
     // Send notification...
-  }
+
+}
 }
 
 export const notificationService = new NotificationService();
@@ -764,19 +783,21 @@ useEffect(() => {
   // Register for notifications
   notificationService.registerForPushNotifications();
 
-  // Handle notification responses
-  const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-    const { type, matchName } = response.notification.request.content.data;
-    
+// Handle notification responses
+const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+const { type, matchName } = response.notification.request.content.data;
+
     if (type === 'match') {
       router.push('/matches');
     } else if (type === 'message') {
       router.push(`/chat/${response.notification.request.content.data.matchId}`);
     }
-  });
 
-  return () => subscription.remove();
+});
+
+return () => subscription.remove();
 }, []);
+
 </CodeBlock>
 
 ---
@@ -792,33 +813,20 @@ useEffect(() => {
     <TabsTrigger value="deployment">Deployment</TabsTrigger>
   </TabsList>
 
-  <TabsContent value="technical">
-    #### Technical Requirements
-    - [ ] Environment variables properly configured
-    - [ ] API keys secured and not hardcoded
-    - [ ] Error tracking (Sentry) integrated
-    - [ ] Analytics (Mixpanel/Amplitude) setup
-    - [ ] Performance monitoring configured
-    - [ ] Rate limiting implemented
-    - [ ] Image optimization and CDN setup
-    - [ ] Database indexes optimized
-    - [ ] Security headers configured
-    - [ ] HTTPS enforced everywhere
-  </TabsContent>
+<TabsContent value="technical">
+  #### Technical Requirements - [ ] Environment variables properly configured - [ ] API keys secured
+  and not hardcoded - [ ] Error tracking (Sentry) integrated - [ ] Analytics (Mixpanel/Amplitude)
+  setup - [ ] Performance monitoring configured - [ ] Rate limiting implemented - [ ] Image
+  optimization and CDN setup - [ ] Database indexes optimized - [ ] Security headers configured - [
+  ] HTTPS enforced everywhere
+</TabsContent>
 
-  <TabsContent value="testing">
-    #### Testing Checklist
-    - [ ] Unit tests for critical functions
-    - [ ] Integration tests for API endpoints
-    - [ ] E2E tests for core user flows
-    - [ ] Performance testing (load testing)
-    - [ ] Security audit completed
-    - [ ] Accessibility audit passed
-    - [ ] Cross-device testing done
-    - [ ] Beta testing with 50+ users
-    - [ ] Crash reporting verified
-    - [ ] Deep linking tested
-  </TabsContent>
+<TabsContent value="testing">
+  #### Testing Checklist - [ ] Unit tests for critical functions - [ ] Integration tests for API
+  endpoints - [ ] E2E tests for core user flows - [ ] Performance testing (load testing) - [ ]
+  Security audit completed - [ ] Accessibility audit passed - [ ] Cross-device testing done - [ ]
+  Beta testing with 50+ users - [ ] Crash reporting verified - [ ] Deep linking tested
+</TabsContent>
 
   <TabsContent value="deployment">
     #### Deployment Steps
@@ -874,36 +882,29 @@ export const launchMonitoring = {
   <TimelineItem>
     <TimelineHeader>Week 1</TimelineHeader>
     <TimelineContent>
-      - Fix critical bugs and ESLint issues
-      - Polish UI/UX for alpha showcase
-      - Implement database swipe tracking
+      - Fix critical bugs and ESLint issues - Polish UI/UX for alpha showcase - Implement database
+      swipe tracking
     </TimelineContent>
   </TimelineItem>
-  
-  <TimelineItem>
-    <TimelineHeader>Week 2</TimelineHeader>
-    <TimelineContent>
-      - Build matching system
-      - Start real-time chat implementation
-      - Create chat UI components
-    </TimelineContent>
-  </TimelineItem>
-  
-  <TimelineItem>
-    <TimelineHeader>Week 3</TimelineHeader>
-    <TimelineContent>
-      - Complete chat functionality
-      - Add loading states and animations
-      - Implement push notifications
-    </TimelineContent>
-  </TimelineItem>
-  
+
+<TimelineItem>
+  <TimelineHeader>Week 2</TimelineHeader>
+  <TimelineContent>
+    - Build matching system - Start real-time chat implementation - Create chat UI components
+  </TimelineContent>
+</TimelineItem>
+
+<TimelineItem>
+  <TimelineHeader>Week 3</TimelineHeader>
+  <TimelineContent>
+    - Complete chat functionality - Add loading states and animations - Implement push notifications
+  </TimelineContent>
+</TimelineItem>
+
   <TimelineItem>
     <TimelineHeader>Week 4</TimelineHeader>
     <TimelineContent>
-      - Production preparation
-      - Testing and QA
-      - App store submission
+      - Production preparation - Testing and QA - App store submission
     </TimelineContent>
   </TimelineItem>
 </Timeline>
@@ -913,9 +914,8 @@ export const launchMonitoring = {
 ## Next Immediate Action
 
 <Alert type="success">
-**Start with**: Fix ESLint warnings and remove unused code  
-**Then**: Implement swipe database tracking  
-**Finally**: Build the matching system
+  **Start with**: Fix ESLint warnings and remove unused code **Then**: Implement swipe database
+  tracking **Finally**: Build the matching system
 </Alert>
 
 Remember to update CLAUDE.md with progress after each major milestone!

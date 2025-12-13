@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } fr
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { theme } from '../../constants/theme';
 
 export default function CommunityGuidelinesScreen() {
   const insets = useSafeAreaInsets();
@@ -12,7 +13,7 @@ export default function CommunityGuidelinesScreen() {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#8B1E2D" />
+            <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Community Guidelines</Text>
           <View style={styles.placeholder} />
@@ -89,7 +90,7 @@ export default function CommunityGuidelinesScreen() {
           <Text style={styles.contact}>support@harvestdating.com</Text>
 
           <View style={styles.thankYou}>
-            <Ionicons name="heart" size={24} color="#8B1E2D" />
+            <Ionicons name="heart" size={24} color={theme.colors.primary} />
             <Text style={styles.thankYouText}>
               Thank you for being part of our mindful community!
             </Text>
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   contact: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontSize: 15,
     fontWeight: '600',
     marginTop: 8,
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   headerTitle: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
@@ -182,14 +183,14 @@ const styles = StyleSheet.create({
   },
   thankYou: {
     alignItems: 'center',
-    backgroundColor: 'rgba(139, 30, 45, 0.05)',
+    backgroundColor: theme.colors.primarySoft,
     borderRadius: 12,
     gap: 12,
     marginTop: 32,
     padding: 24,
   },
   thankYouText: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',

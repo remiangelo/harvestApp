@@ -1,3 +1,4 @@
+import { theme } from '../../constants/theme';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
   option: {
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderColor: '#8B1E2D',
+    borderColor: theme.colors.primary,
     borderRadius: 28,
     borderWidth: 2,
     elevation: 3,
@@ -88,11 +89,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   optionSelected: {
-    backgroundColor: '#8B1E2D',
-    borderColor: '#8B1E2D',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
     borderWidth: 2,
     elevation: 6,
-    shadowColor: '#8B1E2D',
+    shadowColor: theme.colors.primary,
     shadowOffset: {
       height: 4,
       width: 0,
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   optionText: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontFamily: 'System',
     fontSize: 18,
     fontWeight: '600',

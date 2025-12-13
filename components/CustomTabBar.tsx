@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { theme } from '../constants/theme';
 
 export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
   const insets = useSafeAreaInsets();
@@ -186,7 +187,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
                 <FontAwesome
                   name={getIconName(route.name) as any}
                   size={24}
-                  color={isFocused ? '#A0354E' : '#666'}
+                  color={isFocused ? theme.colors.primary : '#666'}
                   style={isFocused ? styles.iconFocused : undefined}
                 />
                 {isFocused && <View style={styles.activeIndicator} />}
@@ -201,7 +202,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
 
 const styles = StyleSheet.create({
   activeIndicator: {
-    backgroundColor: '#A0354E',
+    backgroundColor: theme.colors.primary,
     borderRadius: 2,
     bottom: -8,
     height: 4,

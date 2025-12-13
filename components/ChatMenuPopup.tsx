@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from './liquid/LiquidGlassView';
+import { theme } from '../constants/theme';
 
 interface ChatMenuPopupProps {
   visible: boolean;
@@ -97,7 +98,7 @@ export const ChatMenuPopup: React.FC<ChatMenuPopupProps> = ({
                   <Switch
                     value={isReadyToMoveOff}
                     onValueChange={handleToggleReady}
-                    trackColor={{ false: '#E5E5E5', true: '#A0354E' }}
+                    trackColor={{ false: '#E5E5E5', true: theme.colors.primary }}
                     thumbColor="white"
                   />
                 </View>
@@ -149,7 +150,7 @@ const styles = StyleSheet.create({
   },
   harvestIcon: {
     alignItems: 'center',
-    backgroundColor: '#A0354E',
+    backgroundColor: theme.colors.primary,
     borderRadius: 8,
     height: 30,
     justifyContent: 'center',
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   readyToMoveSubtext: {
-    color: '#A0354E',
+    color: theme.colors.primary,
     fontSize: 12,
     marginTop: 4,
   },

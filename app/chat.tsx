@@ -25,9 +25,10 @@ import { Animated } from 'react-native';
 import { ChatMenuPopup } from '../components/ChatMenuPopup';
 import * as ImagePicker from 'expo-image-picker';
 import { MindfulMessageModal } from '../components/MindfulMessageModal';
+import { theme } from '../constants/theme';
 import { analyzeMessage, isMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
 
-const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/A0354E/FFFFFF?text=No+Image';
+const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/EB1E66/FFFFFF?text=No+Image';
 
 interface ChatPartner {
   id: string;
@@ -429,7 +430,10 @@ export default function ChatScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.headerGradient}>
+      <LinearGradient
+        colors={[theme.colors.primary, theme.colors.primaryDark]}
+        style={styles.headerGradient}
+      >
         <SafeAreaView>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -554,7 +558,7 @@ export default function ChatScreen() {
           <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
           <View style={styles.inputContainer}>
             <TouchableOpacity style={styles.attachButton} onPress={handleAttachPress}>
-              <Ionicons name="add-circle" size={28} color="#A0354E" />
+              <Ionicons name="add-circle" size={28} color={theme.colors.primary} />
             </TouchableOpacity>
 
             <View style={styles.inputWrapper}>
@@ -577,7 +581,11 @@ export default function ChatScreen() {
               onPress={analyzeThenSend}
               disabled={!newMessage.trim()}
             >
-              <Ionicons name="send" size={24} color={newMessage.trim() ? '#A0354E' : '#ccc'} />
+              <Ionicons
+                name="send"
+                size={24}
+                color={newMessage.trim() ? theme.colors.primary : '#ccc'}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -640,7 +648,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   currentUserMessage: {
-    backgroundColor: '#A0354E',
+    backgroundColor: theme.colors.primary,
     borderRadius: 18,
     maxWidth: '75%',
     paddingHorizontal: 16,

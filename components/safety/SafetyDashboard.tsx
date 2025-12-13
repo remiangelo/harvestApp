@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { theme } from '../../constants/theme';
 import {
   View,
   Text,
@@ -180,7 +181,7 @@ export const SafetyDashboard: React.FC = () => {
           <Switch
             value={settings.ai_monitoring_enabled}
             onValueChange={(value) => updateSetting('ai_monitoring_enabled', value)}
-            trackColor={{ false: '#E0E0E0', true: '#A0354E' }}
+            trackColor={{ false: '#E0E0E0', true: theme.colors.primary }}
             thumbColor="white"
           />
         </View>
@@ -193,7 +194,7 @@ export const SafetyDashboard: React.FC = () => {
           <Switch
             value={settings.strict_mode}
             onValueChange={(value) => updateSetting('strict_mode', value)}
-            trackColor={{ false: '#E0E0E0', true: '#A0354E' }}
+            trackColor={{ false: '#E0E0E0', true: theme.colors.primary }}
             thumbColor="white"
           />
         </View>
@@ -208,7 +209,7 @@ export const SafetyDashboard: React.FC = () => {
           <Switch
             value={settings.auto_blur_sensitive_content}
             onValueChange={(value) => updateSetting('auto_blur_sensitive_content', value)}
-            trackColor={{ false: '#E0E0E0', true: '#A0354E' }}
+            trackColor={{ false: '#E0E0E0', true: theme.colors.primary }}
             thumbColor="white"
           />
         </View>
@@ -223,7 +224,7 @@ export const SafetyDashboard: React.FC = () => {
           <Switch
             value={settings.require_video_before_sharing}
             onValueChange={(value) => updateSetting('require_video_before_sharing', value)}
-            trackColor={{ false: '#E0E0E0', true: '#A0354E' }}
+            trackColor={{ false: '#E0E0E0', true: theme.colors.primary }}
             thumbColor="white"
           />
         </View>
@@ -234,7 +235,7 @@ export const SafetyDashboard: React.FC = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#A0354E" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Loading safety dashboard...</Text>
       </View>
     );
@@ -243,7 +244,7 @@ export const SafetyDashboard: React.FC = () => {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
-        <Ionicons name="shield" size={32} color="#A0354E" />
+        <Ionicons name="shield" size={32} color={theme.colors.primary} />
         <Text style={styles.title}>Safety Dashboard</Text>
       </View>
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
 import { OnboardingScreen } from '../../components/OnboardingScreen';
+import { theme } from '../../constants/theme';
 
 const GOALS = ['Dating', 'Relationship', 'Marriage'];
 
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
   option: {
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderColor: '#8B1E2D',
+    borderColor: theme.colors.primary,
     borderRadius: 28,
     borderWidth: 2,
     elevation: 3,
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   optionText: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontFamily: 'System',
     fontSize: 18,
     fontWeight: '600',
@@ -107,11 +108,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   selectedOption: {
-    backgroundColor: '#8B1E2D',
-    borderColor: '#8B1E2D',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
     borderWidth: 2,
     elevation: 6,
-    shadowColor: '#8B1E2D',
+    shadowColor: theme.colors.primary,
     shadowOffset: {
       width: 0,
       height: 4,

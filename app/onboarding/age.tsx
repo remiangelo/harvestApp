@@ -1,3 +1,4 @@
+import { theme } from '../../constants/theme';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -91,7 +92,7 @@ export default function OnboardingAge() {
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
-    backgroundColor: '#8B1E2D',
+    backgroundColor: theme.colors.primary,
     borderRadius: 24,
     height: 48,
     justifyContent: 'center',
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   progressBar: {
-    backgroundColor: '#8B1E2D',
+    backgroundColor: theme.colors.primary,
     borderRadius: 4,
     height: 8,
     width: '33%',

@@ -187,7 +187,10 @@ export default function GardenerScreen() {
       <StatusBar barStyle="light-content" />
 
       {/* Header with Gradient */}
-      <LinearGradient colors={['#A0354E', '#8B1E2D', '#701625']} style={styles.headerGradient}>
+      <LinearGradient
+        colors={[theme.colors.primary, theme.colors.primaryDark, '#701625']}
+        style={styles.headerGradient}
+      >
         <SafeAreaView>
           <View style={styles.header}>
             <View style={styles.headerContent}>
@@ -378,7 +381,7 @@ export default function GardenerScreen() {
             glassTint="rgba(255, 255, 255, 0.95)"
           >
             <LinearGradient
-              colors={['#A0354E', '#8B1E2D']}
+              colors={[theme.colors.primary, theme.colors.primaryDark]}
               style={styles.reflectionGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -606,7 +609,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   tipCategory: {
-    backgroundColor: 'rgba(160, 53, 78, 0.1)',
+    backgroundColor: theme.colors.primarySoft,
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,

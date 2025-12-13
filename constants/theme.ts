@@ -7,25 +7,36 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export const theme = {
   colors: {
-    // Primary colors
-    primary: '#A0354E', // Maroon/burgundy - main brand color
-    primaryDark: '#7D2A3D', // Darker variant for pressed states
-    primaryLight: '#C4566B', // Lighter variant
-    primaryMuted: '#8B2E43', // Slightly darker muted variant
-    primarySoft: 'rgba(160, 53, 78, 0.15)', // 15% opacity for subtle backgrounds
+    // Primary colors - Rose Pink Red
+    primary: '#EB1E66', // Rose pink red - main brand color (headlines, logo, buttons)
+    primaryDark: '#C91854', // Darker variant for pressed states
+    primaryLight: '#F04D85', // Lighter variant
+    primaryMuted: '#D41A5C', // Slightly darker muted variant
+    primarySoft: 'rgba(235, 30, 102, 0.15)', // 15% opacity for subtle backgrounds
 
-    // Secondary colors
+    // Accent colors
+    accent: '#27CF8A', // Bright green - primary accents
+    accentLight: '#4EDBA0', // Lighter green
+    accentDark: '#1FB076', // Darker green
+    accentSoft: 'rgba(39, 207, 138, 0.15)', // 15% opacity
+
+    // Soft blue - minimal accent use
+    softBlue: '#D1E9F6',
+    softBlueDark: '#A8D4EC',
+    softBlueLight: '#E5F3FA',
+
+    // Secondary colors (legacy support)
     secondary: '#F5E6D3', // Cream/beige - app icon background
     secondaryDark: '#E8D4BA',
     secondaryLight: '#FFF9F2',
 
     // Base colors
-    background: '#FFFFFF',
+    background: '#FFFFFF', // White - main content background
     surface: '#FFFFFF',
 
     // Text colors
     text: {
-      primary: '#2C2C2C', // Dark charcoal
+      primary: '#000000', // Black - main text color
       secondary: '#666666', // Medium gray
       tertiary: '#999999', // Light gray
       inverse: '#FFFFFF',
@@ -33,7 +44,7 @@ export const theme = {
 
     // Semantic colors
     error: '#DC2626',
-    success: '#10B981',
+    success: '#27CF8A', // Using accent green for success
     warning: '#F59E0B',
     info: '#3B82F6',
 
@@ -43,25 +54,25 @@ export const theme = {
     overlay: 'rgba(0, 0, 0, 0.5)',
 
     // Special colors for features
-    like: '#10B981', // Green for like
+    like: '#27CF8A', // Bright green for like
     nope: '#DC2626', // Red for nope
-    superLike: '#3B82F6', // Blue for super like
+    superLike: '#EB1E66', // Rose pink for super like
 
-    // Complementary accent colors for maroon theme
-    dustyPink: '#D4738A', // Softer accent
+    // Complementary accent colors
+    dustyPink: '#F04D85', // Softer rose accent
     mutedGold: '#B8956A', // Earthy complement
-    sageGreen: '#7A9B8E', // Muted green for balance
+    sageGreen: '#27CF8A', // Bright green
 
     // Gradients
     gradients: {
-      profileCard: ['#E8B4F3', '#F3B4E8'], // Purple-pink gradient
-      primary: ['#A0354E', '#C4566B'],
+      profileCard: ['#EB1E66', '#F04D85'], // Rose pink gradient
+      primary: ['#EB1E66', '#F04D85'],
       overlay: ['rgba(0,0,0,0)', 'rgba(0,0,0,0.6)'],
     },
   },
 
   typography: {
-    // Font families - DM Sans for UI/body, DM Serif Display for headings
+    // Font families - DM Sans for body, DM Serif Display for headings, Orange Squash for logo
     fontFamily: {
       // Body text fonts (DM Sans)
       regular: 'DMSans_400Regular',
@@ -70,6 +81,9 @@ export const theme = {
 
       // Display/heading font (DM Serif Display)
       display: 'DMSerifDisplay_400Regular',
+
+      // Logo font (Orange Squash)
+      logo: 'OrangeSquash',
     },
 
     // Font sizes

@@ -1,3 +1,4 @@
+import { theme } from '../../constants/theme';
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
@@ -12,7 +13,7 @@ export default function PrivacyPolicyScreen() {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#8B1E2D" />
+            <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Privacy Policy</Text>
           <View style={styles.placeholder} />
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   contact: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontSize: 15,
     fontWeight: '600',
     marginTop: 8,
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   headerTitle: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,

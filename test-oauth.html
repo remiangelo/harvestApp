@@ -1,140 +1,135 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Harvest App - Test Google OAuth</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        h1 {
-            color: #A0354E;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-        }
-        .status {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        .btn {
-            background: #A0354E;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            margin: 10px 0;
-            transition: all 0.3s;
-        }
-        .btn:hover {
-            background: #8B1E2D;
-            transform: translateY(-2px);
-        }
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        .success {
-            color: #28a745;
-            font-weight: bold;
-        }
-        .error {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        .warning {
-            color: #ffc107;
-            font-weight: bold;
-        }
-        .code {
-            background: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            word-break: break-all;
-            margin: 10px 0;
-        }
-        #result {
-            margin-top: 20px;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+      .container {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+      h1 {
+        color: #a0354e;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+      }
+      .status {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+      .btn {
+        background: #a0354e;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 30px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        margin: 10px 0;
+        transition: all 0.3s;
+      }
+      .btn:hover {
+        background: #8b1e2d;
+        transform: translateY(-2px);
+      }
+      .btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      .success {
+        color: #28a745;
+        font-weight: bold;
+      }
+      .error {
+        color: #dc3545;
+        font-weight: bold;
+      }
+      .warning {
+        color: #ffc107;
+        font-weight: bold;
+      }
+      .code {
+        background: #f4f4f4;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        word-break: break-all;
+        margin: 10px 0;
+      }
+      #result {
+        margin-top: 20px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🌱 Harvest App</h1>
-        <p class="subtitle">Google OAuth Test Page</p>
+      <h1>🌱 Harvest App</h1>
+      <p class="subtitle">Google OAuth Test Page</p>
 
-        <div class="status">
-            <h3>📍 Project Configuration</h3>
-            <div class="code">
-                URL: https://jutzlxdboayvmcuqwodn.supabase.co<br>
-                Provider: Google
-            </div>
+      <div class="status">
+        <h3>📍 Project Configuration</h3>
+        <div class="code">
+          URL: https://jutzlxdboayvmcuqwodn.supabase.co<br />
+          Provider: Google
         </div>
+      </div>
 
-        <button class="btn" onclick="testOAuth()">
-            🔐 Test Google OAuth Login
-        </button>
+      <button class="btn" onclick="testOAuth()">🔐 Test Google OAuth Login</button>
 
-        <button class="btn" onclick="openSupabaseDashboard()">
-            ⚙️ Open Supabase Auth Settings
-        </button>
+      <button class="btn" onclick="openSupabaseDashboard()">⚙️ Open Supabase Auth Settings</button>
 
-        <button class="btn" onclick="openGoogleConsole()">
-            ☁️ Open Google Cloud Console
-        </button>
+      <button class="btn" onclick="openGoogleConsole()">☁️ Open Google Cloud Console</button>
 
-        <div id="result"></div>
+      <div id="result"></div>
 
-        <div class="status" style="margin-top: 30px;">
-            <h3>📋 Quick Checklist</h3>
-            <ul style="line-height: 1.8;">
-                <li>☐ Google Cloud project created</li>
-                <li>☐ OAuth consent screen configured</li>
-                <li>☐ OAuth 2.0 credentials generated</li>
-                <li>☐ Client ID & Secret added to Supabase</li>
-                <li>☐ All redirect URIs added</li>
-            </ul>
-        </div>
+      <div class="status" style="margin-top: 30px">
+        <h3>📋 Quick Checklist</h3>
+        <ul style="line-height: 1.8">
+          <li>☐ Google Cloud project created</li>
+          <li>☐ OAuth consent screen configured</li>
+          <li>☐ OAuth 2.0 credentials generated</li>
+          <li>☐ Client ID & Secret added to Supabase</li>
+          <li>☐ All redirect URIs added</li>
+        </ul>
+      </div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://jutzlxdboayvmcuqwodn.supabase.co';
+      const SUPABASE_URL = 'https://jutzlxdboayvmcuqwodn.supabase.co';
 
-        function testOAuth() {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = '<div class="status"><span class="warning">⏳ Opening OAuth window...</span></div>';
+      function testOAuth() {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML =
+          '<div class="status"><span class="warning">⏳ Opening OAuth window...</span></div>';
 
-            // Construct OAuth URL
-            const oauthUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent('harvestapp://auth/callback')}`;
+        // Construct OAuth URL
+        const oauthUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent('harvestapp://auth/callback')}`;
 
-            // Open in new window
-            const authWindow = window.open(oauthUrl, 'Google OAuth', 'width=500,height=600');
+        // Open in new window
+        const authWindow = window.open(oauthUrl, 'Google OAuth', 'width=500,height=600');
 
-            // Update status
-            setTimeout(() => {
-                resultDiv.innerHTML = `
+        // Update status
+        setTimeout(() => {
+          resultDiv.innerHTML = `
                     <div class="status">
                         <h3>🔍 Test Results</h3>
                         <p>A new window should have opened.</p>
@@ -147,36 +142,39 @@
                         <div class="code">OAuth URL: ${oauthUrl}</div>
                     </div>
                 `;
-            }, 1000);
-        }
+        }, 1000);
+      }
 
-        function openSupabaseDashboard() {
-            window.open('https://supabase.com/dashboard/project/jutzlxdboayvmcuqwodn/auth/providers', '_blank');
-        }
+      function openSupabaseDashboard() {
+        window.open(
+          'https://supabase.com/dashboard/project/jutzlxdboayvmcuqwodn/auth/providers',
+          '_blank'
+        );
+      }
 
-        function openGoogleConsole() {
-            window.open('https://console.cloud.google.com/apis/credentials', '_blank');
-        }
+      function openGoogleConsole() {
+        window.open('https://console.cloud.google.com/apis/credentials', '_blank');
+      }
 
-        // Check for OAuth callback
-        if (window.location.hash || window.location.search) {
-            const params = new URLSearchParams(window.location.search);
-            const hash = new URLSearchParams(window.location.hash.substring(1));
+      // Check for OAuth callback
+      if (window.location.hash || window.location.search) {
+        const params = new URLSearchParams(window.location.search);
+        const hash = new URLSearchParams(window.location.hash.substring(1));
 
-            if (params.get('error') || hash.get('error')) {
-                document.getElementById('result').innerHTML = `
+        if (params.get('error') || hash.get('error')) {
+          document.getElementById('result').innerHTML = `
                     <div class="status">
                         <span class="error">❌ OAuth Error:</span> ${params.get('error_description') || hash.get('error_description') || 'Unknown error'}
                     </div>
                 `;
-            } else if (params.get('access_token') || hash.get('access_token')) {
-                document.getElementById('result').innerHTML = `
+        } else if (params.get('access_token') || hash.get('access_token')) {
+          document.getElementById('result').innerHTML = `
                     <div class="status">
                         <span class="success">✅ OAuth Success!</span> Token received
                     </div>
                 `;
-            }
         }
+      }
     </script>
-</body>
+  </body>
 </html>

@@ -11,7 +11,7 @@ export default {
     splash: {
       image: './assets/images/splash-icon.png',
       resizeMode: 'contain',
-      backgroundColor: '#A0354E',
+      backgroundColor: '#EB1E66',
     },
     ios: {
       supportsTablet: false,
@@ -33,7 +33,7 @@ export default {
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/images/adaptive-icon.png',
-        backgroundColor: '#A0354E',
+        backgroundColor: '#EB1E66',
       },
       package: 'com.harvest.app',
       permissions: [
@@ -56,7 +56,7 @@ export default {
         'expo-notifications',
         {
           icon: './assets/images/icon.png',
-          color: '#A0354E',
+          color: '#EB1E66',
           defaultChannel: 'default',
         },
       ],

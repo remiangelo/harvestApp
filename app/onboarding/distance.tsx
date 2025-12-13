@@ -1,3 +1,4 @@
+import { theme } from '../../constants/theme';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
@@ -42,9 +43,9 @@ export default function OnboardingDistance() {
         step={1}
         value={distance}
         onValueChange={setDistance}
-        minimumTrackTintColor="#8B1E2D"
+        minimumTrackTintColor={theme.colors.primary}
         maximumTrackTintColor="#eee"
-        thumbTintColor="#8B1E2D"
+        thumbTintColor={theme.colors.primary}
       />
     </OnboardingScreen>
   );
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   sliderValue: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontFamily: 'System',
     fontSize: 16,
     fontWeight: 'bold',

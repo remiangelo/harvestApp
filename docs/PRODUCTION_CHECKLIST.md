@@ -250,8 +250,8 @@ jobs:
 - [ ] Backup and recovery tested
 - [ ] Team trained and ready
 
-**Target Launch Date:** ******\_******
+**Target Launch Date:** **\*\***\_**\*\***
 
-**Approved by:** ******\_******
+**Approved by:** **\*\***\_**\*\***
 
 **Last Updated:** August 7, 2025

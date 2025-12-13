@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGardenerStore } from '../../stores/useGardenerStore';
+import { theme } from '../../constants/theme';
 import { gardenerService } from '../../lib/ai/gardenerService';
 import { gardenerChatService } from '../../lib/gardenerSupabase';
 import { useAuthStore } from '../../stores/useAuthStore';
@@ -162,7 +163,10 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     <View style={styles.container}>
       {/* Header - Only show if onBack is provided */}
       {onBack && (
-        <LinearGradient colors={['#A0354E', '#8B1E2D', '#701625']} style={styles.header}>
+        <LinearGradient
+          colors={[theme.colors.primary, theme.colors.primaryDark, theme.colors.primaryDark]}
+          style={styles.header}
+        >
           <SafeAreaView style={styles.headerSafe}>
             <View style={styles.headerContent}>
               <TouchableOpacity onPress={onBack} style={styles.backButton}>
@@ -173,7 +177,10 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
                 <Text style={styles.headerSubtitle}>AI Dating Coach</Text>
               </View>
               <View style={styles.headerAvatar}>
-                <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.avatar}>
+                <LinearGradient
+                  colors={[theme.colors.primary, theme.colors.primaryDark]}
+                  style={styles.avatar}
+                >
                   <Ionicons name="leaf" size={24} color="white" />
                 </LinearGradient>
               </View>
@@ -205,7 +212,10 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
             >
               {message.sender === 'gardener' && (
                 <View style={styles.avatarContainer}>
-                  <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.avatar}>
+                  <LinearGradient
+                    colors={[theme.colors.primary, theme.colors.primaryDark]}
+                    style={styles.avatar}
+                  >
                     <Ionicons name="leaf" size={20} color="white" />
                   </LinearGradient>
                 </View>
@@ -238,7 +248,10 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
           {isTyping && (
             <View style={[styles.messageWrapper, styles.gardenerMessageWrapper]}>
               <View style={styles.avatarContainer}>
-                <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.avatar}>
+                <LinearGradient
+                  colors={[theme.colors.primary, theme.colors.primaryDark]}
+                  style={styles.avatar}
+                >
                   <Ionicons name="leaf" size={20} color="white" />
                 </LinearGradient>
               </View>
@@ -271,7 +284,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
               <Ionicons
                 name="send"
                 size={20}
-                color={!inputText.trim() || isTyping ? '#ccc' : '#A0354E'}
+                color={!inputText.trim() || isTyping ? '#ccc' : theme.colors.primary}
               />
             </TouchableOpacity>
           </View>
@@ -405,7 +418,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   userMessage: {
-    backgroundColor: '#A0354E',
+    backgroundColor: theme.colors.primary,
     borderBottomRightRadius: 4,
   },
   userMessageText: {

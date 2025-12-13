@@ -1,3 +1,4 @@
+import { theme } from '../../constants/theme';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Platform, KeyboardAvoidingView, Alert } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   uploadingMessage: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontSize: 14,
     marginBottom: 16,
     marginTop: -16,

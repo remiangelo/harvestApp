@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     alignItems: 'center',
-    backgroundColor: theme.colors.secondary,
+    backgroundColor: theme.colors.primarySoft, // Soft rose pink background
     borderRadius: theme.borderRadius.full,
     height: 100,
     justifyContent: 'center',

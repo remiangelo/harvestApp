@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { safetyService } from '../../lib/ai/safetyAnalysisService';
 import { getSafetyColor, getSafetyLevel } from '../../lib/ai/safetyConfig';
+import { theme } from '../../constants/theme';
 
 interface ReadyToMoveGateProps {
   visible: boolean;
@@ -191,7 +192,7 @@ export const ReadyToMoveGate: React.FC<ReadyToMoveGateProps> = ({
           <Ionicons
             name="call-outline"
             size={24}
-            color={contactMethod === 'phone' ? '#A0354E' : '#666'}
+            color={contactMethod === 'phone' ? theme.colors.primary : '#666'}
           />
           <Text
             style={[
@@ -210,7 +211,7 @@ export const ReadyToMoveGate: React.FC<ReadyToMoveGateProps> = ({
           <Ionicons
             name="logo-instagram"
             size={24}
-            color={contactMethod === 'social' ? '#A0354E' : '#666'}
+            color={contactMethod === 'social' ? theme.colors.primary : '#666'}
           />
           <Text
             style={[
@@ -231,7 +232,10 @@ export const ReadyToMoveGate: React.FC<ReadyToMoveGateProps> = ({
         <BlurView intensity={90} style={StyleSheet.absoluteFillObject} />
 
         <View style={styles.content}>
-          <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.header}>
+          <LinearGradient
+            colors={[theme.colors.primary, theme.colors.primaryDark]}
+            style={styles.header}
+          >
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={28} color="white" />
             </TouchableOpacity>
@@ -242,7 +246,7 @@ export const ReadyToMoveGate: React.FC<ReadyToMoveGateProps> = ({
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#A0354E" />
+              <ActivityIndicator size="large" color={theme.colors.primary} />
               <Text style={styles.loadingText}>Analyzing conversation safety...</Text>
             </View>
           ) : (
@@ -338,7 +342,7 @@ const styles = StyleSheet.create({
   },
   contactOptionSelected: {
     backgroundColor: '#FFF0F3',
-    borderColor: '#A0354E',
+    borderColor: theme.colors.primary,
   },
   contactOptionText: {
     color: '#666',
@@ -346,7 +350,7 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   contactOptionTextSelected: {
-    color: '#A0354E',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   container: {

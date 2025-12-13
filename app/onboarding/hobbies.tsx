@@ -1,3 +1,4 @@
+import { theme } from '../../constants/theme';
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
 import useUserStore from '../../stores/useUserStore';
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
   },
   hobby: {
     backgroundColor: '#fff',
-    borderColor: '#8B1E2D',
+    borderColor: theme.colors.primary,
     borderRadius: 20,
     borderWidth: 1,
     margin: 4,
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   hobbyText: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontFamily: 'System',
     fontSize: 16,
   },
@@ -158,13 +159,13 @@ const styles = StyleSheet.create({
   },
   selectedCount: {
     alignSelf: 'flex-start',
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontFamily: 'System',
     fontSize: 14,
     marginBottom: 8,
   },
   selectedHobby: {
-    backgroundColor: '#8B1E2D',
+    backgroundColor: theme.colors.primary,
   },
   selectedHobbyText: {
     color: '#fff',

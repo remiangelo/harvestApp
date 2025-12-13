@@ -214,16 +214,43 @@ EXPO_PUBLIC_OPENAI_API_KEY=your_openai_key  # Optional
 
 ### Design System
 
+**Typography**:
+
+- **Logo Font**: Orange Squash (custom font in assets/fonts/OrangeSquash.ttf)
+- **Headings Font**: DM Serif Display (Google Font)
+- **Body Font**: DM Sans (Google Font)
+
+**Colors**:
+
 ```typescript
 const COLORS = {
-  primary: '#8B1E2D',      // Maroon
-  text: '#222',            // Dark gray
-  textSecondary: '#555',   // Medium gray
-  white: '#fff',           // White
-  background: '#F5F5F5',   // Light gray
-};
+  // Primary - Rose Pink Red (Headlines, logo name, buttons)
+  primary: '#EB1E66',
+  primaryDark: '#C91854',
+  primaryLight: '#F04D85',
 
-// Standard button styling
+  // Accent - Bright Green (Primary accents, use with black text for high contrast)
+  accent: '#27CF8A',
+
+  // Soft Blue (Accents, minimal use)
+  softBlue: '#D1E9F6',
+
+  // Base colors
+  background: '#FFFFFF', // White - main content background
+  text: '#000000', // Black - main text color
+  textSecondary: '#666666', // Medium gray
+};
+```
+
+**Font Usage**:
+
+- Logo ("Harvest" text): `theme.typography.fontFamily.logo` (Orange Squash) + `theme.colors.primary` (Rose red)
+- Headings (h1-h4): `theme.typography.fontFamily.display` (DM Serif Display)
+- Body text: `theme.typography.fontFamily.regular/medium/bold` (DM Sans)
+
+**Standard Button Styling**:
+
+```css
 borderRadius: 28px
 height: 56px
 elevation: 3 (unselected), 6 (selected)

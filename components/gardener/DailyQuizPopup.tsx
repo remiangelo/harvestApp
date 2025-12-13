@@ -15,7 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { gardenerService, QuizQuestion } from '../../lib/ai/gardenerService';
 import { gardenerQuizService, gardenerInsightsService } from '../../lib/gardenerSupabase';
-import { useAuthStore } from '../../stores/useAuthStore';
+import { useGardenerStore } from '../../stores/useGardenerStore';
+import { theme } from '../../constants/theme';
 
 interface DailyQuizPopupProps {
   visible: boolean;
@@ -33,7 +34,7 @@ export const DailyQuizPopup: React.FC<DailyQuizPopupProps> = ({ visible, onClose
   const [hasAnswered, setHasAnswered] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const scaleAnim = useState(new Animated.Value(0.9))[0];
-  const { user } = useAuthStore();
+  const { user } = useGardenerStore();
 
   useEffect(() => {
     if (visible) {
@@ -250,25 +251,28 @@ export const DailyQuizPopup: React.FC<DailyQuizPopupProps> = ({ visible, onClose
 
         <Animated.View style={[styles.popup, { transform: [{ scale: scaleAnim }] }]}>
           <LinearGradient
-            colors={['rgba(160, 53, 78, 0.15)', 'rgba(139, 30, 45, 0.1)']}
+            colors={[theme.colors.primarySoft, 'rgba(139, 30, 45, 0.1)']}
             style={styles.gradientBackground}
           />
 
           <View style={styles.header}>
             <View style={styles.iconContainer}>
-              <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.iconGradient}>
+              <LinearGradient
+                colors={[theme.colors.primary, theme.colors.primaryDark]}
+                style={styles.iconGradient}
+              >
                 <Ionicons name="sparkles" size={24} color="white" />
               </LinearGradient>
             </View>
             <Text style={styles.title}>Daily Reflection</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#666" />
+              <Ionicons name="close" size={24} color={theme.colors.primary} />
             </TouchableOpacity>
           </View>
 
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#A0354E" />
+              <ActivityIndicator size="large" color={theme.colors.primary} />
               <Text style={styles.loadingText}>Preparing your daily question...</Text>
             </View>
           ) : question ? (
@@ -316,7 +320,11 @@ export const DailyQuizPopup: React.FC<DailyQuizPopupProps> = ({ visible, onClose
                   disabled={!selectedOption}
                 >
                   <LinearGradient
-                    colors={selectedOption ? ['#A0354E', '#8B1E2D'] : ['#ccc', '#aaa']}
+                    colors={
+                      selectedOption
+                        ? [theme.colors.primary, theme.colors.primaryDark]
+                        : ['#ccc', '#aaa']
+                    }
                     style={styles.submitGradient}
                   >
                     <Text style={styles.submitText}>Submit Answer</Text>
@@ -340,7 +348,7 @@ export const DailyQuizPopup: React.FC<DailyQuizPopupProps> = ({ visible, onClose
 
 const styles = StyleSheet.create({
   answeredOption: {
-    backgroundColor: 'rgba(160, 53, 78, 0.1)',
+    backgroundColor: theme.colors.primarySoft,
   },
   closeButton: {
     padding: 4,
@@ -379,7 +387,7 @@ const styles = StyleSheet.create({
     width: 40,
   },
   innerCircle: {
-    backgroundColor: '#A0354E',
+    backgroundColor: theme.colors.primary,
     borderRadius: 5,
     height: 10,
     width: 10,
@@ -446,11 +454,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   selectedCircle: {
-    borderColor: '#A0354E',
+    borderColor: theme.colors.primary,
   },
   selectedOption: {
-    backgroundColor: 'rgba(160, 53, 78, 0.05)',
-    borderColor: '#A0354E',
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primary,
   },
   selectedOptionText: {
     color: '#333',

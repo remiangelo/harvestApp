@@ -19,8 +19,9 @@ import { router } from 'expo-router';
 import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 import { useUser } from '../../context/UserContext';
+import { theme } from '../../constants/theme';
 
-const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/A0354E/FFFFFF?text=No+Image';
+const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/EB1E66/FFFFFF?text=No+Image';
 
 // Remove the hardcoded recentMatches array
 
@@ -191,7 +192,10 @@ export default function MatchesScreen() {
       <StatusBar barStyle="light-content" />
 
       {/* Header with gradient background */}
-      <LinearGradient colors={['#A0354E', '#8B1E2D']} style={styles.headerGradient}>
+      <LinearGradient
+        colors={[theme.colors.primary, theme.colors.primaryDark]}
+        style={styles.headerGradient}
+      >
         <SafeAreaView>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()}>
@@ -537,7 +541,7 @@ const styles = StyleSheet.create({
   },
   unreadCountBadge: {
     alignItems: 'center',
-    backgroundColor: '#A0354E',
+    backgroundColor: theme.colors.primary,
     borderRadius: 10,
     minWidth: 20,
     paddingHorizontal: 6,

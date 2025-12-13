@@ -1,3 +1,4 @@
+import { theme } from '../../constants/theme';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Alert, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -140,7 +141,7 @@ export default function OnboardingLocation() {
         buttonDisabled={true}
       >
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#8B1E2D" />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>Loading location settings...</Text>
         </View>
       </OnboardingScreen>
@@ -159,7 +160,7 @@ export default function OnboardingLocation() {
         <Ionicons
           name={locationGranted ? 'checkmark-circle' : 'location'}
           size={48}
-          color={locationGranted ? '#4CAF50' : '#8B1E2D'}
+          color={locationGranted ? theme.colors.accent : theme.colors.primary}
         />
       </View>
       <Text style={styles.title}>{locationGranted ? 'Location Enabled' : 'Enable Location'}</Text>
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   requestingText: {
-    color: '#8B1E2D',
+    color: theme.colors.primary,
     fontFamily: 'System',
     fontSize: 14,
     fontStyle: 'italic',

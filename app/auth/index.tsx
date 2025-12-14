@@ -2,9 +2,9 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet, SafeAreaView, TouchableOpacity, Text, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { LiquidGlassView } from '../components/liquid/LiquidGlassView';
-import { theme } from '../constants/theme';
-import { useAuthStore } from '../stores/useAuthStore';
+import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
+import { theme } from '../../constants/theme';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function AuthScreen() {

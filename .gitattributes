@@ -1,0 +1,5 @@
+# Ensure shell scripts and xcode.env files use Unix line endings (LF)
+*.sh text eol=lf
+.xcode.env text eol=lf
+.xcode.env.local text eol=lf
+ios/.xcode.env text eol=lf

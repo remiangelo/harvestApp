@@ -1,20 +1,51 @@
 import { supabase } from './supabase';
+import * as FileSystem from 'expo-file-system';
 
 export const uploadProfilePhoto = async (userId: string, photoUri: string, photoIndex: number) => {
   try {
     // Generate unique filename
-    const fileExt = photoUri.split('.').pop();
-    const fileName = `${userId}/${Date.now()}_${photoIndex}.${fileExt}`;
+    const fileName = `${userId}/${Date.now()}_${photoIndex}.jpg`;
 
-    // Convert image to blob
-    const response = await fetch(photoUri);
-    const blob = await response.blob();
+    // For React Native, we need to read the file as base64 and convert to ArrayBuffer
+    // The fetch API doesn't work properly with local file:// URIs in React Native
+    let fileData: ArrayBuffer | Blob;
 
-    // Upload blob directly to Supabase Storage
-    const { data, error } = await supabase.storage.from('profile-photos').upload(fileName, blob, {
-      contentType: `image/${fileExt}`,
-      upsert: false,
-    });
+    // Check if it's a local file URI
+    const isLocalFile =
+      photoUri.startsWith('file://') ||
+      photoUri.startsWith('content://') ||
+      photoUri.startsWith('ph://') ||
+      photoUri.startsWith('assets-library://') ||
+      !photoUri.startsWith('http');
+
+    if (isLocalFile) {
+      // Use expo-file-system to read the file as base64
+
+      // Read file as base64
+      const base64Data = await FileSystem.readAsStringAsync(photoUri, {
+        encoding: 'base64',
+      });
+
+      // Convert base64 to ArrayBuffer
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      fileData = bytes.buffer;
+    } else {
+      // For remote URLs, use fetch
+      const response = await fetch(photoUri);
+      fileData = await response.blob();
+    }
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('profile-photos')
+      .upload(fileName, fileData, {
+        contentType: 'image/jpeg',
+        upsert: true,
+      });
 
     if (error) throw error;
 

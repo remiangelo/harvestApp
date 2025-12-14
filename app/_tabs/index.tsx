@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Platform,
-  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -45,6 +44,24 @@ export default function SwipingScreen() {
       }
 
       try {
+        // First, fetch the current user's profile to get their preferences
+        const { data: myProfile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error('Error fetching my profile:', profileError);
+        }
+
+        console.log('[SwipingScreen] My profile:', {
+          id: myProfile?.id,
+          gender: myProfile?.gender,
+          interested_in: myProfile?.interested_in,
+          onboarding_completed: myProfile?.onboarding_completed,
+        });
+
         // Fetch users who haven't been swiped on yet
         const { data: profiles, error } = await supabase
           .from('users')
@@ -59,6 +76,13 @@ export default function SwipingScreen() {
           return;
         }
 
+        console.log('[SwipingScreen] Fetched profiles:', profiles?.length, 'profiles');
+        profiles?.forEach((p: any) => {
+          console.log(
+            `  - ${p.nickname || p.id}: gender=${p.gender}, interested_in=${JSON.stringify(p.interested_in)}`
+          );
+        });
+
         // Filter out already swiped profiles
         const { data: swipes } = await supabase
           .from('swipes')
@@ -68,9 +92,14 @@ export default function SwipingScreen() {
         const swipedIds = swipes?.map((s: any) => s.swiped_id) || [];
         const unseenProfiles = profiles?.filter((p: any) => !swipedIds.includes(p.id)) || [];
 
-        // Apply user preferences filter
-        const filtered = filterProfiles(unseenProfiles, currentUser);
-        const sorted = sortProfilesByRelevance(filtered, currentUser);
+        console.log('[SwipingScreen] Unseen profiles:', unseenProfiles.length);
+
+        // Apply user preferences filter using the fresh profile data
+        const userPrefs = myProfile || currentUser;
+        const filtered = filterProfiles(unseenProfiles, userPrefs);
+        const sorted = sortProfilesByRelevance(filtered, userPrefs);
+
+        console.log('[SwipingScreen] After filtering:', sorted.length, 'profiles');
 
         setFilteredProfiles(sorted);
         setIsLoading(false);
@@ -239,9 +268,39 @@ export default function SwipingScreen() {
   if (!currentProfile) {
     return (
       <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.title}>No Profiles Available</Text>
-          <Text style={styles.subtitle}>Check back later for new matches!</Text>
+        <View style={styles.emptyStateContainer}>
+          <View style={styles.emptyStateIconContainer}>
+            <Ionicons name="search-outline" size={64} color={theme.colors.primary} />
+          </View>
+          <Text style={styles.emptyStateTitle}>No Profiles Found</Text>
+          <Text style={styles.emptyStateSubtitle}>
+            Try adjusting your filters to see more people in your area
+          </Text>
+          <TouchableOpacity
+            style={styles.emptyStateButton}
+            onPress={() => router.push('/filters' as any)}
+          >
+            <Ionicons name="options-outline" size={20} color="white" style={{ marginRight: 8 }} />
+            <Text style={styles.emptyStateButtonText}>Adjust Filters</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.emptyStateSecondaryButton}
+            onPress={() => {
+              setIsLoading(true);
+              setFilteredProfiles([]);
+              setCurrentProfileIndex(0);
+              // Re-trigger the useEffect by updating a dependency
+              setTimeout(() => setIsLoading(false), 100);
+            }}
+          >
+            <Ionicons
+              name="refresh-outline"
+              size={18}
+              color={theme.colors.primary}
+              style={{ marginRight: 6 }}
+            />
+            <Text style={styles.emptyStateSecondaryButtonText}>Refresh</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -306,11 +365,59 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     flex: 1,
   },
-  content: {
+  emptyStateButton: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.primary,
+    borderRadius: 25,
+    flexDirection: 'row',
+    marginTop: 24,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+  },
+  emptyStateButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyStateContainer: {
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: 40,
+  },
+  emptyStateIconContainer: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 60,
+    height: 120,
+    justifyContent: 'center',
+    marginBottom: 24,
+    width: 120,
+  },
+  emptyStateSecondaryButton: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  emptyStateSecondaryButtonText: {
+    color: theme.colors.primary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  emptyStateSubtitle: {
+    color: '#888',
+    fontSize: 16,
+    lineHeight: 22,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  emptyStateTitle: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   filterButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
@@ -334,18 +441,5 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 16,
     marginTop: 16,
-  },
-  subtitle: {
-    color: '#555',
-    fontSize: 18,
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  title: {
-    color: theme.colors.primary,
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
   },
 });

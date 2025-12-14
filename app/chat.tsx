@@ -467,7 +467,9 @@ export default function ChatScreen() {
         <ScrollView
           ref={scrollViewRef}
           style={styles.messagesList}
-          contentContainerStyle={styles.messagesContent}
+          contentContainerStyle={
+            messages.length === 0 && !loading ? styles.messagesContentEmpty : styles.messagesContent
+          }
           showsVerticalScrollIndicator={false}
         >
           {loading ? (
@@ -661,9 +663,9 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     alignItems: 'center',
-    flex: 1,
     justifyContent: 'center',
     paddingVertical: 100,
+    width: '100%',
   },
   emptyStateSubtext: {
     color: '#666',
@@ -772,7 +774,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messagesContent: {
+    flexGrow: 1,
     paddingBottom: 40, // Increased from 20 to ensure messages don't get cut off
+    paddingHorizontal: 16,
+    paddingTop: 20,
+  },
+  messagesContentEmpty: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingBottom: 40,
     paddingHorizontal: 16,
     paddingTop: 20,
   },

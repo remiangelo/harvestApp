@@ -1,10 +1,6 @@
 import { Profile } from '../types/profile';
 
-interface FilterCriteria {
-  ageRange: { min: number; max: number };
-  maxDistance: number;
-  interestedIn: string;
-}
+// FilterCriteria is now extracted inline in filterProfiles function
 
 interface UserWithPreferences {
   age?: number | Date | string;
@@ -12,6 +8,8 @@ interface UserWithPreferences {
   distance_preference?: number;
   maxDistance?: number;
   preferences?: string;
+  interested_in?: string[];
+  gender?: string;
   location?: string;
 }
 
@@ -71,22 +69,55 @@ function calculateDistance(location1: string, location2: string): number {
 
 /**
  * Check if a profile matches gender preferences
+ * Uses interested_in array (e.g., ["Men", "Women", "Everyone"])
  */
-function matchesGenderPreference(profileGender: string, preference: string): boolean {
-  if (preference === 'all' || preference === 'everyone') {
+function matchesGenderPreference(profileGender: string, interestedIn: string[]): boolean {
+  if (!interestedIn || interestedIn.length === 0) {
+    return true; // No preference set, show all
+  }
+
+  // Normalize profile gender
+  const normalizedGender = profileGender?.toLowerCase() || '';
+
+  // Check if interested in everyone
+  if (interestedIn.includes('Everyone') || interestedIn.includes('everyone')) {
     return true;
   }
 
-  if (preference === profileGender) {
-    return true;
+  // Map profile gender to interested_in values
+  // Profile gender: "Man", "Woman", "Non-binary", "male", "female"
+  // Interested in: "Men", "Women", "Non-binary", "Everyone"
+
+  if (normalizedGender === 'man' || normalizedGender === 'male') {
+    return interestedIn.includes('Men') || interestedIn.includes('men');
   }
 
-  // Handle bisexual/pansexual preferences
-  if (preference === 'bisexual' || preference === 'pansexual') {
-    return profileGender === 'male' || profileGender === 'female';
+  if (normalizedGender === 'woman' || normalizedGender === 'female') {
+    return interestedIn.includes('Women') || interestedIn.includes('women');
+  }
+
+  if (normalizedGender === 'non-binary' || normalizedGender === 'nonbinary') {
+    return interestedIn.includes('Non-binary') || interestedIn.includes('non-binary');
   }
 
   return false;
+}
+
+/**
+ * Check if current user matches the profile's preferences (mutual filtering)
+ */
+function profileIsInterestedInUser(profile: any, userGender: string | undefined): boolean {
+  const profileInterestedIn = profile.interested_in;
+
+  if (!profileInterestedIn || profileInterestedIn.length === 0) {
+    return true; // Profile has no preference, assume interested in everyone
+  }
+
+  if (!userGender) {
+    return true; // User gender unknown, don't filter
+  }
+
+  return matchesGenderPreference(userGender, profileInterestedIn);
 }
 
 /**
@@ -101,38 +132,63 @@ export function filterProfiles(
   }
 
   // Extract filter criteria from user preferences
-  const criteria: FilterCriteria = {
-    ageRange: currentUser.agePreference || { min: 18, max: 50 },
-    maxDistance: currentUser.distance_preference || currentUser.maxDistance || 50,
-    interestedIn: currentUser.preferences || 'all',
-  };
+  const ageRange = currentUser.agePreference || { min: 18, max: 99 };
+  const maxDistance = currentUser.distance_preference || currentUser.maxDistance || 100;
+  const interestedIn = currentUser.interested_in || [];
+  const userGender = currentUser.gender;
+  const userLocation = currentUser.location || '';
 
-  const userLocation = currentUser.location || 'San Francisco, CA';
+  console.log('[filterProfiles] Filtering with criteria:', {
+    ageRange,
+    maxDistance,
+    interestedIn,
+    userGender,
+    totalProfiles: profiles.length,
+  });
 
-  return profiles.filter((profile) => {
-    // Age filter
+  const filtered = profiles.filter((profile) => {
+    const profileName = (profile as any).nickname || profile.name || profile.id;
+
+    // Age filter - be lenient if age is not set
     const profileAge = calculateAge(profile.age);
-    if (profileAge < criteria.ageRange.min || profileAge > criteria.ageRange.max) {
+    if (profileAge && (profileAge < ageRange.min || profileAge > ageRange.max)) {
+      console.log(`[filterProfiles] Filtered out ${profileName}: age ${profileAge} not in range`);
       return false;
     }
 
-    // Distance filter
-    const distance = calculateDistance(userLocation, profile.location);
-    if (distance > criteria.maxDistance) {
+    // Distance filter - skip if no location data
+    if (userLocation && profile.location) {
+      const distance = calculateDistance(userLocation, profile.location);
+      if (distance > maxDistance) {
+        console.log(
+          `[filterProfiles] Filtered out ${profileName}: distance ${distance} > ${maxDistance}`
+        );
+        return false;
+      }
+    }
+
+    // Gender preference filter - check if user is interested in this profile's gender
+    const profileGender = profile.gender || '';
+    if (interestedIn.length > 0 && !matchesGenderPreference(profileGender, interestedIn)) {
+      console.log(
+        `[filterProfiles] Filtered out ${profileName}: gender ${profileGender} not in ${interestedIn}`
+      );
       return false;
     }
 
-    // Gender preference filter
-    const profileGender = profile.gender || 'unknown';
-    if (!matchesGenderPreference(profileGender, criteria.interestedIn)) {
+    // Mutual filtering - check if the profile is interested in the current user
+    if (!profileIsInterestedInUser(profile, userGender)) {
+      console.log(
+        `[filterProfiles] Filtered out ${profileName}: not interested in user's gender ${userGender}`
+      );
       return false;
     }
-
-    // In a real app, you would also check if the current user matches
-    // the profile's preferences (mutual filtering)
 
     return true;
   });
+
+  console.log(`[filterProfiles] Filtered ${profiles.length} -> ${filtered.length} profiles`);
+  return filtered;
 }
 
 /**

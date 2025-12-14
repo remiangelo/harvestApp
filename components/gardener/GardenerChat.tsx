@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   SafeAreaView,
+  Keyboard,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -46,8 +47,27 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
+
+  // Track keyboard visibility
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const keyboardShowListener = Keyboard.addListener(showEvent, () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardHideListener = Keyboard.addListener(hideEvent, () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardShowListener.remove();
+      keyboardHideListener.remove();
+    };
+  }, []);
 
   // Load chat history from database
   useEffect(() => {
@@ -192,7 +212,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
       <KeyboardAvoidingView
         style={styles.chatContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={onBack ? 100 : 200}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? (onBack ? 0 : 90) : 0}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -263,7 +283,12 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
         </ScrollView>
 
         <BlurView intensity={70} tint="light" style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
+          <View
+            style={[
+              styles.inputWrapper,
+              { paddingBottom: keyboardVisible ? 12 : insets.bottom + 70 },
+            ]}
+          >
             <TextInput
               style={styles.input}
               value={inputText}
@@ -377,8 +402,8 @@ const styles = StyleSheet.create({
   inputWrapper: {
     alignItems: 'flex-end',
     flexDirection: 'row',
-    padding: 12,
-    paddingBottom: 76, // Tab bar (56px) + padding (20px)
+    paddingHorizontal: 12,
+    paddingTop: 12,
   },
   messageBubble: {
     borderRadius: 16,

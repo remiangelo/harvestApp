@@ -26,6 +26,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [formError, setFormError] = useState('');
   const router = useRouter();
   const { login, register, setTestMode, setAuthenticated } = useAuthStore();
   const { setCurrentUser } = useUserStore();
@@ -67,6 +68,7 @@ export default function LoginScreen() {
 
   const handleEmailChange = (text: string) => {
     setEmail(text);
+    setFormError(''); // Clear form error when user types
     if (text && !validateEmail(text)) {
       setEmailError('Please enter a valid email address');
     } else {
@@ -76,6 +78,7 @@ export default function LoginScreen() {
 
   const handlePasswordChange = (text: string) => {
     setPassword(text);
+    setFormError(''); // Clear form error when user types
     if (text && !validatePassword(text)) {
       setPasswordError('Password must be at least 6 characters');
     } else {
@@ -84,22 +87,25 @@ export default function LoginScreen() {
   };
 
   const handleLogin = async () => {
+    // Clear previous form error
+    setFormError('');
+
     // Validate inputs before submitting
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
 
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setFormError('Please fill in all fields');
       return;
     }
 
     if (!isEmailValid) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      setFormError('Please enter a valid email address');
       return;
     }
 
     if (!isPasswordValid) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      setFormError('Password must be at least 6 characters long');
       return;
     }
 
@@ -125,11 +131,10 @@ export default function LoginScreen() {
           ]
         );
       } else {
-        Alert.alert(
-          'Login Failed',
-          error.message || 'Invalid email or password. Please try again.'
-        );
+        // Show inline error instead of Alert
+        setFormError('Invalid email or password. Please try again.');
       }
+      return; // Stay on login screen
     } else {
       // Check if user has completed onboarding
       const authState = useAuthStore.getState();
@@ -325,6 +330,14 @@ export default function LoginScreen() {
               onRightIconPress={() => setShowPassword(!showPassword)}
             />
 
+            {/* Inline error message */}
+            {formError ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={18} color={theme.colors.error} />
+                <Text style={styles.errorText}>{formError}</Text>
+              </View>
+            ) : null}
+
             <Button
               title={
                 loading
@@ -413,6 +426,21 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     marginHorizontal: theme.spacing.md,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+    borderRadius: theme.borderRadius.sm,
+    flexDirection: 'row',
+    marginBottom: theme.spacing.md,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+  },
+  errorText: {
+    color: theme.colors.error,
+    flex: 1,
+    fontSize: 14,
+    marginLeft: theme.spacing.sm,
   },
   formSection: {
     marginBottom: theme.spacing.xl,

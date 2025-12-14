@@ -14,6 +14,7 @@ export interface Profile {
   gender: string;
   sexualIdentity: string;
   relationshipGoals: string[];
+  interested_in?: string[];
 }
 
 export interface User {
@@ -28,8 +29,10 @@ export interface User {
   photos?: string[];
   hobbies?: string[];
   distance?: number;
+  distance_preference?: number;
   gender?: string;
   preferences?: string;
+  interested_in?: string[];
   goals?: string;
   location?: string;
 }

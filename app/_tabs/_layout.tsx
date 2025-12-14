@@ -30,10 +30,10 @@ export default function TabLayout() {
         }}
       >
         <Tabs.Screen
-          name="gardener"
+          name="tips"
           options={{
-            title: 'Gardener',
-            tabBarIcon: ({ color }) => <TabBarIcon name="graduation-cap" color={color} />,
+            title: 'Tips',
+            tabBarIcon: ({ color }) => <TabBarIcon name="lightbulb-o" color={color} />,
             headerShown: false,
           }}
         />
@@ -58,6 +58,14 @@ export default function TabLayout() {
           options={{
             title: 'Chat',
             tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
+          name="gardener"
+          options={{
+            title: 'Gardener',
+            tabBarIcon: ({ color }) => <TabBarIcon name="leaf" color={color} />,
             headerShown: false,
           }}
         />

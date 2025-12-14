@@ -250,8 +250,11 @@ export default function MatchesScreen() {
               ))
             ) : (
               <View style={styles.noMatchesContainer}>
+                <View style={styles.noMatchesIconContainer}>
+                  <Ionicons name="heart-outline" size={32} color="rgba(255, 255, 255, 0.8)" />
+                </View>
                 <Text style={styles.noMatchesText}>No matches yet</Text>
-                <Text style={styles.noMatchesSubtext}>Keep swiping!</Text>
+                <Text style={styles.noMatchesSubtext}>Keep swiping to find your match!</Text>
               </View>
             )}
           </ScrollView>
@@ -295,8 +298,22 @@ export default function MatchesScreen() {
             </>
           ) : conversations.length === 0 ? (
             <View style={styles.noConversationsContainer}>
+              <View style={styles.noConversationsIconContainer}>
+                <Ionicons name="chatbubbles-outline" size={64} color={theme.colors.primary} />
+              </View>
               <Text style={styles.noConversationsText}>No conversations yet</Text>
-              <Text style={styles.noConversationsSubtext}>Start chatting with your matches!</Text>
+              <Text style={styles.noConversationsSubtext}>
+                When you match with someone, you can start a conversation here
+              </Text>
+              <TouchableOpacity style={styles.discoverButton} onPress={() => router.push('/_tabs')}>
+                <Ionicons
+                  name="compass-outline"
+                  size={20}
+                  color="white"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.discoverButtonText}>Discover People</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             conversations.map((chat, index) => (
@@ -403,6 +420,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 25,
   },
+  discoverButton: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.primary,
+    borderRadius: 25,
+    flexDirection: 'row',
+    marginTop: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+  },
+  discoverButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   header: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -473,32 +504,56 @@ const styles = StyleSheet.create({
   },
   noConversationsContainer: {
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
     paddingHorizontal: 40,
-    paddingVertical: 40,
+    paddingVertical: 60,
+  },
+  noConversationsIconContainer: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.primarySoft,
+    borderRadius: 50,
+    height: 100,
+    justifyContent: 'center',
+    marginBottom: 20,
+    width: 100,
   },
   noConversationsSubtext: {
     color: '#999',
     fontSize: 14,
-    marginTop: 4,
+    lineHeight: 20,
+    marginTop: 8,
+    textAlign: 'center',
   },
   noConversationsText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: '600',
+    color: '#333',
+    fontSize: 20,
+    fontWeight: '700',
   },
   noMatchesContainer: {
     alignItems: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
     paddingVertical: 20,
+    width: '100%',
+  },
+  noMatchesIconContainer: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 30,
+    height: 60,
+    justifyContent: 'center',
+    marginBottom: 12,
+    width: 60,
   },
   noMatchesSubtext: {
     color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 14,
     marginTop: 4,
+    textAlign: 'center',
   },
   noMatchesText: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontSize: 18,
     fontWeight: '600',
   },
   onlineDot: {

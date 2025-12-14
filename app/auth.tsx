@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, SafeAreaView, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, SafeAreaView, TouchableOpacity, Text, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LiquidGlassView } from '../components/liquid/LiquidGlassView';
@@ -35,9 +35,11 @@ export default function AuthScreen() {
               borderRadius={50}
               glassTint="rgba(255, 255, 255, 0.95)"
             >
-              <View style={{ zIndex: 10 }}>
-                <Text style={styles.logoText}>H</Text>
-              </View>
+              <Image
+                source={require('../assets/images/icon.png')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
             </LiquidGlassView>
             <Text style={styles.appName}>Harvest</Text>
             <Text style={styles.tagline}>Mindful Dating, Real Connections</Text>
@@ -178,10 +180,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.spacing.xxl,
   },
-  logoText: {
-    color: theme.colors.primary, // Rose red
-    fontFamily: theme.typography.fontFamily.logo, // Orange Squash font
-    fontSize: 52,
+  logoImage: {
+    height: 80,
+    width: 80,
+    zIndex: 10,
   },
   safeArea: {
     flex: 1,

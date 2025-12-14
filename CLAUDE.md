@@ -336,7 +336,7 @@ cd android && ./gradlew clean
 
 ### Pre-Flight Checklist
 
-- [x] Version 1.3.9, Build 26 synchronized
+- [x] Version 1.4.11, Build 42 synchronized
 - [x] Bundle ID: com.harvest.harvestdating
 - [x] Supabase credentials in eas.json
 - [x] All TypeScript errors fixed (0 errors)

@@ -28,19 +28,13 @@ export default function AuthScreen() {
         <View style={styles.content}>
           {/* Logo */}
           <View style={styles.logoContainer}>
-            <LiquidGlassView
-              intensity={70}
-              tint="light"
-              style={styles.logo}
-              borderRadius={50}
-              glassTint="rgba(255, 255, 255, 0.95)"
-            >
+            <View style={styles.logoWrapper}>
               <Image
                 source={require('../../assets/images/icon.png')}
                 style={styles.logoImage}
                 resizeMode="contain"
               />
-            </LiquidGlassView>
+            </View>
             <Text style={styles.appName}>Harvest</Text>
             <Text style={styles.tagline}>Mindful Dating, Real Connections</Text>
           </View>
@@ -170,20 +164,26 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     textDecorationLine: 'underline',
   },
-  logo: {
-    alignItems: 'center',
-    height: 100,
-    justifyContent: 'center',
-    width: 100,
-  },
   logoContainer: {
     alignItems: 'center',
     marginBottom: theme.spacing.xxl,
   },
   logoImage: {
-    height: 80,
-    width: 80,
-    zIndex: 10,
+    height: 100,
+    width: 100,
+  },
+  logoWrapper: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 50,
+    height: 100,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    width: 100,
   },
   safeArea: {
     flex: 1,

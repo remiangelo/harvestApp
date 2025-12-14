@@ -146,12 +146,22 @@ export function filterProfiles(
     totalProfiles: profiles.length,
   });
 
+  // Debug: Log each profile's data before filtering
+  profiles.forEach((profile) => {
+    const profileName = (profile as any).nickname || profile.name || profile.id;
+    console.log(`[filterProfiles] Profile ${profileName}:`, {
+      gender: profile.gender,
+      interested_in: (profile as any).interested_in,
+      age: profile.age,
+    });
+  });
+
   const filtered = profiles.filter((profile) => {
     const profileName = (profile as any).nickname || profile.name || profile.id;
 
     // Age filter - be lenient if age is not set
     const profileAge = calculateAge(profile.age);
-    if (profileAge && (profileAge < ageRange.min || profileAge > ageRange.max)) {
+    if (profileAge < ageRange.min || profileAge > ageRange.max) {
       console.log(`[filterProfiles] Filtered out ${profileName}: age ${profileAge} not in range`);
       return false;
     }

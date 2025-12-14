@@ -252,19 +252,23 @@ export default function HarvestSwipeCard({
     };
   }, [position, cardScale]);
 
+  const photos = profile.photos || [];
+
   const nextPhoto = useCallback(() => {
+    if (photos.length === 0) return;
     setImageLoading(true);
     setImageError(false);
-    setCurrentPhotoIndex((prev) => (prev + 1) % profile.photos.length);
-  }, [profile.photos.length]);
+    setCurrentPhotoIndex((prev) => (prev + 1) % photos.length);
+  }, [photos.length]);
 
   const prevPhoto = useCallback(() => {
+    if (photos.length === 0) return;
     setImageLoading(true);
     setImageError(false);
-    setCurrentPhotoIndex((prev) => (prev - 1 + profile.photos.length) % profile.photos.length);
-  }, [profile.photos.length]);
+    setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
+  }, [photos.length]);
 
-  const currentPhoto = profile.photos[currentPhotoIndex];
+  const currentPhoto = photos[currentPhotoIndex] || FALLBACK_IMAGE;
 
   return (
     <View style={styles.container}>
@@ -319,14 +323,16 @@ export default function HarvestSwipeCard({
           />
 
           {/* Photo dots indicator - positioned at top */}
-          <View style={[styles.photoIndicator, { top: insets.top + 20 }]}>
-            {profile.photos.map((_, index) => (
-              <View
-                key={index}
-                style={[styles.dot, index === currentPhotoIndex && styles.activeDot]}
-              />
-            ))}
-          </View>
+          {photos.length > 1 && (
+            <View style={[styles.photoIndicator, { top: insets.top + 20 }]}>
+              {photos.map((_, index) => (
+                <View
+                  key={index}
+                  style={[styles.dot, index === currentPhotoIndex && styles.activeDot]}
+                />
+              ))}
+            </View>
+          )}
 
           {/* Swipe indicators */}
           <Animated.View style={[styles.likeLabel, { opacity: likeOpacity }]}>
@@ -404,7 +410,7 @@ export default function HarvestSwipeCard({
             <View style={styles.infoContent}>
               <View style={styles.header}>
                 <Text style={styles.name}>
-                  {profile.name}, {profile.age}
+                  {(profile as any).nickname || profile.name}, {profile.age}
                 </Text>
                 <View style={styles.locationRow}>
                   <Ionicons name="location" size={16} color="rgba(255,255,255,0.8)" />
@@ -446,13 +452,15 @@ export default function HarvestSwipeCard({
               </View>
 
               {/* Hobbies */}
-              <View style={styles.hobbiesRow}>
-                {profile.hobbies.slice(0, 4).map((hobby, index) => (
-                  <View key={index} style={styles.hobbyTag}>
-                    <Text style={styles.hobbyText}>{hobby}</Text>
-                  </View>
-                ))}
-              </View>
+              {profile.hobbies && profile.hobbies.length > 0 && (
+                <View style={styles.hobbiesRow}>
+                  {profile.hobbies.slice(0, 4).map((hobby, index) => (
+                    <View key={index} style={styles.hobbyTag}>
+                      <Text style={styles.hobbyText}>{hobby}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
 
               {/* Bio */}
               {profile.bio && (

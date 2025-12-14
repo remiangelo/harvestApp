@@ -178,7 +178,7 @@ export default function ProfileScreen() {
           scrollEventThrottle={16}
         >
           {/* Compact Profile Header */}
-          <View style={[styles.profileHeader, { paddingTop: insets.top + 60 }]}>
+          <View style={[styles.profileHeader, { paddingTop: 20 }]}>
             <View style={styles.profileInfo}>
               <TouchableOpacity
                 style={styles.mainPhotoContainer}

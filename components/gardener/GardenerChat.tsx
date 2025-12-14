@@ -211,8 +211,8 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
 
       <KeyboardAvoidingView
         style={styles.chatContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? (onBack ? 0 : 90) : 0}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? (onBack ? 0 : insets.bottom + 50) : 0}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -286,7 +286,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
           <View
             style={[
               styles.inputWrapper,
-              { paddingBottom: keyboardVisible ? 12 : insets.bottom + 70 },
+              { paddingBottom: keyboardVisible ? 8 : Math.max(insets.bottom, 20) + 70 },
             ]}
           >
             <TextInput

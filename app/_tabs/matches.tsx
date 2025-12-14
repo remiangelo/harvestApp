@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 import { useUser } from '../../context/UserContext';
 import { theme } from '../../constants/theme';
+import { ensureConversation } from '../../lib/chat';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/EB1E66/FFFFFF?text=No+Image';
 
@@ -179,11 +180,17 @@ export default function MatchesScreen() {
     setShowProfileModal(true);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     // Close modal and navigate to chat
     setShowProfileModal(false);
     if (selectedProfile) {
-      router.push(`/chat?id=${selectedProfile.id}` as any);
+      // Ensure a conversation exists for this match before navigating
+      const conversationId = await ensureConversation(selectedProfile.id);
+      if (conversationId) {
+        router.push(`/chat?id=${conversationId}` as any);
+      } else {
+        console.error('Failed to create conversation for match:', selectedProfile.id);
+      }
     }
   };
 
@@ -212,7 +219,10 @@ export default function MatchesScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.matchesScroll}
+            contentContainerStyle={[
+              styles.matchesScroll,
+              recentMatches.length === 0 && !loading && styles.matchesScrollEmpty,
+            ]}
           >
             {loading ? (
               // Skeleton loader for matches
@@ -502,12 +512,16 @@ const styles = StyleSheet.create({
   matchesScroll: {
     paddingRight: 20,
   },
+  matchesScrollEmpty: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   noConversationsContainer: {
     alignItems: 'center',
-    flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 40,
     paddingVertical: 60,
+    width: '100%',
   },
   noConversationsIconContainer: {
     alignItems: 'center',
@@ -532,9 +546,10 @@ const styles = StyleSheet.create({
   },
   noMatchesContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 300,
     paddingHorizontal: 20,
     paddingVertical: 20,
-    width: '100%',
   },
   noMatchesIconContainer: {
     alignItems: 'center',

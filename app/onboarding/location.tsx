@@ -45,12 +45,40 @@ export default function OnboardingLocation() {
     });
   }, []);
 
+  // Helper function to get actual location string
+  const getLocationString = async (): Promise<string> => {
+    try {
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      // Reverse geocode to get city name
+      const [address] = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      const locationString =
+        address.city && address.region
+          ? `${address.city}, ${address.region}`
+          : address.city || address.region || 'Location enabled';
+
+      console.log('Got location:', locationString);
+      return locationString;
+    } catch (locError) {
+      console.error('Error getting location:', locError);
+      return 'Location enabled';
+    }
+  };
+
   const handleValidate = async () => {
     try {
-      // If permission already granted, just proceed
+      // If permission already granted, get the actual location
       if (locationGranted) {
-        const location = onboardingData?.location || 'Location enabled';
-        return { location };
+        setIsRequestingPermission(true);
+        const locationString = await getLocationString();
+        setIsRequestingPermission(false);
+        return { location: locationString };
       }
 
       // Request location permission
@@ -63,29 +91,8 @@ export default function OnboardingLocation() {
           setLocationGranted(true);
 
           // Try to get actual location
-          try {
-            const location = await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.Balanced,
-            });
-
-            // Reverse geocode to get city name
-            const [address] = await Location.reverseGeocodeAsync({
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            });
-
-            const locationString =
-              address.city && address.region
-                ? `${address.city}, ${address.region}`
-                : 'Location enabled';
-
-            console.log('Got location:', locationString);
-            return { location: locationString };
-          } catch (locError) {
-            console.error('Error getting location:', locError);
-            // Permission granted but couldn't get location - that's okay
-            return { location: 'Location enabled' };
-          }
+          const locationString = await getLocationString();
+          return { location: locationString };
         } else if (status === 'denied') {
           // User explicitly denied permission
           Alert.alert(

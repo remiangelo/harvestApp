@@ -36,7 +36,7 @@ export default function AuthScreen() {
               glassTint="rgba(255, 255, 255, 0.95)"
             >
               <Image
-                source={require('../assets/images/icon.png')}
+                source={require('../../assets/images/icon.png')}
                 style={styles.logoImage}
                 resizeMode="contain"
               />

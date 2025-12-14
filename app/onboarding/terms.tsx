@@ -32,7 +32,7 @@ export default function TermsScreen() {
 
   return (
     <OnboardingScreen
-      progress={95}
+      progress={100}
       currentStep="terms"
       nextStep="complete"
       onValidate={handleValidate}

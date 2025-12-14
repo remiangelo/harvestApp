@@ -134,7 +134,7 @@ export default function OnboardingLocation() {
   if (isLoading) {
     return (
       <OnboardingScreen
-        progress={90}
+        progress={87.5}
         currentStep="location"
         nextStep="terms"
         onValidate={() => ({ location: 'Loading...' })}
@@ -150,7 +150,7 @@ export default function OnboardingLocation() {
 
   return (
     <OnboardingScreen
-      progress={90}
+      progress={87.5}
       currentStep="location"
       nextStep="terms"
       onValidate={handleValidate}

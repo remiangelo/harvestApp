@@ -89,7 +89,8 @@ export default function OnboardingPhotos() {
 
   const handleValidate = () => {
     const validPhotos = photos.filter((photo) => photo !== null) as string[];
-    if (validPhotos.length > 0) {
+    if (validPhotos.length >= 1) {
+      // Require at least 1 photo
       return { photos: validPhotos };
     }
     return null;
@@ -100,9 +101,9 @@ export default function OnboardingPhotos() {
 
   return (
     <OnboardingScreen
-      progress={80}
+      progress={37.5}
       currentStep="photos"
-      nextStep="hobbies"
+      nextStep="goals"
       onValidate={handleValidate}
       buttonDisabled={!hasPhotos || isAnyUploading}
     >
@@ -112,8 +113,8 @@ export default function OnboardingPhotos() {
       >
         <Text style={styles.title}>Show your Best Self</Text>
         <Text style={styles.subtitle}>
-          Upload up to six of your best photos to make a fantastic first impression. Let your
-          personality shine.
+          Upload at least one photo, up to six maximum. Show your personality and make a great first
+          impression.
         </Text>
         <View style={styles.grid}>
           {photos.map((photo, idx) => (

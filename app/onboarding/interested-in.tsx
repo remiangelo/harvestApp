@@ -64,18 +64,14 @@ export default function InterestedInScreen() {
   const handleValidate = () => {
     if (selected.length > 0) {
       console.log('[InterestedIn] User selected:', selected);
-      // Note: interested_in doesn't have a database column
-      // This data is used for matching logic but not persisted
-      // The matching is done via preferences/sexual_orientation fields
-      // Return empty object to skip database save and just navigate
-      // The preferences field was already saved in the sexual-orientation step
-      return {};
+      // Save interested_in data for matching logic
+      return { interested_in: selected };
     }
     return null;
   };
   return (
     <OnboardingScreen
-      progress={50}
+      progress={75}
       currentStep="interested-in"
       nextStep="location"
       onValidate={handleValidate}

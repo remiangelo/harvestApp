@@ -17,9 +17,9 @@ export default function GenderIdentityScreen() {
 
   return (
     <OnboardingScreen
-      progress={30}
+      progress={62.5}
       currentStep="gender-identity"
-      nextStep="sexual-orientation"
+      nextStep="interested-in"
       onValidate={handleValidate}
       buttonDisabled={!selected}
     >

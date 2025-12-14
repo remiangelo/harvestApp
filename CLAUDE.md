@@ -112,22 +112,24 @@ Organized Folders:
 - ✅ Session persistence
 - ✅ Profile creation on signup
 
-### Onboarding (11 Steps)
+### Onboarding (8 Steps - Streamlined)
 
 - ✅ Age verification
-- ✅ Preferences (orientation)
-- ✅ Bio creation
 - ✅ Nickname
-- ✅ Photo upload (Supabase storage)
-- ✅ Hobbies selection
-- ✅ Distance preferences
+- ✅ Photo upload (1-6 photos, Supabase storage)
 - ✅ Relationship goals
 - ✅ Gender identity
-- ✅ Sexual orientation
 - ✅ Interested in
 - ✅ Location (with GPS)
 - ✅ Terms acceptance
 - ✅ Progress restoration (resume where left off)
+
+**Removed from onboarding (moved to profile/settings):**
+
+- Bio creation → Default "I'm new here!" (editable in profile)
+- Hobbies selection → Profile edit page
+- Distance preferences → Filter settings
+- Sexual orientation → Removed completely
 
 ### Core Features
 

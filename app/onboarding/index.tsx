@@ -43,17 +43,13 @@ export default function OnboardingIndex() {
       if (data) {
         const restoredData: any = {};
 
-        // Map database fields to local state
+        // Map database fields to local state (streamlined onboarding flow)
         if (data.age) restoredData.age = data.age;
-        if (data.preferences) restoredData.preferences = data.preferences;
-        if (data.sexual_orientation) restoredData.sexual_orientation = data.sexual_orientation;
-        if (data.bio) restoredData.bio = data.bio;
         if (data.nickname) restoredData.nickname = data.nickname;
         if (data.photos) restoredData.photos = data.photos;
-        if (data.hobbies) restoredData.hobbies = data.hobbies;
-        if (data.distance_preference) restoredData.distance = data.distance_preference;
         if (data.goals) restoredData.goals = data.goals;
         if (data.gender) restoredData.gender = data.gender;
+        if ((data as any).interested_in) restoredData.interested_in = (data as any).interested_in;
         if (data.location) restoredData.location = data.location;
 
         updateOnboardingData(restoredData);

@@ -31,6 +31,7 @@ export const createProfile = async (userId: string, email: string) => {
           id: userId,
           email,
           nickname: email.split('@')[0], // Use email prefix as default nickname
+          bio: "I'm new here!", // Default bio for streamlined onboarding
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },

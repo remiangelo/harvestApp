@@ -113,16 +113,13 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       if (data) {
         const onboardingData: any = {};
 
-        // Map database fields to local state fields
+        // Map database fields to local state fields (streamlined onboarding flow)
         if (data.age) onboardingData.age = data.age;
-        if (data.preferences) onboardingData.preferences = data.preferences;
-        if (data.bio) onboardingData.bio = data.bio;
         if (data.nickname) onboardingData.nickname = data.nickname;
         if (data.photos) onboardingData.photos = data.photos;
-        if (data.hobbies) onboardingData.hobbies = data.hobbies;
-        if (data.distance_preference) onboardingData.distance = data.distance_preference;
         if (data.goals) onboardingData.goals = data.goals;
         if (data.gender) onboardingData.gender = data.gender;
+        if ((data as any).interested_in) onboardingData.interested_in = (data as any).interested_in;
         if (data.location) onboardingData.location = data.location;
 
         // Update the onboarding data in store

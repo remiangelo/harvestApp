@@ -25,7 +25,7 @@ export default function OnboardingNickname() {
 
   return (
     <OnboardingScreen
-      progress={70}
+      progress={25}
       currentStep="nickname"
       nextStep="photos"
       onValidate={handleValidate}

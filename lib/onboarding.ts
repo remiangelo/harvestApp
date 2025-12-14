@@ -112,6 +112,7 @@ export const saveOnboardingStep = async (
       'goals',
       'gender',
       'location',
+      'interested_in',
     ];
     directFields.forEach((field) => {
       if (stepData[field] !== undefined) {
@@ -275,6 +276,7 @@ export const getOnboardingProgress = async (userId: string) => {
         goals,
         gender,
         location,
+        interested_in,
         onboarding_completed
       `
       )
@@ -284,6 +286,7 @@ export const getOnboardingProgress = async (userId: string) => {
     if (error) throw error;
 
     // Calculate which step the user is on based on completed fields
+    // New streamlined flow: age -> nickname -> photos -> goals -> gender-identity -> interested-in -> location -> terms
     let currentStep = 'age'; // Default to first step
 
     if (data) {
@@ -291,25 +294,23 @@ export const getOnboardingProgress = async (userId: string) => {
       if (data.onboarding_completed) {
         currentStep = 'complete';
       } else if (data.location) {
-        currentStep = 'complete'; // Location is the last step before complete
+        currentStep = 'terms'; // After location, go to terms
+      } else if (
+        data.interested_in &&
+        Array.isArray(data.interested_in) &&
+        data.interested_in.length > 0
+      ) {
+        currentStep = 'location'; // After interested-in, collect location
       } else if (data.gender) {
-        // After gender identity, proceed to sexual orientation
-        currentStep = 'sexual-orientation';
+        currentStep = 'interested-in'; // After gender identity, collect interested-in (skip sexual orientation)
       } else if (data.goals) {
-        // After goals, collect gender identity
-        currentStep = 'gender-identity';
-      } else if (data.distance_preference !== null && data.distance_preference !== undefined) {
-        currentStep = 'goals';
-      } else if (data.hobbies && data.hobbies.length > 0) {
-        currentStep = 'distance';
+        currentStep = 'gender-identity'; // After goals, collect gender identity
       } else if (data.photos && data.photos.length > 0) {
-        currentStep = 'hobbies';
+        currentStep = 'goals'; // After photos, collect goals (skip hobbies and distance)
       } else if (data.nickname) {
-        currentStep = 'photos';
-      } else if (data.bio) {
-        currentStep = 'nickname';
+        currentStep = 'photos'; // After nickname, collect photos
       } else if (data.age !== null && data.age !== undefined) {
-        currentStep = 'bio';
+        currentStep = 'nickname'; // After age, collect nickname (skip bio)
       }
     }
 

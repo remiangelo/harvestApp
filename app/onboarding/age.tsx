@@ -1,25 +1,13 @@
-import { theme } from '../../constants/theme';
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-  SafeAreaView,
-  ActivityIndicator,
-} from 'react-native';
-import { useRouter } from 'expo-router';
+import { Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import useUserStore from '../../stores/useUserStore';
-import { useOnboarding } from '../../hooks/useOnboarding';
+import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 export default function OnboardingAge() {
   const [date, setDate] = useState(new Date(2000, 0, 1));
   const [show, setShow] = useState(false);
-  const router = useRouter();
   const { onboardingData } = useUserStore();
-  const { goToNextStep, isSaving } = useOnboarding();
 
   // Pre-fill with restored or demo data
   useEffect(() => {
@@ -34,9 +22,8 @@ export default function OnboardingAge() {
     }
   }, [onboardingData]);
 
-  const handleContinue = async () => {
-    // Save birthDate and navigate to next step
-    await goToNextStep('age', 'bio', { age: date });
+  const handleValidate = () => {
+    return { age: date };
   };
 
   const onChange = (event: any, selectedDate?: Date) => {
@@ -45,102 +32,54 @@ export default function OnboardingAge() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={styles.container}>
-        <View style={styles.progressBarContainer}>
-          <View style={styles.progressBar} />
-        </View>
-        <Text style={styles.title}>Let&apos;s Start with Your Age</Text>
-        <Text style={styles.subtitle}>Input your birth date so people know how old you are</Text>
-        <TouchableOpacity
-          style={styles.input}
-          onPress={() => setShow(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Select your birth date"
-          accessibilityHint="Tap to open date picker"
-        >
-          <Text style={{ color: date ? '#222' : '#888', fontSize: 18, textAlign: 'center' }}>
-            {date ? date.toLocaleDateString() : 'MM/DD/YYYY'}
-          </Text>
-        </TouchableOpacity>
-        {show && (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display="spinner"
-            onChange={onChange}
-            maximumDate={new Date()}
-            accessibilityLabel="Date picker for selecting birth date"
-          />
-        )}
-        <TouchableOpacity
-          style={[styles.button, isSaving && styles.buttonDisabled]}
-          onPress={handleContinue}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Continue</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    <OnboardingScreen
+      progress={12.5}
+      currentStep="age"
+      nextStep="nickname"
+      onValidate={handleValidate}
+    >
+      <Text style={styles.title}>Let&apos;s Start with Your Age</Text>
+      <Text style={styles.subtitle}>Input your birth date so people know how old you are</Text>
+      <TouchableOpacity
+        style={styles.input}
+        onPress={() => setShow(true)}
+        accessibilityRole="button"
+        accessibilityLabel="Select your birth date"
+        accessibilityHint="Tap to open date picker"
+      >
+        <Text style={styles.inputText}>{date ? date.toLocaleDateString() : 'MM/DD/YYYY'}</Text>
+      </TouchableOpacity>
+      {show && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display="spinner"
+          onChange={onChange}
+          maximumDate={new Date()}
+          accessibilityLabel="Date picker for selecting birth date"
+        />
+      )}
+    </OnboardingScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    backgroundColor: theme.colors.primary,
-    borderRadius: 24,
-    height: 48,
-    justifyContent: 'center',
-    marginTop: 16,
-    width: '100%',
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  container: {
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    flex: 1,
-    justifyContent: 'flex-start',
-    paddingBottom: 32,
-    paddingHorizontal: 24,
-    paddingTop: 80,
-  },
   input: {
     alignItems: 'center',
     backgroundColor: '#fafafa',
     borderColor: '#ccc',
     borderRadius: 24,
     borderWidth: 1,
-    fontSize: 18,
     height: 48,
     justifyContent: 'center',
     marginBottom: 32,
     paddingHorizontal: 16,
     width: '100%',
   },
-  progressBar: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 4,
-    height: 8,
-    width: '33%',
-  },
-  progressBarContainer: {
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    height: 8,
-    marginBottom: 32,
-    width: '100%',
+  inputText: {
+    color: '#222',
+    fontSize: 18,
+    textAlign: 'center',
   },
   subtitle: {
     color: '#555',

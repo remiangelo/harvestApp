@@ -39,7 +39,7 @@ export default function OnboardingGoals() {
 
   return (
     <OnboardingScreen
-      progress={100}
+      progress={50}
       currentStep="goals"
       nextStep="gender-identity"
       onValidate={handleValidate}

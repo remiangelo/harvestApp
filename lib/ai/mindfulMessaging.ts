@@ -26,6 +26,49 @@ const FLAGGED_KEYWORDS = {
     'worthless',
     'disgusting',
     'ugly',
+    'moron',
+    'retard',
+    'trash',
+    'garbage',
+    'scum',
+    'freak',
+    'psycho',
+    'crazy',
+    'insane',
+    'shut up',
+    'go away',
+    'leave me alone',
+    'f you',
+    'fk you',
+    'fck',
+    'fuk',
+    'fuc',
+    'a**hole',
+    'asshole',
+    'bitch',
+    'bastard',
+    'damn you',
+    'screw you',
+    'piss off',
+    'get lost',
+    'drop dead',
+    'kill yourself',
+    'kys',
+    'die',
+    'you suck',
+    'jerk',
+    'fool',
+    'clown',
+    'weirdo',
+    'creep',
+    'creepy',
+    'gross',
+    'nasty',
+    'perv',
+    'pervert',
+    'slut',
+    'whore',
+    'hoe',
   ],
   possessive: ['you belong', "you're mine", 'no one else', "can't talk to", 'not allowed to'],
   pressuring: ['you have to', 'you must', 'you better', 'or else', "don't make me", 'you owe'],
@@ -38,7 +81,35 @@ const FLAGGED_KEYWORDS = {
     'my everything',
     'only you',
   ],
+  personal_info: [
+    'my number is',
+    'my phone',
+    'call me at',
+    'text me at',
+    'reach me at',
+    'contact me at',
+    'whatsapp',
+    'telegram',
+    'snapchat',
+    'instagram',
+    'my insta',
+    'my snap',
+    'add me on',
+    'follow me',
+    'my address',
+    'i live at',
+    'my email',
+    'email me',
+  ],
 };
+
+// Phone number regex patterns
+const PHONE_PATTERNS = [
+  /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/, // US: 123-456-7890
+  /\b\d{10,11}\b/, // 10-11 digit numbers
+  /\b\+\d{1,3}[-.]?\d{3,4}[-.]?\d{3,4}[-.]?\d{3,4}\b/, // International: +1-234-567-8901
+  /\b\(\d{3}\)\s*\d{3}[-.]?\d{4}\b/, // (123) 456-7890
+];
 
 const GROWTH_LESSONS = {
   aggressive: {
@@ -69,6 +140,10 @@ const GROWTH_LESSONS = {
     title: 'Pause & Reflect',
     message: `Taking a moment to consider how our words might land can deepen understanding. How might the other person receive this message?`,
   },
+  personal_info: {
+    title: 'Stay Safe',
+    message: `Sharing personal contact info early can put your safety at risk. Take time to build trust within the app first. When you're ready to connect outside, consider video chatting first.`,
+  },
 };
 
 /**
@@ -80,45 +155,62 @@ function analyzeWithKeywords(message: string): SentimentAnalysisResult {
   let category: keyof typeof GROWTH_LESSONS | null = null;
   let severity: 'low' | 'medium' | 'high' = 'low';
 
-  // Check each category
-  for (const [cat, keywords] of Object.entries(FLAGGED_KEYWORDS)) {
-    for (const keyword of keywords) {
-      if (lowerMessage.includes(keyword.toLowerCase())) {
-        flaggedWords.push(keyword);
-        category = cat as keyof typeof GROWTH_LESSONS;
+  console.log('[MindfulMessaging] Analyzing with keywords:', lowerMessage);
 
-        // Determine severity
-        if (cat === 'aggressive' || cat === 'sexual_pressure') {
-          severity = 'high';
-        } else if (cat === 'possessive' || cat === 'pressuring') {
-          severity = 'medium';
-        } else {
-          severity = 'low';
-        }
-        break;
-      }
+  // Check for phone numbers FIRST (high priority safety concern)
+  for (const pattern of PHONE_PATTERNS) {
+    if (pattern.test(message)) {
+      console.log('[MindfulMessaging] Phone number detected');
+      flaggedWords.push('phone number');
+      category = 'personal_info';
+      severity = 'medium';
+      break;
     }
-    if (category) break;
+  }
+
+  // Check each keyword category if no phone number found
+  if (!category) {
+    for (const [cat, keywords] of Object.entries(FLAGGED_KEYWORDS)) {
+      for (const keyword of keywords) {
+        if (lowerMessage.includes(keyword.toLowerCase())) {
+          console.log(`[MindfulMessaging] Flagged keyword found: "${keyword}" in category: ${cat}`);
+          flaggedWords.push(keyword);
+          category = cat as keyof typeof GROWTH_LESSONS;
+
+          // Determine severity
+          if (cat === 'aggressive' || cat === 'sexual_pressure') {
+            severity = 'high';
+          } else if (cat === 'possessive' || cat === 'pressuring' || cat === 'personal_info') {
+            severity = 'medium';
+          } else {
+            severity = 'low';
+          }
+          break;
+        }
+      }
+      if (category) break;
+    }
   }
 
   // Check for excessive capitalization (SHOUTING)
   const capsRatio = (message.match(/[A-Z]/g) || []).length / message.length;
-  if (capsRatio > 0.5 && message.length > 10) {
+  if (capsRatio > 0.5 && message.length > 10 && !category) {
+    console.log('[MindfulMessaging] Excessive caps detected');
     flaggedWords.push('EXCESSIVE CAPS');
     category = 'aggressive';
     severity = 'medium';
   }
 
   // Check for excessive punctuation
-  if (message.match(/!{3,}/) || message.match(/\?{3,}/)) {
+  if ((message.match(/!{3,}/) || message.match(/\?{3,}/)) && !category) {
+    console.log('[MindfulMessaging] Excessive punctuation detected');
     flaggedWords.push('excessive punctuation');
-    if (!category) {
-      category = 'general';
-      severity = 'low';
-    }
+    category = 'general';
+    severity = 'low';
   }
 
   if (!category) {
+    console.log('[MindfulMessaging] No issues found');
     return {
       needsReview: false,
       severity: 'low',
@@ -129,10 +221,21 @@ function analyzeWithKeywords(message: string): SentimentAnalysisResult {
 
   const lesson = GROWTH_LESSONS[category] || GROWTH_LESSONS.general;
 
+  const reasonMap: Record<string, string> = {
+    aggressive: 'hurtful',
+    possessive: 'controlling',
+    pressuring: 'pressuring',
+    manipulative: 'manipulative',
+    sexual_pressure: 'inappropriate',
+    excessive_intensity: 'overwhelming',
+    personal_info: 'sharing personal contact information',
+    general: 'concerning',
+  };
+
   return {
     needsReview: true,
     severity,
-    reason: `This message contains language that might be ${category === 'aggressive' ? 'hurtful' : category === 'possessive' ? 'controlling' : category === 'pressuring' ? 'pressuring' : 'concerning'}`,
+    reason: `This message contains language that might be ${reasonMap[category] || 'concerning'}`,
     growthLesson: `${lesson.title}\n\n${lesson.message}`,
     flaggedWords,
   };
@@ -238,12 +341,17 @@ export async function isMindfulMessagingEnabled(): Promise<boolean> {
     const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
     const value = await AsyncStorage.getItem('mindful_messaging_enabled');
 
+    console.log('[MindfulMessaging] Checking if enabled, stored value:', value);
+
     // Default to enabled if not set
     if (value === null) {
+      console.log('[MindfulMessaging] No stored value, defaulting to enabled');
       return true;
     }
 
-    return value === 'true';
+    const isEnabled = value === 'true';
+    console.log('[MindfulMessaging] Feature enabled:', isEnabled);
+    return isEnabled;
   } catch (error) {
     console.error('[MindfulMessaging] Error checking setting:', error);
     // Default to enabled on error

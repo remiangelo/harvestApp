@@ -462,7 +462,7 @@ export default function ChatScreen() {
       <KeyboardAvoidingView
         style={styles.messagesContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={90}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -556,7 +556,7 @@ export default function ChatScreen() {
         </ScrollView>
 
         {/* Input Bar */}
-        <View style={[styles.inputBar, { paddingBottom: insets.bottom > 0 ? insets.bottom : 8 }]}>
+        <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
           <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
           <View style={styles.inputContainer}>
             <TouchableOpacity style={styles.attachButton} onPress={handleAttachPress}>

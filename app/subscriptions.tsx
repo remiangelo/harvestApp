@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../constants/theme';
-import { LiquidGlassView } from '../components/liquid/LiquidGlassView';
 
 type PlanType = 'free' | 'premium' | 'gold';
 
@@ -22,60 +29,56 @@ interface Plan {
   popular?: boolean;
   features: Feature[];
   gradient: string[];
+  icon: keyof typeof Ionicons.glyphMap;
 }
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const plans: Plan[] = [
   {
     id: 'free',
-    name: 'Harvest Free',
+    name: 'Free',
     price: '$0',
     period: 'Forever',
+    icon: 'leaf-outline',
     features: [
       { text: '10 likes per day', included: true },
       { text: '3 Super Likes per day', included: true },
       { text: 'Basic filters', included: true },
       { text: 'Standard matching', included: true },
-      { text: 'Unlimited likes', included: false },
-      { text: 'See who liked you', included: false },
-      { text: 'Rewind last swipe', included: false },
-      { text: 'Priority support', included: false },
     ],
-    gradient: [theme.colors.primary, '#999'],
+    gradient: ['#6B7280', '#4B5563'],
   },
   {
     id: 'premium',
-    name: 'Harvest Premium',
+    name: 'Premium',
     price: '$14.99',
     period: '/month',
     popular: true,
+    icon: 'heart',
     features: [
       { text: 'Unlimited likes', included: true },
       { text: '5 Super Likes per day', included: true },
-      { text: 'Advanced filters', included: true },
       { text: 'See who liked you', included: true },
       { text: 'Rewind last swipe', included: true },
-      { text: 'Priority in match queue', included: true },
-      { text: 'Read receipts', included: true },
-      { text: 'Message before matching', included: false },
+      { text: 'Priority matching', included: true },
     ],
     gradient: [theme.colors.primary, theme.colors.primaryDark],
   },
   {
     id: 'gold',
-    name: 'Harvest Gold',
+    name: 'Gold',
     price: '$24.99',
     period: '/month',
+    icon: 'diamond',
     features: [
       { text: 'Everything in Premium', included: true },
       { text: '10 Super Likes per day', included: true },
-      { text: 'Boost profile monthly', included: true },
-      { text: 'Message before matching (2/day)', included: true },
-      { text: 'Advanced AI matchmaking', included: true },
+      { text: 'Monthly profile boost', included: true },
+      { text: 'Message before matching', included: true },
       { text: 'Exclusive Gold badge', included: true },
-      { text: 'Priority support', included: true },
-      { text: 'Early access to features', included: true },
     ],
-    gradient: [theme.colors.primary, '#FFA500'],
+    gradient: ['#F59E0B', '#D97706'],
   },
 ];
 
@@ -133,24 +136,30 @@ export default function SubscriptionsScreen() {
 
         {/* Plans */}
         {plans.map((plan) => (
-          <TouchableOpacity key={plan.id} activeOpacity={0.9} style={styles.planContainer}>
-            <LiquidGlassView
-              intensity={65}
-              tint="light"
-              style={styles.planCard as any}
-              borderRadius={20}
-              glassTint="rgba(255, 255, 255, 0.92)"
-            >
+          <TouchableOpacity
+            key={plan.id}
+            activeOpacity={0.9}
+            style={[styles.planContainer, plan.popular && styles.planContainerPopular]}
+            onPress={() => handleSubscribe(plan.id)}
+          >
+            <View style={[styles.planCard, plan.popular && styles.planCardPopular]}>
               {plan.popular && (
                 <LinearGradient
                   colors={[theme.colors.primary, theme.colors.primaryDark]}
                   style={styles.popularBadge}
                 >
+                  <Ionicons name="star" size={12} color="white" />
                   <Text style={styles.popularText}>MOST POPULAR</Text>
                 </LinearGradient>
               )}
 
-              <LinearGradient colors={plan.gradient as any} style={styles.planHeader}>
+              <LinearGradient
+                colors={plan.gradient as [string, string]}
+                style={[styles.planHeader, plan.popular && styles.planHeaderPopular]}
+              >
+                <View style={styles.planIconContainer}>
+                  <Ionicons name={plan.icon} size={28} color="white" />
+                </View>
                 <Text style={styles.planName}>{plan.name}</Text>
                 <View style={styles.priceContainer}>
                   <Text style={styles.price}>{plan.price}</Text>
@@ -161,11 +170,22 @@ export default function SubscriptionsScreen() {
               <View style={styles.featuresContainer}>
                 {plan.features.map((feature, index) => (
                   <View key={index} style={styles.featureRow}>
-                    <Ionicons
-                      name={feature.included ? 'checkmark-circle' : 'close-circle'}
-                      size={20}
-                      color={feature.included ? theme.colors.primary : '#999'}
-                    />
+                    <View
+                      style={[
+                        styles.featureIconContainer,
+                        {
+                          backgroundColor: feature.included
+                            ? `${theme.colors.primary}15`
+                            : '#f5f5f5',
+                        },
+                      ]}
+                    >
+                      <Ionicons
+                        name={feature.included ? 'checkmark' : 'close'}
+                        size={14}
+                        color={feature.included ? theme.colors.primary : '#999'}
+                      />
+                    </View>
                     <Text
                       style={[styles.featureText, !feature.included && styles.featureTextDisabled]}
                     >
@@ -175,30 +195,22 @@ export default function SubscriptionsScreen() {
                 ))}
               </View>
 
-              {currentPlan !== plan.id && (
-                <TouchableOpacity
-                  style={styles.subscribeButton}
-                  onPress={() => handleSubscribe(plan.id)}
-                >
-                  <LinearGradient
-                    colors={
-                      (plan.id === 'free' ? [theme.colors.primary, '#666'] : plan.gradient) as any
-                    }
-                    style={styles.subscribeGradient}
-                  >
-                    <Text style={styles.subscribeText}>
-                      {plan.id === 'free' ? 'Downgrade' : 'Subscribe'}
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              )}
-
-              {currentPlan === plan.id && (
+              {currentPlan === plan.id ? (
                 <View style={styles.currentIndicator}>
-                  <Text style={styles.currentText}>Your Current Plan</Text>
+                  <Ionicons name="checkmark-circle" size={18} color="white" />
+                  <Text style={styles.currentText}>Current Plan</Text>
                 </View>
+              ) : (
+                <LinearGradient
+                  colors={plan.gradient as [string, string]}
+                  style={styles.subscribeButton}
+                >
+                  <Text style={styles.subscribeText}>
+                    {plan.id === 'free' ? 'Select Free' : `Get ${plan.name}`}
+                  </Text>
+                </LinearGradient>
               )}
-            </LiquidGlassView>
+            </View>
           </TouchableOpacity>
         ))}
 
@@ -298,16 +310,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   container: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#f8f9fa',
     flex: 1,
   },
   currentIndicator: {
     alignItems: 'center',
     backgroundColor: '#4CAF50',
-    borderRadius: 20,
+    borderRadius: 25,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    marginHorizontal: 20,
     marginTop: 15,
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   currentPlanBadge: {
     alignItems: 'center',
@@ -330,6 +346,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  featureIconContainer: {
+    alignItems: 'center',
+    borderRadius: 12,
+    height: 24,
+    justifyContent: 'center',
+    width: 24,
+  },
   featureRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -337,15 +360,19 @@ const styles = StyleSheet.create({
   },
   featureText: {
     color: theme.colors.text.primary,
+    flex: 1,
     fontSize: 14,
-    marginLeft: 10,
+    marginLeft: 12,
   },
   featureTextDisabled: {
-    color: theme.colors.primary,
+    color: '#999',
     textDecorationLine: 'line-through',
   },
   featuresContainer: {
-    padding: 20,
+    backgroundColor: 'white',
+    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   header: {
     alignItems: 'center',
@@ -368,27 +395,56 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   planCard: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    elevation: 4,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  planCardPopular: {
+    borderColor: theme.colors.primary,
+    borderWidth: 2,
   },
   planContainer: {
-    marginBottom: 20,
+    marginBottom: 16,
     marginHorizontal: 20,
+  },
+  planContainerPopular: {
+    marginBottom: 20,
+    transform: [{ scale: 1.02 }],
   },
   planHeader: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingBottom: 24,
+    paddingTop: 24,
+  },
+  planHeaderPopular: {
+    paddingTop: 36,
+  },
+  planIconContainer: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 20,
+    height: 56,
+    justifyContent: 'center',
+    marginBottom: 12,
+    width: 56,
   },
   planName: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   popularBadge: {
     alignItems: 'center',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingVertical: 5,
+    flexDirection: 'row',
+    gap: 4,
+    justifyContent: 'center',
+    paddingVertical: 6,
     position: 'absolute',
     right: 0,
     top: 0,
@@ -397,8 +453,9 @@ const styles = StyleSheet.create({
   },
   popularText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
   price: {
     color: 'white',
@@ -414,15 +471,11 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   subscribeButton: {
+    alignItems: 'center',
     borderRadius: 25,
     marginBottom: 20,
     marginHorizontal: 20,
-    marginTop: 10,
-    overflow: 'hidden',
-  },
-  subscribeGradient: {
-    alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
   subscribeText: {
     color: 'white',

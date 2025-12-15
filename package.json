@@ -1,7 +1,7 @@
 {
   "name": "harvestapp",
   "main": "expo-router/entry",
-  "version": "1.4.14",
+  "version": "1.4.15",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",

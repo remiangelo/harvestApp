@@ -23,6 +23,7 @@ import { OptimizedImage } from '../components/OptimizedImage';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Chip } from '../components/ui/Chip';
+import { analyzeMessage } from '../lib/ai/mindfulMessaging';
 
 const AVAILABLE_HOBBIES = [
   'Photography',
@@ -107,6 +108,40 @@ export default function ProfileEditScreen() {
     });
 
     if (!result.canceled && result.assets?.[0]?.uri && user) {
+      // Basic validation for inappropriate content based on filename
+      const fileName = result.assets[0].uri.toLowerCase();
+      const suspiciousPatterns = [
+        'nude',
+        'naked',
+        'sex',
+        'porn',
+        'xxx',
+        'adult',
+        'explicit',
+        'onlyfans',
+        'nsfw',
+        'sensitive',
+        'intimate',
+      ];
+
+      const containsSuspiciousContent = suspiciousPatterns.some((pattern) =>
+        fileName.includes(pattern)
+      );
+
+      if (containsSuspiciousContent) {
+        Alert.alert(
+          'Inappropriate Content',
+          'Please ensure your photos are appropriate and do not contain explicit or suggestive content. Photos with inappropriate content will be removed.',
+          [
+            {
+              text: 'OK',
+              style: 'cancel',
+            },
+          ]
+        );
+        return;
+      }
+
       setUploadingPhoto(index);
 
       try {
@@ -172,6 +207,22 @@ export default function ProfileEditScreen() {
 
     if (!profile.bio.trim()) {
       Alert.alert('Required Field', 'Please write something about yourself.');
+      return;
+    }
+
+    // Validate bio for harmful content
+    const bioAnalysis = await analyzeMessage(profile.bio);
+    if (bioAnalysis.needsReview) {
+      Alert.alert(
+        'Inappropriate Content',
+        'Your bio contains content that may be inappropriate. Please revise it to remove any harmful or offensive language, including references to OnlyFans or similar platforms.',
+        [
+          {
+            text: 'OK',
+            style: 'cancel',
+          },
+        ]
+      );
       return;
     }
 

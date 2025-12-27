@@ -73,7 +73,17 @@ const FLAGGED_KEYWORDS = {
   possessive: ['you belong', "you're mine", 'no one else', "can't talk to", 'not allowed to'],
   pressuring: ['you have to', 'you must', 'you better', 'or else', "don't make me", 'you owe'],
   manipulative: ['if you loved me', 'prove it', 'you never', 'you always', 'everyone else'],
-  sexual_pressure: ['send pics', 'show me', 'prove yourself', 'blue balls', 'tease'],
+  sexual_pressure: [
+    'send pics',
+    'show me',
+    'prove yourself',
+    'blue balls',
+    'tease',
+    'send nudes',
+    'nudes',
+    'nude pics',
+    'nude photos',
+  ],
   excessive_intensity: [
     'obsessed',
     "can't live without",
@@ -100,6 +110,13 @@ const FLAGGED_KEYWORDS = {
     'i live at',
     'my email',
     'email me',
+    'onlyfans',
+    'only fans',
+    'of.com',
+    'subscribe',
+    'subscription',
+    'paid content',
+    'premium content',
   ],
 };
 

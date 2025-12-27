@@ -25,6 +25,7 @@ import { Animated } from 'react-native';
 import { ChatMenuPopup } from '../components/ChatMenuPopup';
 import * as ImagePicker from 'expo-image-picker';
 import { MindfulMessageModal } from '../components/MindfulMessageModal';
+import { HarmfulMessageModal } from '../components/HarmfulMessageModal';
 import { theme } from '../constants/theme';
 import { analyzeMessage, isMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
 
@@ -36,23 +37,53 @@ interface ChatPartner {
   profileImage: string;
 }
 
+interface Message {
+  id: string;
+  text?: string;
+  content?: string;
+  senderId?: string;
+  sender_id?: string;
+  createdAt?: string;
+  created_at?: string;
+  conversation_id?: string;
+  sending?: boolean;
+  [key: string]: unknown;
+}
+
+interface AnalysisResult {
+  reason?: string;
+  growthLesson?: string;
+  severity?: 'low' | 'medium' | 'high';
+  needsReview?: boolean;
+  [key: string]: unknown;
+}
+
+interface Subscription {
+  track?: (data: { user_id: string; typing: boolean }) => void;
+  unsubscribe?: () => void;
+  [key: string]: unknown;
+}
+
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const { currentUser } = useUser();
   const insets = useSafeAreaInsets();
   const [newMessage, setNewMessage] = useState('');
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const [otherUserTyping, setOtherUserTyping] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const [mindfulModalVisible, setMindfulModalVisible] = useState(false);
   const [pendingMessage, setPendingMessage] = useState('');
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [harmfulMessageModalVisible, setHarmfulMessageModalVisible] = useState(false);
+  const [harmfulMessageAnalysis, setHarmfulMessageAnalysis] = useState<AnalysisResult | null>(null);
+  const [harmfulMessageContent, setHarmfulMessageContent] = useState('');
   const [chatPartner, setChatPartner] = useState<ChatPartner | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
-  const subscriptionRef = useRef<any>(null);
-  const typingTimeoutRef = useRef<any>(null);
+  const subscriptionRef = useRef<Subscription | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const conversationId = String(id);
 
@@ -133,8 +164,27 @@ export default function ChatScreen() {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        async (payload: any) => {
-          const newMessage = payload.new as any;
+        async (payload: { new: Message }) => {
+          const newMessage = payload.new;
+
+          // Check if this is a message from the other user and mindful messaging is enabled
+          if (newMessage.sender_id !== currentUser.id) {
+            const isEnabled = await isMindfulMessagingEnabled();
+
+            if (isEnabled) {
+              // Analyze the received message for harmful content
+              const analysis = await analyzeMessage(newMessage.content || '');
+
+              if (analysis.needsReview) {
+                // Store the harmful message details and show confirmation modal
+                setHarmfulMessageContent(newMessage.content || '');
+                setHarmfulMessageAnalysis(analysis as AnalysisResult);
+                setHarmfulMessageModalVisible(true);
+                return; // Don't add the message to the list yet
+              }
+            }
+          }
+
           // Add the new message to the list
           setMessages((current) => [...current, newMessage]);
           // Hide typing indicator when message is received
@@ -149,7 +199,7 @@ export default function ChatScreen() {
             const { notificationService } = await import('../lib/notifications');
             await notificationService.sendMessageNotification(
               chatPartner.name,
-              newMessage.content,
+              newMessage.content || '',
               conversationId
             );
           }
@@ -158,20 +208,34 @@ export default function ChatScreen() {
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
         // Check if other user is typing
-        const otherUsers = Object.values(state).flat();
+        const otherUsers = Object.values(state).flat() as { user_id: string; typing: boolean }[];
         const isOtherTyping = otherUsers.some(
-          (user: any) => user.user_id !== currentUser.id && user.typing === true
+          (user) => user.user_id !== currentUser.id && user.typing === true
         );
         setOtherUserTyping(isOtherTyping);
       })
-      .on('presence', { event: 'join' }, ({ key: _key, newPresences: _newPresences }: any) => {
-        // Handle user joining
-      })
-      .on('presence', { event: 'leave' }, ({ key: _key, leftPresences: _leftPresences }: any) => {
-        // Handle user leaving
-        setOtherUserTyping(false);
-      })
-      .subscribe(async (status: any) => {
+      .on(
+        'presence',
+        { event: 'join' },
+        ({ key: _key, newPresences: _newPresences }: { key: string; newPresences: unknown[] }) => {
+          // Handle user joining
+        }
+      )
+      .on(
+        'presence',
+        { event: 'leave' },
+        ({
+          key: _key,
+          leftPresences: _leftPresences,
+        }: {
+          key: string;
+          leftPresences: unknown[];
+        }) => {
+          // Handle user leaving
+          setOtherUserTyping(false);
+        }
+      )
+      .subscribe(async (status: 'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED') => {
         if (status === 'SUBSCRIBED') {
           // Track user presence
           await channel.track({
@@ -233,8 +297,8 @@ export default function ChatScreen() {
     if (analysis.needsReview) {
       // Show warning modal
       console.log('[Chat] Message needs review, showing modal');
-      setPendingMessage(messageText);
-      setAnalysisResult(analysis);
+      setPendingMessage(analysis.reason || '');
+      setAnalysisResult(analysis as AnalysisResult);
       setMindfulModalVisible(true);
     } else {
       // Message is fine, send it
@@ -326,6 +390,30 @@ export default function ChatScreen() {
     setAnalysisResult(null);
   };
 
+  const handleViewHarmfulAnyway = () => {
+    // Add the harmful message to the list
+    const harmfulMessage = {
+      id: `harmful-${Date.now()}`,
+      conversation_id: conversationId,
+      sender_id: chatPartner?.id || '',
+      content: harmfulMessageContent,
+      created_at: new Date().toISOString(),
+    };
+    setMessages((current) => [...current, harmfulMessage]);
+
+    // Close the modal and reset state
+    setHarmfulMessageModalVisible(false);
+    setHarmfulMessageContent('');
+    setHarmfulMessageAnalysis(null);
+  };
+
+  const handleKeepHidden = () => {
+    // Just close the modal and reset state
+    setHarmfulMessageModalVisible(false);
+    setHarmfulMessageContent('');
+    setHarmfulMessageAnalysis(null);
+  };
+
   const formatMessageTime = (timestamp: string) => {
     return format(new Date(timestamp), 'h:mm a');
   };
@@ -386,7 +474,7 @@ export default function ChatScreen() {
   };
 
   // Handle selected image
-  const handleImageSelected = async (imageUri: string) => {
+  const handleImageSelected = async (_imageUri: string) => {
     // For now, just show an alert. In production, you would:
     // 1. Upload the image to Supabase storage
     // 2. Send a message with the image URL
@@ -411,8 +499,8 @@ export default function ChatScreen() {
     // Send typing indicator
     if (!isTyping) {
       setIsTyping(true);
-      await subscriptionRef.current.track({
-        user_id: currentUser.id,
+      await subscriptionRef.current?.track?.({
+        user_id: currentUser.id || '',
         typing: true,
       });
     }
@@ -420,8 +508,8 @@ export default function ChatScreen() {
     // Stop typing after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(async () => {
       setIsTyping(false);
-      await subscriptionRef.current.track({
-        user_id: currentUser.id,
+      await subscriptionRef.current?.track?.({
+        user_id: currentUser.id || '',
         typing: false,
       });
     }, 2000);
@@ -460,9 +548,9 @@ export default function ChatScreen() {
 
       {/* Messages */}
       <KeyboardAvoidingView
-        style={styles.messagesContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -487,11 +575,12 @@ export default function ChatScreen() {
                     style={[
                       index % 2 === 0 ? styles.currentUserMessage : styles.otherUserMessage,
                       styles.skeletonMessage,
+                      styles.skeletonMessageRandom,
                       { width: `${60 + Math.random() * 20}%` },
                     ]}
                   >
                     <View style={styles.skeletonText} />
-                    <View style={[styles.skeletonText, { width: '40%', marginTop: 8 }]} />
+                    <View style={styles.skeletonMessageSecondLine} />
                   </View>
                 </View>
               ))}
@@ -519,16 +608,21 @@ export default function ChatScreen() {
 
                   {isCurrentUser ? (
                     <View style={styles.currentUserMessage}>
-                      <Text style={styles.currentUserMessageText}>{message.content}</Text>
+                      <Text style={styles.currentUserMessageText}>
+                        {message.content ?? message.text ?? ''}
+                      </Text>
                       <Text style={styles.messageTime}>
-                        {formatMessageTime(message.created_at)}
+                        {formatMessageTime(message.created_at || message.createdAt || '')}
                       </Text>
                     </View>
                   ) : (
                     <View style={styles.otherUserMessage}>
-                      <Text style={styles.otherUserMessageText}>{message.content}</Text>
+                      <Text style={styles.otherUserMessageText}>
+                        {message.content ?? message.text ?? ''}
+                      </Text>
+                      {/* Message time */}
                       <Text style={styles.messageTime}>
-                        {formatMessageTime(message.created_at)}
+                        {formatMessageTime(message.created_at || message.createdAt || '')}
                       </Text>
                     </View>
                   )}
@@ -546,9 +640,9 @@ export default function ChatScreen() {
               />
               <View style={styles.typingIndicator}>
                 <View style={styles.typingDots}>
-                  <Animated.View style={[styles.typingDot, { opacity: 0.4 }]} />
-                  <Animated.View style={[styles.typingDot, { opacity: 0.7 }]} />
-                  <Animated.View style={[styles.typingDot, { opacity: 1 }]} />
+                  <Animated.View style={[styles.typingDot, styles.typingDotFirst]} />
+                  <Animated.View style={[styles.typingDot, styles.typingDotSecond]} />
+                  <Animated.View style={[styles.typingDot, styles.typingDotThird]} />
                 </View>
               </View>
             </View>
@@ -609,7 +703,7 @@ export default function ChatScreen() {
         }}
         onGardenerAI={() => {
           setMenuVisible(false);
-          router.push('/gardener' as any);
+          router.push('/gardener');
         }}
         onReportProfile={() => {
           setMenuVisible(false);
@@ -628,9 +722,21 @@ export default function ChatScreen() {
           onClose={handleCancelMessage}
           onEdit={handleEditMessage}
           onSendAnyway={handleSendAnyway}
-          reason={analysisResult.reason}
-          growthLesson={analysisResult.growthLesson}
-          severity={analysisResult.severity}
+          reason={analysisResult.reason || ''}
+          growthLesson={analysisResult.growthLesson || ''}
+          severity={analysisResult.severity || 'low'}
+        />
+      )}
+
+      {/* Harmful Message Modal */}
+      {harmfulMessageAnalysis && (
+        <HarmfulMessageModal
+          visible={harmfulMessageModalVisible}
+          onClose={handleKeepHidden}
+          onViewAnyway={handleViewHarmfulAnyway}
+          reason={harmfulMessageAnalysis.reason || ''}
+          growthLesson={harmfulMessageAnalysis.growthLesson || ''}
+          severity={harmfulMessageAnalysis.severity || 'low'}
         />
       )}
     </View>
@@ -770,9 +876,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     minWidth: 60, // Ensure consistent width
   },
-  messagesContainer: {
-    flex: 1,
-  },
   messagesContent: {
     flexGrow: 1,
     paddingBottom: 40, // Increased from 20 to ensure messages don't get cut off
@@ -817,6 +920,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     padding: 16,
   },
+  skeletonMessageRandom: {
+    width: '70%', // Will be overridden dynamically
+  },
+  skeletonMessageSecondLine: {
+    marginTop: 8,
+    width: '40%',
+  },
   skeletonText: {
     backgroundColor: '#e0e0e0',
     borderRadius: 4,
@@ -829,6 +939,15 @@ const styles = StyleSheet.create({
     height: 8,
     marginHorizontal: 2,
     width: 8,
+  },
+  typingDotFirst: {
+    opacity: 0.4,
+  },
+  typingDotSecond: {
+    opacity: 0.7,
+  },
+  typingDotThird: {
+    opacity: 1,
   },
   typingDots: {
     alignItems: 'center',

@@ -4,6 +4,7 @@ export default function OnboardingLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="features" options={{ headerShown: false }} />
       <Stack.Screen name="age" options={{ headerShown: false }} />
       <Stack.Screen name="nickname" options={{ headerShown: false }} />
       <Stack.Screen name="photos" options={{ headerShown: false }} />

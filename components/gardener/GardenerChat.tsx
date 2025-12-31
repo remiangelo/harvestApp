@@ -21,6 +21,9 @@ import { theme } from '../../constants/theme';
 import { gardenerService } from '../../lib/ai/gardenerService';
 import { gardenerChatService } from '../../lib/gardenerSupabase';
 import { useAuthStore } from '../../stores/useAuthStore';
+import useSubscriptionStore from '../../stores/useSubscriptionStore';
+import { UpgradeModal } from '../UpgradeModal';
+import { formatLimitMessage } from '../../lib/subscription';
 
 interface Message {
   id: string;
@@ -36,6 +39,8 @@ interface GardenerChatProps {
 export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const { chatHistory, addChatMessage, openAiApiKey } = useGardenerStore();
   const { user } = useAuthStore();
+  const { tier, canUseGardener, incrementGardenerUsage, fetchSubscription, fetchUsage } =
+    useSubscriptionStore();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -48,8 +53,18 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
+
+  // Load subscription and usage data
+  useEffect(() => {
+    if (user?.id) {
+      fetchSubscription(user.id);
+      fetchUsage(user.id);
+    }
+  }, [user?.id]);
 
   // Track keyboard visibility
   useEffect(() => {
@@ -116,6 +131,22 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const sendMessage = async () => {
     if (!inputText.trim()) return;
 
+    // Check if user can use gardener based on their tier
+    if (!canUseGardener()) {
+      setLimitReached(true);
+      // Show limit reached message
+      const limitMessage = formatLimitMessage('gardener', tier, 0);
+      const gardenerLimitMessage: Message = {
+        id: Date.now().toString(),
+        text: limitMessage,
+        sender: 'gardener',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, gardenerLimitMessage]);
+      setShowUpgradeModal(true);
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       text: inputText.trim(),
@@ -134,6 +165,11 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     }
 
     try {
+      // Increment gardener usage
+      if (user?.id) {
+        await incrementGardenerUsage(user.id);
+      }
+
       // Get AI response
       const conversationHistory = messages.slice(-10).map((msg) => ({
         role: msg.sender === 'user' ? ('user' as const) : ('assistant' as const),
@@ -155,6 +191,11 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
       // Save AI response to database
       if (user?.id) {
         await gardenerChatService.saveMessage(user.id, response, 'gardener');
+      }
+
+      // Check if user has hit their limit after this conversation
+      if (!canUseGardener()) {
+        setLimitReached(true);
       }
     } catch (error) {
       console.error('Error getting AI response:', error);
@@ -181,6 +222,15 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
 
   return (
     <View style={styles.container}>
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        visible={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        highlightFeature="gardener"
+        title="Unlock More Gardener Conversations"
+        subtitle="Get unlimited AI dating advice with Gold"
+      />
+
       {/* Header - Only show if onBack is provided */}
       {onBack && (
         <LinearGradient
@@ -289,29 +339,41 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
               { paddingBottom: keyboardVisible ? 8 : Math.max(insets.bottom, 8) + 70 },
             ]}
           >
-            <TextInput
-              style={styles.input}
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="Ask for dating advice..."
-              placeholderTextColor="#999"
-              multiline
-              maxLength={500}
-            />
-            <TouchableOpacity
-              onPress={sendMessage}
-              disabled={!inputText.trim() || isTyping}
-              style={[
-                styles.sendButton,
-                (!inputText.trim() || isTyping) && styles.sendButtonDisabled,
-              ]}
-            >
-              <Ionicons
-                name="send"
-                size={20}
-                color={!inputText.trim() || isTyping ? '#ccc' : theme.colors.primary}
-              />
-            </TouchableOpacity>
+            {limitReached ? (
+              <TouchableOpacity
+                style={styles.upgradeInputButton}
+                onPress={() => setShowUpgradeModal(true)}
+              >
+                <Ionicons name="sparkles" size={18} color="#fff" />
+                <Text style={styles.upgradeInputButtonText}>Upgrade to continue chatting</Text>
+              </TouchableOpacity>
+            ) : (
+              <>
+                <TextInput
+                  style={styles.input}
+                  value={inputText}
+                  onChangeText={setInputText}
+                  placeholder="Ask for dating advice..."
+                  placeholderTextColor="#999"
+                  multiline
+                  maxLength={500}
+                />
+                <TouchableOpacity
+                  onPress={sendMessage}
+                  disabled={!inputText.trim() || isTyping}
+                  style={[
+                    styles.sendButton,
+                    (!inputText.trim() || isTyping) && styles.sendButtonDisabled,
+                  ]}
+                >
+                  <Ionicons
+                    name="send"
+                    size={20}
+                    color={!inputText.trim() || isTyping ? '#ccc' : theme.colors.primary}
+                  />
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </BlurView>
       </KeyboardAvoidingView>
@@ -441,6 +503,22 @@ const styles = StyleSheet.create({
   typingBubble: {
     paddingHorizontal: 24,
     paddingVertical: 16,
+  },
+  upgradeInputButton: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.accent,
+    borderRadius: 20,
+    flex: 1,
+    flexDirection: 'row',
+    height: 44,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  upgradeInputButtonText: {
+    color: '#fff',
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: 15,
+    marginLeft: 8,
   },
   userMessage: {
     backgroundColor: theme.colors.primary,

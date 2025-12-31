@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { Redirect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { getOnboardingProgress } from '../../lib/onboarding';
 import useUserStore from '../../stores/useUserStore';
 import { theme } from '../../constants/theme';
 
+const FEATURES_SEEN_KEY = 'harvest_features_seen';
+
 export default function OnboardingIndex() {
   const [loading, setLoading] = useState(true);
-  const [nextStep, setNextStep] = useState<string>('age');
+  const [nextStep, setNextStep] = useState<string>('features');
   const { user, isTestMode } = useAuthStore();
   const { updateOnboardingData, currentUser } = useUserStore();
 
@@ -21,17 +24,35 @@ export default function OnboardingIndex() {
     console.log('[OnboardingIndex] User:', user ? 'exists' : 'null');
     console.log('[OnboardingIndex] CurrentUser:', currentUser ? 'exists' : 'null');
 
-    // In test mode, skip database check and start from beginning
+    // Check if user has seen features intro
+    const featuresSeen = await AsyncStorage.getItem(FEATURES_SEEN_KEY);
+    const hasSeenFeatures = featuresSeen === 'true';
+
+    // In test mode, skip database check and start from features (if not seen) or age
     if (isTestMode) {
-      console.log('[OnboardingIndex] Test mode detected - starting from age step');
-      setNextStep('age');
+      console.log('[OnboardingIndex] Test mode detected');
+      if (!hasSeenFeatures) {
+        console.log('[OnboardingIndex] Showing features intro');
+        setNextStep('features');
+        await AsyncStorage.setItem(FEATURES_SEEN_KEY, 'true');
+      } else {
+        console.log('[OnboardingIndex] Features already seen, starting from age');
+        setNextStep('age');
+      }
       setLoading(false);
       return;
     }
 
     if (!user) {
-      console.log('[OnboardingIndex] No user found, starting from age step');
-      setNextStep('age');
+      console.log('[OnboardingIndex] No user found');
+      if (!hasSeenFeatures) {
+        console.log('[OnboardingIndex] Showing features intro');
+        setNextStep('features');
+        await AsyncStorage.setItem(FEATURES_SEEN_KEY, 'true');
+      } else {
+        console.log('[OnboardingIndex] Features already seen, starting from age');
+        setNextStep('age');
+      }
       setLoading(false);
       return;
     }
@@ -55,11 +76,23 @@ export default function OnboardingIndex() {
         updateOnboardingData(restoredData);
       }
 
-      setNextStep(currentStep);
+      // If user has progress, skip features intro
+      if (currentStep !== 'age' || hasSeenFeatures) {
+        setNextStep(currentStep);
+      } else {
+        // New user, show features first
+        setNextStep('features');
+        await AsyncStorage.setItem(FEATURES_SEEN_KEY, 'true');
+      }
     } catch (error) {
       console.error('Error checking onboarding progress:', error);
-      // On error, start from the beginning
-      setNextStep('age');
+      // On error, check if features seen
+      if (!hasSeenFeatures) {
+        setNextStep('features');
+        await AsyncStorage.setItem(FEATURES_SEEN_KEY, 'true');
+      } else {
+        setNextStep('age');
+      }
     } finally {
       setLoading(false);
     }

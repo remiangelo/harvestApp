@@ -2,7 +2,7 @@
   "expo": {
     "name": "harvestApp",
     "slug": "harvest",
-    "version": "1.4.15",
+    "version": "1.4.16",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "harvestapp",
@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.harvest.harvestdating",
-      "buildNumber": "47",
+      "buildNumber": "48",
       "appleTeamId": "L3P46Q9398"
     },
     "android": {

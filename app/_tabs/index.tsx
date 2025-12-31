@@ -21,18 +21,40 @@ import { saveSwipe } from '../../lib/swipes';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { notificationService } from '../../lib/notifications';
+import useSubscriptionStore from '../../stores/useSubscriptionStore';
+import { UpgradeModal } from '../../components/UpgradeModal';
+import { formatLimitMessage } from '../../lib/subscription';
 
 export default function SwipingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { currentUser } = useUserStore();
   const { user, isTestMode } = useAuthStore();
+  const {
+    tier,
+    usage,
+    canMatch,
+    incrementMatchCount,
+    fetchSubscription,
+    fetchUsage,
+    getMaxDistance,
+    tierDetails,
+  } = useSubscriptionStore();
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [filteredProfiles, setFilteredProfiles] = useState<any[]>([]);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState<any>(null);
   const [nextProfiles, setNextProfiles] = useState<any[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Load subscription and usage data
+  useEffect(() => {
+    if (user?.id) {
+      fetchSubscription(user.id);
+      fetchUsage(user.id);
+    }
+  }, [user?.id]);
 
   // Fetch real users from the database
   useEffect(() => {
@@ -147,7 +169,27 @@ export default function SwipingScreen() {
         return;
       }
 
+      // Check if user has reached their match limit
+      if (!canMatch()) {
+        const remaining = tierDetails?.matches_per_week
+          ? tierDetails.matches_per_week - (usage?.matches_count || 0)
+          : 0;
+        const limitMessage = formatLimitMessage('matches', tier, remaining);
+        Alert.alert('Match Limit Reached', limitMessage, [
+          { text: 'Upgrade', onPress: () => setShowUpgradeModal(true) },
+          { text: 'OK', style: 'cancel' },
+        ]);
+        return;
+      }
+
       if (user && !isTestMode) {
+        // Increment match count before saving
+        const canProceed = await incrementMatchCount(user.id);
+        if (!canProceed) {
+          setShowUpgradeModal(true);
+          return;
+        }
+
         // Save swipe to database
         const result = await saveSwipe(user.id, currentProfile.id, 'like');
 
@@ -184,7 +226,17 @@ export default function SwipingScreen() {
       Alert.alert('Error', 'Failed to process like. Please try again.');
       nextProfile();
     }
-  }, [currentProfile, user, isTestMode, nextProfile]);
+  }, [
+    currentProfile,
+    user,
+    isTestMode,
+    nextProfile,
+    canMatch,
+    incrementMatchCount,
+    tier,
+    tierDetails,
+    usage,
+  ]);
 
   const handleDislike = React.useCallback(async () => {
     try {
@@ -309,6 +361,30 @@ export default function SwipingScreen() {
   return (
     <ErrorBoundary>
       <View style={styles.container}>
+        {/* Upgrade Modal */}
+        <UpgradeModal
+          visible={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          highlightFeature="matching"
+          title="Unlock Unlimited Matches"
+          subtitle="Upgrade to Green or Gold for unlimited matching"
+        />
+
+        {/* Matches remaining indicator for Seed tier */}
+        {tier === 'seed' && tierDetails?.matches_per_week && (
+          <View
+            style={[
+              styles.matchesRemaining,
+              { top: insets.top + (Platform.OS === 'android' ? 20 : 10) },
+            ]}
+          >
+            <Ionicons name="heart" size={14} color={theme.colors.primary} />
+            <Text style={styles.matchesRemainingText}>
+              {Math.max(0, tierDetails.matches_per_week - (usage?.matches_count || 0))} left
+            </Text>
+          </View>
+        )}
+
         {/* Filters button in top right */}
         <TouchableOpacity
           style={[
@@ -441,5 +517,22 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 16,
     marginTop: 16,
+  },
+  matchesRemaining: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    flexDirection: 'row',
+    left: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    position: 'absolute',
+    zIndex: 100,
+  },
+  matchesRemainingText: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: '600',
+    marginLeft: 6,
   },
 });

@@ -26,7 +26,7 @@ import useSubscriptionStore from '../../stores/useSubscriptionStore';
 import { UpgradeModal } from '../UpgradeModal';
 import { formatLimitMessage } from '../../lib/subscription';
 
-import GARDENER_AVATAR from '../../assets/images/gardener-avatar.png';
+import GARDENER_AVATAR from '../../assets/images/unnamed.png';
 
 interface Message {
   id: string;

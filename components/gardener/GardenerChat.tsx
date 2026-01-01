@@ -11,6 +11,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Keyboard,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,6 +25,8 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import useSubscriptionStore from '../../stores/useSubscriptionStore';
 import { UpgradeModal } from '../UpgradeModal';
 import { formatLimitMessage } from '../../lib/subscription';
+
+import GARDENER_AVATAR from '../../assets/images/gardener-avatar.png';
 
 interface Message {
   id: string;
@@ -52,7 +55,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -66,21 +69,22 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     }
   }, [user?.id]);
 
-  // Track keyboard visibility
+  // Track keyboard height
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
-    const keyboardShowListener = Keyboard.addListener(showEvent, () => {
-      setKeyboardVisible(true);
+    const showSubscription = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
     });
-    const keyboardHideListener = Keyboard.addListener(hideEvent, () => {
-      setKeyboardVisible(false);
+
+    const hideSubscription = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
     });
 
     return () => {
-      keyboardShowListener.remove();
-      keyboardHideListener.remove();
+      showSubscription.remove();
+      hideSubscription.remove();
     };
   }, []);
 
@@ -220,6 +224,16 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     }
   };
 
+  // Calculate bottom padding based on keyboard state and whether there's a tab bar
+  const inputBottomPadding =
+    Platform.OS === 'ios'
+      ? keyboardHeight > 0
+        ? 8
+        : Math.max(insets.bottom, 8) + (onBack ? 0 : 70)
+      : onBack
+        ? 8
+        : 78;
+
   return (
     <View style={styles.container}>
       {/* Upgrade Modal */}
@@ -247,28 +261,24 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
                 <Text style={styles.headerSubtitle}>AI Dating Coach</Text>
               </View>
               <View style={styles.headerAvatar}>
-                <LinearGradient
-                  colors={[theme.colors.primary, theme.colors.primaryDark]}
-                  style={styles.avatar}
-                >
-                  <Ionicons name="leaf" size={24} color="white" />
-                </LinearGradient>
+                <Image source={GARDENER_AVATAR} style={styles.avatar} />
               </View>
             </View>
           </SafeAreaView>
         </LinearGradient>
       )}
 
-      <KeyboardAvoidingView
-        style={styles.chatContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? (onBack ? 0 : 85) : 0}
-      >
+      {/* Chat Container */}
+      <View style={styles.chatContainer}>
         <ScrollView
           ref={scrollViewRef}
           style={styles.messagesContainer}
-          contentContainerStyle={styles.messagesContent}
+          contentContainerStyle={[
+            styles.messagesContent,
+            { paddingBottom: keyboardHeight > 0 ? 20 : 40 },
+          ]}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {messages.map((message) => (
             <View
@@ -282,12 +292,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
             >
               {message.sender === 'gardener' && (
                 <View style={styles.avatarContainer}>
-                  <LinearGradient
-                    colors={[theme.colors.primary, theme.colors.primaryDark]}
-                    style={styles.avatar}
-                  >
-                    <Ionicons name="leaf" size={20} color="white" />
-                  </LinearGradient>
+                  <Image source={GARDENER_AVATAR} style={styles.messageAvatar} />
                 </View>
               )}
               <View
@@ -318,12 +323,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
           {isTyping && (
             <View style={[styles.messageWrapper, styles.gardenerMessageWrapper]}>
               <View style={styles.avatarContainer}>
-                <LinearGradient
-                  colors={[theme.colors.primary, theme.colors.primaryDark]}
-                  style={styles.avatar}
-                >
-                  <Ionicons name="leaf" size={20} color="white" />
-                </LinearGradient>
+                <Image source={GARDENER_AVATAR} style={styles.messageAvatar} />
               </View>
               <View style={[styles.messageBubble, styles.gardenerMessage, styles.typingBubble]}>
                 <ActivityIndicator size="small" color="#666" />
@@ -332,61 +332,63 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
           )}
         </ScrollView>
 
-        <BlurView intensity={70} tint="light" style={styles.inputContainer}>
-          <View
-            style={[
-              styles.inputWrapper,
-              { paddingBottom: keyboardVisible ? 8 : Math.max(insets.bottom, 8) + 70 },
-            ]}
-          >
-            {limitReached ? (
-              <TouchableOpacity
-                style={styles.upgradeInputButton}
-                onPress={() => setShowUpgradeModal(true)}
-              >
-                <Ionicons name="sparkles" size={18} color="#fff" />
-                <Text style={styles.upgradeInputButtonText}>Upgrade to continue chatting</Text>
-              </TouchableOpacity>
-            ) : (
-              <>
-                <TextInput
-                  style={styles.input}
-                  value={inputText}
-                  onChangeText={setInputText}
-                  placeholder="Ask for dating advice..."
-                  placeholderTextColor="#999"
-                  multiline
-                  maxLength={500}
-                />
+        {/* Input Bar */}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={0}
+        >
+          <View style={[styles.inputBar, { paddingBottom: inputBottomPadding }]}>
+            <BlurView intensity={70} tint="light" style={StyleSheet.absoluteFillObject} />
+            <View style={styles.inputWrapper}>
+              {limitReached ? (
                 <TouchableOpacity
-                  onPress={sendMessage}
-                  disabled={!inputText.trim() || isTyping}
-                  style={[
-                    styles.sendButton,
-                    (!inputText.trim() || isTyping) && styles.sendButtonDisabled,
-                  ]}
+                  style={styles.upgradeInputButton}
+                  onPress={() => setShowUpgradeModal(true)}
                 >
-                  <Ionicons
-                    name="send"
-                    size={20}
-                    color={!inputText.trim() || isTyping ? '#ccc' : theme.colors.primary}
-                  />
+                  <Ionicons name="sparkles" size={18} color="#fff" />
+                  <Text style={styles.upgradeInputButtonText}>Upgrade to continue chatting</Text>
                 </TouchableOpacity>
-              </>
-            )}
+              ) : (
+                <>
+                  <View style={styles.textInputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      value={inputText}
+                      onChangeText={setInputText}
+                      placeholder="Ask for dating advice..."
+                      placeholderTextColor="#999"
+                      multiline
+                      maxLength={500}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    onPress={sendMessage}
+                    disabled={!inputText.trim() || isTyping}
+                    style={[
+                      styles.sendButton,
+                      (!inputText.trim() || isTyping) && styles.sendButtonDisabled,
+                    ]}
+                  >
+                    <Ionicons
+                      name="send"
+                      size={20}
+                      color={!inputText.trim() || isTyping ? '#ccc' : theme.colors.primary}
+                    />
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
           </View>
-        </BlurView>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   avatar: {
-    alignItems: 'center',
     borderRadius: 18,
     height: 36,
-    justifyContent: 'center',
     width: 36,
   },
   avatarContainer: {
@@ -446,26 +448,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 20,
     color: '#333',
     flex: 1,
     fontSize: 15,
-    marginRight: 8,
     maxHeight: 120,
     minHeight: 40,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
-  inputContainer: {
+  inputBar: {
     borderTopColor: 'rgba(0, 0, 0, 0.1)',
     borderTopWidth: 0.5,
+    paddingHorizontal: 12,
+    paddingTop: 12,
   },
   inputWrapper: {
     alignItems: 'flex-end',
     flexDirection: 'row',
-    paddingHorizontal: 12,
-    paddingTop: 12,
+  },
+  messageAvatar: {
+    borderRadius: 16,
+    height: 32,
+    width: 32,
   },
   messageBubble: {
     borderRadius: 16,
@@ -485,16 +489,26 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     padding: 16,
-    paddingBottom: 20,
   },
   sendButton: {
     alignItems: 'center',
     height: 40,
     justifyContent: 'center',
+    marginLeft: 8,
     width: 40,
   },
   sendButtonDisabled: {
     opacity: 0.5,
+  },
+  textInputContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 20,
+    elevation: 2,
+    flex: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   timestamp: {
     fontSize: 11,

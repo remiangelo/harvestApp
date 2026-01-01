@@ -42,41 +42,44 @@ const plans: Plan[] = [
     period: 'Forever',
     icon: 'leaf-outline',
     features: [
-      { text: '10 likes per day', included: true },
-      { text: '3 Super Likes per day', included: true },
-      { text: 'Basic filters', included: true },
-      { text: 'Standard matching', included: true },
+      { text: 'Unlimited swipes', included: true },
+      { text: 'Basic filters (age, distance, gender)', included: true },
+      { text: 'Real-time messaging', included: true },
+      { text: '5 Gardener AI chats/month', included: true },
+      { text: 'Mindful Messaging feature', included: true },
     ],
     gradient: ['#6B7280', '#4B5563'],
   },
   {
     id: 'premium',
     name: 'Premium',
-    price: '$14.99',
+    price: '$9.99',
     period: '/month',
     popular: true,
     icon: 'heart',
     features: [
-      { text: 'Unlimited likes', included: true },
-      { text: '5 Super Likes per day', included: true },
+      { text: 'Everything in Free', included: true },
+      { text: '20 Gardener AI chats/month', included: true },
+      { text: 'Advanced filters', included: true },
       { text: 'See who liked you', included: true },
       { text: 'Rewind last swipe', included: true },
-      { text: 'Priority matching', included: true },
+      { text: 'No ads', included: true },
     ],
     gradient: [theme.colors.primary, theme.colors.primaryDark],
   },
   {
     id: 'gold',
     name: 'Gold',
-    price: '$24.99',
+    price: '$19.99',
     period: '/month',
     icon: 'diamond',
     features: [
       { text: 'Everything in Premium', included: true },
-      { text: '10 Super Likes per day', included: true },
-      { text: 'Monthly profile boost', included: true },
-      { text: 'Message before matching', included: true },
+      { text: 'Unlimited Gardener AI chats', included: true },
+      { text: 'Priority profile visibility', included: true },
+      { text: 'Advanced AI safety features', included: true },
       { text: 'Exclusive Gold badge', included: true },
+      { text: 'Early access to new features', included: true },
     ],
     gradient: ['#F59E0B', '#D97706'],
   },
@@ -223,35 +226,37 @@ export default function SubscriptionsScreen() {
               colors={[theme.colors.primary, theme.colors.primaryDark]}
               style={styles.benefitIcon}
             >
-              <Ionicons name="heart" size={24} color="white" />
+              <Ionicons name="leaf" size={24} color="white" />
             </LinearGradient>
             <View style={styles.benefitContent}>
-              <Text style={styles.benefitTitle}>3x More Matches</Text>
+              <Text style={styles.benefitTitle}>Unlimited AI Dating Coach</Text>
               <Text style={styles.benefitDescription}>
-                Premium members get 3 times more matches on average
+                Get personalized advice from The Gardener whenever you need it
               </Text>
             </View>
           </View>
 
           <View style={styles.benefitCard}>
             <LinearGradient colors={[theme.colors.primary, '#45a049']} style={styles.benefitIcon}>
-              <Ionicons name="eye" size={24} color="white" />
+              <Ionicons name="shield-checkmark" size={24} color="white" />
             </LinearGradient>
             <View style={styles.benefitContent}>
-              <Text style={styles.benefitTitle}>See Who Likes You</Text>
+              <Text style={styles.benefitTitle}>Advanced Safety Features</Text>
               <Text style={styles.benefitDescription}>
-                Save time by seeing who already likes you
+                Enhanced AI protection for mindful, meaningful conversations
               </Text>
             </View>
           </View>
 
           <View style={styles.benefitCard}>
             <LinearGradient colors={[theme.colors.primary, '#1976D2']} style={styles.benefitIcon}>
-              <Ionicons name="flash" size={24} color="white" />
+              <Ionicons name="eye" size={24} color="white" />
             </LinearGradient>
             <View style={styles.benefitContent}>
-              <Text style={styles.benefitTitle}>Priority Visibility</Text>
-              <Text style={styles.benefitDescription}>Be seen by more potential matches</Text>
+              <Text style={styles.benefitTitle}>See Who Likes You</Text>
+              <Text style={styles.benefitDescription}>
+                Save time by connecting with people already interested in you
+              </Text>
             </View>
           </View>
         </View>

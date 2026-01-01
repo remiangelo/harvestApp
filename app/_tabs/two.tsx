@@ -4,32 +4,28 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   TouchableOpacity,
   TextInput,
   Animated,
-  useWindowDimensions,
   Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import useUserStore from '../../stores/useUserStore';
 import { useAuthStore } from '../../stores/useAuthStore';
-import { LogoutButton } from '../../components/LogoutButton';
 import { OptimizedImage } from '../../components/OptimizedImage';
-import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { width: screenWidth } = useWindowDimensions();
   const [isEditing, setIsEditing] = useState(false);
   const { currentUser, updateOnboardingData } = useUserStore();
-  const { user } = useAuthStore();
+  useAuthStore();
 
   // Animation values for header
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -153,7 +149,7 @@ export default function ProfileScreen() {
             },
           ]}
         >
-          <TouchableOpacity onPress={() => router.push('/settings' as any)}>
+          <TouchableOpacity onPress={() => router.push('/settings')}>
             <Ionicons name="settings-outline" size={24} color="#333" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => (isEditing ? handleSave() : setIsEditing(true))}>
@@ -167,18 +163,15 @@ export default function ProfileScreen() {
           showsVerticalScrollIndicator={false}
           onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
             useNativeDriver: true,
-            listener: (event: any) => {
-              const y = event.nativeEvent.contentOffset.y;
+            listener: (_event: NativeSyntheticEvent<NativeScrollEvent>) => {
               // Notify tab bar about scroll - but keep tab bar always visible for profile
-              if ((global as any).handleTabBarScroll) {
-                (global as any).handleTabBarScroll(0); // Always keep tab bar visible
-              }
+              (globalThis as { handleTabBarScroll?: (y: number) => void }).handleTabBarScroll?.(0); // Always keep tab bar visible
             },
           })}
           scrollEventThrottle={16}
         >
           {/* Compact Profile Header */}
-          <View style={[styles.profileHeader, { paddingTop: 20 }]}>
+          <View style={[styles.profileHeader, { paddingTop: insets.top + 60 }]}>
             <View style={styles.profileInfo}>
               <TouchableOpacity
                 style={styles.mainPhotoContainer}
@@ -189,7 +182,7 @@ export default function ProfileScreen() {
                   <OptimizedImage
                     source={{ uri: firstPhoto }}
                     style={styles.mainPhoto}
-                    showLoadingIndicator={true}
+                    showLoadingIndicator={false}
                   />
                 ) : (
                   <View style={styles.emptyMainPhoto}>
@@ -260,7 +253,7 @@ export default function ProfileScreen() {
                     <OptimizedImage
                       source={{ uri: photo }}
                       style={styles.photo}
-                      showLoadingIndicator={true}
+                      showLoadingIndicator={false}
                     />
                   ) : (
                     <View style={styles.emptyPhoto}>
@@ -276,14 +269,14 @@ export default function ProfileScreen() {
           <View style={styles.actionButtons}>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => router.push('/profile-edit' as any)}
+              onPress={() => router.push('/profile-edit')}
             >
               <Text style={styles.actionButtonText}>Edit Full Profile</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.secondaryButton}
-              onPress={() => router.push('/settings' as any)}
+              onPress={() => router.push('/settings')}
             >
               <Text style={styles.secondaryButtonText}>Account Settings</Text>
             </TouchableOpacity>

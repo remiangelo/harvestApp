@@ -46,6 +46,42 @@ const AVAILABLE_HOBBIES = [
   'Wine',
 ];
 
+const LOOKING_FOR_OPTIONS = [
+  { value: 'dating', label: 'Dating' },
+  { value: 'relationship', label: 'Relationship' },
+  { value: 'marriage', label: 'Marriage' },
+];
+
+const LIFESTYLE_OPTIONS = [
+  { value: 'never', label: 'Never' },
+  { value: 'sometimes', label: 'Sometimes' },
+  { value: 'regularly', label: 'Regularly' },
+  { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+];
+
+const SPIRITUAL_OPTIONS = [
+  { value: 'spiritual_not_religious', label: 'Spiritual but not religious' },
+  { value: 'christian', label: 'Christian' },
+  { value: 'catholic', label: 'Catholic' },
+  { value: 'jewish', label: 'Jewish' },
+  { value: 'muslim', label: 'Muslim' },
+  { value: 'hindu', label: 'Hindu' },
+  { value: 'buddhist', label: 'Buddhist' },
+  { value: 'atheist', label: 'Atheist' },
+  { value: 'agnostic', label: 'Agnostic' },
+  { value: 'other', label: 'Other' },
+  { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+];
+
+const CHILDREN_OPTIONS = [
+  { value: 'have_and_want_more', label: 'Have and want more' },
+  { value: 'have_and_dont_want_more', label: "Have and don't want more" },
+  { value: 'want_kids', label: 'Want kids' },
+  { value: 'open_to_kids', label: 'Open to kids' },
+  { value: 'dont_want_kids', label: "Don't want kids" },
+  { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+];
+
 export default function ProfileEditScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -62,6 +98,15 @@ export default function ProfileEditScreen() {
     hobbies: [] as string[],
     location: '',
     age: 25,
+    // Premium tier fields
+    lookingFor: null as string | null,
+    heightCm: null as number | null,
+    smoking: null as string | null,
+    drinking: null as string | null,
+    cannabis: null as string | null,
+    // Gold tier fields
+    spiritualOrientation: null as string | null,
+    childrenStatus: null as string | null,
   });
 
   useEffect(() => {
@@ -89,6 +134,15 @@ export default function ProfileEditScreen() {
         hobbies: currentUser.hobbies || [],
         location: currentUser.location || '',
         age,
+        // Premium tier fields
+        lookingFor: (currentUser as any).looking_for || null,
+        heightCm: (currentUser as any).height_cm || null,
+        smoking: (currentUser as any).smoking || null,
+        drinking: (currentUser as any).drinking || null,
+        cannabis: (currentUser as any).cannabis || null,
+        // Gold tier fields
+        spiritualOrientation: (currentUser as any).spiritual_orientation || null,
+        childrenStatus: (currentUser as any).children_status || null,
       });
     }
   }, [currentUser]);
@@ -238,6 +292,15 @@ export default function ProfileEditScreen() {
         hobbies: profile.hobbies,
         location: profile.location.trim(),
         photos: validPhotos,
+        // Premium tier fields
+        looking_for: profile.lookingFor,
+        height_cm: profile.heightCm,
+        smoking: profile.smoking,
+        drinking: profile.drinking,
+        cannabis: profile.cannabis,
+        // Gold tier fields
+        spiritual_orientation: profile.spiritualOrientation,
+        children_status: profile.childrenStatus,
       };
 
       const { error } = await updateProfile(user.id, updateData);
@@ -263,7 +326,7 @@ export default function ProfileEditScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={styles.fullHeight}
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -379,6 +442,229 @@ export default function ProfileEditScreen() {
             </View>
           </View>
 
+          {/* Looking For Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Looking For</Text>
+            <Text style={styles.sectionSubtitle}>What are you looking for?</Text>
+
+            <View style={styles.optionsRow}>
+              {LOOKING_FOR_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.optionButton,
+                    profile.lookingFor === option.value && styles.selectedOption,
+                  ]}
+                  onPress={() =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      lookingFor: prev.lookingFor === option.value ? null : option.value,
+                    }))
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      profile.lookingFor === option.value && styles.selectedOptionText,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Height Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Height</Text>
+            <Text style={styles.sectionSubtitle}>Your height in centimeters (optional)</Text>
+
+            <TextInput
+              style={styles.heightInput}
+              value={profile.heightCm?.toString() || ''}
+              onChangeText={(text) => {
+                const num = parseInt(text);
+                setProfile((prev) => ({
+                  ...prev,
+                  heightCm: isNaN(num) ? null : Math.min(250, Math.max(100, num)),
+                }));
+              }}
+              placeholder="e.g., 175"
+              keyboardType="number-pad"
+              maxLength={3}
+            />
+            {profile.heightCm && (
+              <Text style={styles.heightHelper}>
+                {`${Math.floor(profile.heightCm / 30.48 / 12)}′ ${Math.round(
+                  (profile.heightCm / 30.48) % 12
+                )}″ (${profile.heightCm} cm)`}
+              </Text>
+            )}
+          </View>
+
+          {/* Lifestyle Habits Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Lifestyle Habits</Text>
+
+            <View style={styles.lifestyleItem}>
+              <Text style={styles.lifestyleLabel}>Smoking</Text>
+              <View style={styles.optionsRow}>
+                {LIFESTYLE_OPTIONS.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.smallOptionButton,
+                      profile.smoking === option.value && styles.selectedOption,
+                    ]}
+                    onPress={() =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        smoking: prev.smoking === option.value ? null : option.value,
+                      }))
+                    }
+                  >
+                    <Text
+                      style={[
+                        styles.smallOptionText,
+                        profile.smoking === option.value && styles.selectedOptionText,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.lifestyleItem}>
+              <Text style={styles.lifestyleLabel}>Drinking</Text>
+              <View style={styles.optionsRow}>
+                {LIFESTYLE_OPTIONS.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.smallOptionButton,
+                      profile.drinking === option.value && styles.selectedOption,
+                    ]}
+                    onPress={() =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        drinking: prev.drinking === option.value ? null : option.value,
+                      }))
+                    }
+                  >
+                    <Text
+                      style={[
+                        styles.smallOptionText,
+                        profile.drinking === option.value && styles.selectedOptionText,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.lifestyleItem}>
+              <Text style={styles.lifestyleLabel}>Cannabis</Text>
+              <View style={styles.optionsRow}>
+                {LIFESTYLE_OPTIONS.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.smallOptionButton,
+                      profile.cannabis === option.value && styles.selectedOption,
+                    ]}
+                    onPress={() =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        cannabis: prev.cannabis === option.value ? null : option.value,
+                      }))
+                    }
+                  >
+                    <Text
+                      style={[
+                        styles.smallOptionText,
+                        profile.cannabis === option.value && styles.selectedOptionText,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Spiritual Orientation Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Spiritual/Faith Orientation</Text>
+            <Text style={styles.sectionSubtitle}>Optional</Text>
+
+            <View style={styles.optionsColumn}>
+              {SPIRITUAL_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.wideOptionButton,
+                    profile.spiritualOrientation === option.value && styles.selectedOption,
+                  ]}
+                  onPress={() =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      spiritualOrientation:
+                        prev.spiritualOrientation === option.value ? null : option.value,
+                    }))
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      profile.spiritualOrientation === option.value && styles.selectedOptionText,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Children Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Children</Text>
+            <Text style={styles.sectionSubtitle}>Your preferences about children</Text>
+
+            <View style={styles.optionsColumn}>
+              {CHILDREN_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.wideOptionButton,
+                    profile.childrenStatus === option.value && styles.selectedOption,
+                  ]}
+                  onPress={() =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      childrenStatus: prev.childrenStatus === option.value ? null : option.value,
+                    }))
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      profile.childrenStatus === option.value && styles.selectedOptionText,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
           {/* Save Button */}
           <View style={styles.bottomSection}>
             <Button
@@ -431,6 +717,9 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.primary,
     borderWidth: 2,
   },
+  fullHeight: {
+    flex: 1,
+  },
   header: {
     alignItems: 'center',
     borderBottomColor: '#eee',
@@ -440,16 +729,62 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
+  heightHelper: {
+    color: theme.colors.text.tertiary,
+    fontSize: 14,
+    marginTop: 8,
+  },
+  heightInput: {
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    borderWidth: 1,
+    color: theme.colors.text.primary,
+    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
   hobbiesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginHorizontal: -4,
+  },
+  lifestyleItem: {
+    marginBottom: 20,
+  },
+  lifestyleLabel: {
+    color: theme.colors.text.primary,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
   },
   mainPhotoLabel: {
     color: theme.colors.text.secondary,
     fontSize: 12,
     marginTop: 4,
     textAlign: 'center',
+  },
+  optionButton: {
+    alignItems: 'center',
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    borderWidth: 2,
+    flex: 1,
+    minWidth: '30%',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  optionText: {
+    color: theme.colors.text.primary,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  optionsColumn: {
+    gap: 8,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   photo: {
     height: '100%',
@@ -497,9 +832,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 4,
   },
+  selectedOption: {
+    backgroundColor: `${theme.colors.primary}15`,
+    borderColor: theme.colors.primary,
+  },
+  selectedOptionText: {
+    color: theme.colors.primary,
+    fontWeight: '600',
+  },
+  smallOptionButton: {
+    alignItems: 'center',
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    borderWidth: 1,
+    flex: 1,
+    minWidth: '22%',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  smallOptionText: {
+    color: theme.colors.text.primary,
+    fontSize: 13,
+    fontWeight: '500',
+  },
   title: {
     color: theme.colors.text.primary,
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  wideOptionButton: {
+    alignItems: 'center',
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    borderWidth: 2,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
 });

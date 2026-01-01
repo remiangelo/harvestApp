@@ -1,29 +1,16 @@
 import React, { useEffect, useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, Animated, Platform } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Animated, Platform, Image } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { theme } from '../constants/theme';
+import GARDENER_ICON from '../assets/images/unnamed.png';
 
 export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(0)).current;
-
-  // Store the last scroll position
-  const lastScrollY = useRef(0);
-  const isScrollingDown = useRef(false);
-
-  // Function to show/hide tab bar
-  const animateTabBar = (show: boolean) => {
-    Animated.spring(translateY, {
-      toValue: show ? 0 : 120,
-      useNativeDriver: true,
-      tension: 65,
-      friction: 11,
-    }).start();
-  };
 
   // Listen for scroll events from all screens - but keep tab bar always visible for now
   useEffect(() => {
@@ -184,12 +171,23 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
               style={styles.tab}
             >
               <View style={styles.iconContainer}>
-                <FontAwesome
-                  name={getIconName(route.name) as any}
-                  size={24}
-                  color={isFocused ? theme.colors.primary : '#666'}
-                  style={isFocused ? styles.iconFocused : undefined}
-                />
+                {route.name === 'gardener' ? (
+                  <Image
+                    source={GARDENER_ICON}
+                    style={[
+                      styles.customIcon,
+                      { tintColor: isFocused ? theme.colors.primary : '#666' },
+                      isFocused && styles.iconFocused,
+                    ]}
+                  />
+                ) : (
+                  <FontAwesome
+                    name={getIconName(route.name) as any}
+                    size={24}
+                    color={isFocused ? theme.colors.primary : '#666'}
+                    style={isFocused ? styles.iconFocused : undefined}
+                  />
+                )}
                 {isFocused && <View style={styles.activeIndicator} />}
               </View>
             </TouchableOpacity>
@@ -248,6 +246,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     zIndex: 100,
+  },
+  customIcon: {
+    height: 24,
+    width: 24,
   },
   edgeHighlight: {
     backgroundColor: 'rgba(255, 255, 255, 0.6)',

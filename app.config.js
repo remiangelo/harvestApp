@@ -2,7 +2,7 @@ export default {
   expo: {
     name: 'Harvest',
     slug: 'harvest',
-    version: '1.4.16',
+    version: '1.4.17',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'harvestapp',
@@ -16,7 +16,7 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'com.harvest.harvestdating',
-      buildNumber: '49',
+      buildNumber: '50',
       appleTeamId: 'L3P46Q9398',
       config: {
         usesNonExemptEncryption: false,
@@ -32,7 +32,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: './assets/images/adaptive-icon.png',
+        foregroundImage: './assets/images/icon.png',
         backgroundColor: '#EB1E66',
       },
       package: 'com.harvest.app',

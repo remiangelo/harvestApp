@@ -11,6 +11,7 @@ import {
   Image,
   SafeAreaView,
   Alert,
+  Keyboard,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -81,11 +82,31 @@ export default function ChatScreen() {
   const [harmfulMessageAnalysis, setHarmfulMessageAnalysis] = useState<AnalysisResult | null>(null);
   const [harmfulMessageContent, setHarmfulMessageContent] = useState('');
   const [chatPartner, setChatPartner] = useState<ChatPartner | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const subscriptionRef = useRef<Subscription | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const conversationId = String(id);
+
+  // Track keyboard height
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSubscription = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+
+    const hideSubscription = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   // Load conversation and messages when component mounts
   useEffect(() => {
@@ -279,30 +300,38 @@ export default function ChatScreen() {
     if (!newMessage.trim() || !currentUser || !chatPartner) return;
 
     const messageText = newMessage.trim();
+    setNewMessage(''); // Clear input immediately for instant feedback
 
-    // Check if mindful messaging is enabled
-    const isEnabled = await isMindfulMessagingEnabled();
+    try {
+      // Check if mindful messaging is enabled
+      const isEnabled = await isMindfulMessagingEnabled();
 
-    if (!isEnabled) {
-      // Feature disabled, send directly
-      console.log('[Chat] Mindful messaging disabled, sending directly');
-      await actualSendMessage(messageText);
-      return;
-    }
+      if (!isEnabled) {
+        // Feature disabled, send directly
+        console.log('[Chat] Mindful messaging disabled, sending directly');
+        await actualSendMessage(messageText);
+        return;
+      }
 
-    // Analyze the message with mindful messaging
-    console.log('[Chat] Analyzing message with mindful messaging...');
-    const analysis = await analyzeMessage(messageText);
+      // Analyze the message with mindful messaging
+      console.log('[Chat] Analyzing message with mindful messaging...');
+      const analysis = await analyzeMessage(messageText);
 
-    if (analysis.needsReview) {
-      // Show warning modal
-      console.log('[Chat] Message needs review, showing modal');
-      setPendingMessage(analysis.reason || '');
-      setAnalysisResult(analysis as AnalysisResult);
-      setMindfulModalVisible(true);
-    } else {
-      // Message is fine, send it
-      console.log('[Chat] Message passed analysis, sending');
+      if (analysis.needsReview) {
+        // Show warning modal - restore message to input for editing
+        console.log('[Chat] Message needs review, showing modal');
+        setNewMessage(messageText); // Restore for editing
+        setPendingMessage(messageText);
+        setAnalysisResult(analysis as AnalysisResult);
+        setMindfulModalVisible(true);
+      } else {
+        // Message is fine, send it
+        console.log('[Chat] Message passed analysis, sending');
+        await actualSendMessage(messageText);
+      }
+    } catch (error) {
+      console.error('[Chat] Error analyzing message:', error);
+      // If analysis fails, send the message anyway
       await actualSendMessage(messageText);
     }
   };
@@ -310,8 +339,6 @@ export default function ChatScreen() {
   // Actually send the message (bypassing analysis)
   const actualSendMessage = async (messageText: string) => {
     if (!currentUser || !chatPartner) return;
-
-    setNewMessage(''); // Clear input immediately for better UX
 
     // Optimistically add the message to the UI
     const optimisticMessage = {
@@ -353,7 +380,6 @@ export default function ChatScreen() {
         console.error('Error sending message:', error);
         // Remove the optimistic message on error
         setMessages((current) => current.filter((m) => m.id !== optimisticMessage.id));
-        // Show error feedback (could add a toast here)
         return;
       }
 
@@ -475,16 +501,11 @@ export default function ChatScreen() {
 
   // Handle selected image
   const handleImageSelected = async (_imageUri: string) => {
-    // For now, just show an alert. In production, you would:
-    // 1. Upload the image to Supabase storage
-    // 2. Send a message with the image URL
-    // 3. Display the image in the chat
     Alert.alert(
       'Image Selected',
       'Image upload functionality will be implemented with backend storage.',
       [{ text: 'OK' }]
     );
-    // console.log('Selected image:', imageUri);
   };
 
   // Handle typing indicator
@@ -514,6 +535,10 @@ export default function ChatScreen() {
       });
     }, 2000);
   };
+
+  // Calculate bottom padding based on keyboard state
+  const inputBottomPadding =
+    Platform.OS === 'ios' ? (keyboardHeight > 0 ? 8 : Math.max(insets.bottom, 8)) : 8;
 
   return (
     <View style={styles.container}>
@@ -546,19 +571,19 @@ export default function ChatScreen() {
         </SafeAreaView>
       </LinearGradient>
 
-      {/* Messages */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-      >
+      {/* Messages Container */}
+      <View style={styles.messagesContainer}>
         <ScrollView
           ref={scrollViewRef}
           style={styles.messagesList}
-          contentContainerStyle={
-            messages.length === 0 && !loading ? styles.messagesContentEmpty : styles.messagesContent
-          }
+          contentContainerStyle={[
+            messages.length === 0 && !loading
+              ? styles.messagesContentEmpty
+              : styles.messagesContent,
+            { paddingBottom: keyboardHeight > 0 ? 20 : 40 },
+          ]}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {loading ? (
             // Skeleton loader for messages
@@ -620,7 +645,6 @@ export default function ChatScreen() {
                       <Text style={styles.otherUserMessageText}>
                         {message.content ?? message.text ?? ''}
                       </Text>
-                      {/* Message time */}
                       <Text style={styles.messageTime}>
                         {formatMessageTime(message.created_at || message.createdAt || '')}
                       </Text>
@@ -650,42 +674,49 @@ export default function ChatScreen() {
         </ScrollView>
 
         {/* Input Bar */}
-        <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
-          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
-          <View style={styles.inputContainer}>
-            <TouchableOpacity style={styles.attachButton} onPress={handleAttachPress}>
-              <Ionicons name="add-circle" size={28} color={theme.colors.primary} />
-            </TouchableOpacity>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={0}
+        >
+          <View style={[styles.inputBar, { paddingBottom: inputBottomPadding }]}>
+            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
+            <View style={styles.inputContainer}>
+              <TouchableOpacity style={styles.attachButton} onPress={handleAttachPress}>
+                <Ionicons name="add-circle" size={28} color={theme.colors.primary} />
+              </TouchableOpacity>
 
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                value={newMessage}
-                onChangeText={(text) => {
-                  setNewMessage(text);
-                  handleTyping();
-                }}
-                placeholder="Type a message..."
-                placeholderTextColor="#999"
-                multiline
-                contextMenuHidden={true}
-              />
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  value={newMessage}
+                  onChangeText={(text) => {
+                    setNewMessage(text);
+                    handleTyping();
+                  }}
+                  placeholder="Type a message..."
+                  placeholderTextColor="#999"
+                  multiline
+                  maxLength={1000}
+                  contextMenuHidden={true}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
+                onPress={analyzeThenSend}
+                disabled={!newMessage.trim()}
+              >
+                <Ionicons
+                  name="send"
+                  size={24}
+                  color={newMessage.trim() ? theme.colors.primary : '#ccc'}
+                />
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
-              onPress={analyzeThenSend}
-              disabled={!newMessage.trim()}
-            >
-              <Ionicons
-                name="send"
-                size={24}
-                color={newMessage.trim() ? theme.colors.primary : '#ccc'}
-              />
-            </TouchableOpacity>
           </View>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </View>
+
       {/* Chat menu */}
       <ChatMenuPopup
         visible={menuVisible}
@@ -834,10 +865,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   inputBar: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderTopWidth: 0,
     paddingHorizontal: 16,
-    paddingVertical: 8, // Reduced from 12 to reduce whitespace
+    paddingTop: 8,
     position: 'relative',
   },
   inputContainer: {
@@ -871,21 +902,22 @@ const styles = StyleSheet.create({
   },
   messageTime: {
     color: 'rgba(0, 0, 0, 0.5)',
-    flexShrink: 0, // Prevent shrinking
+    flexShrink: 0,
     fontSize: 12,
     marginTop: 4,
-    minWidth: 60, // Ensure consistent width
+    minWidth: 60,
+  },
+  messagesContainer: {
+    flex: 1,
   },
   messagesContent: {
     flexGrow: 1,
-    paddingBottom: 40, // Increased from 20 to ensure messages don't get cut off
     paddingHorizontal: 16,
     paddingTop: 20,
   },
   messagesContentEmpty: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingBottom: 40,
     paddingHorizontal: 16,
     paddingTop: 20,
   },
@@ -921,7 +953,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   skeletonMessageRandom: {
-    width: '70%', // Will be overridden dynamically
+    width: '70%',
   },
   skeletonMessageSecondLine: {
     marginTop: 8,

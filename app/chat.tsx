@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
+  FlatList,
   Image,
   SafeAreaView,
   Alert,
@@ -29,6 +29,7 @@ import { MindfulMessageModal } from '../components/MindfulMessageModal';
 import { HarmfulMessageModal } from '../components/HarmfulMessageModal';
 import { theme } from '../constants/theme';
 import { analyzeMessage, isMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
+import { useKeyboardSafeArea } from '../hooks/useKeyboardSafeArea';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/EB1E66/FFFFFF?text=No+Image';
 
@@ -69,6 +70,10 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const { currentUser } = useUser();
   const insets = useSafeAreaInsets();
+  const { bottomPadding, keyboardBehavior, getKeyboardVerticalOffset } = useKeyboardSafeArea({
+    hasTabBar: false,
+  });
+
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,31 +87,13 @@ export default function ChatScreen() {
   const [harmfulMessageAnalysis, setHarmfulMessageAnalysis] = useState<AnalysisResult | null>(null);
   const [harmfulMessageContent, setHarmfulMessageContent] = useState('');
   const [chatPartner, setChatPartner] = useState<ChatPartner | null>(null);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  const flatListRef = useRef<FlatList>(null);
   const subscriptionRef = useRef<Subscription | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const conversationId = String(id);
-
-  // Track keyboard height
-  useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-
-    const showSubscription = Keyboard.addListener(showEvent, (e) => {
-      setKeyboardHeight(e.endCoordinates.height);
-    });
-
-    const hideSubscription = Keyboard.addListener(hideEvent, () => {
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
 
   // Load conversation and messages when component mounts
   useEffect(() => {
@@ -210,10 +197,6 @@ export default function ChatScreen() {
           setMessages((current) => [...current, newMessage]);
           // Hide typing indicator when message is received
           setOtherUserTyping(false);
-          // Scroll to bottom when new message arrives
-          setTimeout(() => {
-            scrollViewRef.current?.scrollToEnd({ animated: true });
-          }, 100);
 
           // Send notification if message is from other user
           if (newMessage.sender_id !== currentUser.id && chatPartner) {
@@ -277,15 +260,6 @@ export default function ChatScreen() {
     };
   }, [chatPartner, currentUser, conversationId]);
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: false });
-      }, 100);
-    }
-  }, [messages]);
-
   // Early return if chat partner not found (after all hooks)
   if (!chatPartner && !loading) {
     return (
@@ -301,6 +275,7 @@ export default function ChatScreen() {
 
     const messageText = newMessage.trim();
     setNewMessage(''); // Clear input immediately for instant feedback
+    Keyboard.dismiss(); // Dismiss keyboard after sending
 
     try {
       // Check if mindful messaging is enabled
@@ -405,6 +380,7 @@ export default function ChatScreen() {
 
   const handleSendAnyway = async () => {
     setMindfulModalVisible(false);
+    Keyboard.dismiss();
     await actualSendMessage(pendingMessage);
     setPendingMessage('');
     setAnalysisResult(null);
@@ -536,186 +512,191 @@ export default function ChatScreen() {
     }, 2000);
   };
 
-  // Calculate bottom padding based on keyboard state
-  const inputBottomPadding =
-    Platform.OS === 'ios' ? (keyboardHeight > 0 ? 8 : Math.max(insets.bottom, 8)) : 8;
+  // Render individual message
+  const renderMessage = ({ item: message }: { item: Message }) => {
+    const isCurrentUser = message.sender_id === currentUser?.id;
+    return (
+      <View style={[styles.messageRow, isCurrentUser && styles.messageRowRight]}>
+        {!isCurrentUser && (
+          <Image
+            source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
+            style={styles.messageAvatar}
+          />
+        )}
+
+        {isCurrentUser ? (
+          <View style={styles.currentUserMessage}>
+            <Text style={styles.currentUserMessageText}>
+              {message.content ?? message.text ?? ''}
+            </Text>
+            <Text style={styles.messageTime}>
+              {formatMessageTime(message.created_at || message.createdAt || '')}
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.otherUserMessage}>
+            <Text style={styles.otherUserMessageText}>{message.content ?? message.text ?? ''}</Text>
+            <Text style={styles.messageTime}>
+              {formatMessageTime(message.created_at || message.createdAt || '')}
+            </Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  // Render skeleton loader
+  const renderSkeletonLoader = () => (
+    <>
+      {[1, 2, 3, 4, 5].map((index) => (
+        <View
+          key={`skeleton-${index}`}
+          style={[styles.messageRow, index % 2 === 0 && styles.messageRowRight]}
+        >
+          {index % 2 !== 0 && <View style={[styles.messageAvatar, styles.skeletonAvatar]} />}
+          <View
+            style={[
+              index % 2 === 0 ? styles.currentUserMessage : styles.otherUserMessage,
+              styles.skeletonMessage,
+              styles.skeletonMessageRandom,
+              { width: `${60 + Math.random() * 20}%` },
+            ]}
+          >
+            <View style={styles.skeletonText} />
+            <View style={styles.skeletonMessageSecondLine} />
+          </View>
+        </View>
+      ))}
+    </>
+  );
+
+  // Render empty state
+  const renderEmptyState = () => {
+    if (loading) return null;
+    return (
+      <View style={styles.emptyState}>
+        <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
+        <Text style={styles.emptyStateText}>Start the conversation!</Text>
+        <Text style={styles.emptyStateSubtext}>Say hello and break the ice 👋</Text>
+      </View>
+    );
+  };
+
+  // Render typing indicator as list header (appears at top when inverted)
+  const renderTypingIndicator = () => {
+    if (!otherUserTyping) return null;
+    return (
+      <View style={styles.typingIndicatorRow}>
+        <Image
+          source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
+          style={styles.messageAvatar}
+        />
+        <View style={styles.typingIndicator}>
+          <View style={styles.typingDots}>
+            <Animated.View style={[styles.typingDot, styles.typingDotFirst]} />
+            <Animated.View style={[styles.typingDot, styles.typingDotSecond]} />
+            <Animated.View style={[styles.typingDot, styles.typingDotThird]} />
+          </View>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient
-        colors={[theme.colors.primary, theme.colors.primaryDark]}
-        style={styles.headerGradient}
-      >
-        <SafeAreaView>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="chevron-back" size={28} color="white" />
-            </TouchableOpacity>
+      <View onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}>
+        <LinearGradient
+          colors={[theme.colors.primary, theme.colors.primaryDark]}
+          style={styles.headerGradient}
+        >
+          <SafeAreaView>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                <Ionicons name="chevron-back" size={28} color="white" />
+              </TouchableOpacity>
 
-            <View style={styles.headerCenter}>
-              <Image
-                source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
-                style={styles.headerAvatar}
-              />
-              <View style={styles.headerInfo}>
-                <Text style={styles.headerName}>{chatPartner?.name}</Text>
-                <Text style={styles.headerStatus}>Offline</Text>
+              <View style={styles.headerCenter}>
+                <Image
+                  source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
+                  style={styles.headerAvatar}
+                />
+                <View style={styles.headerInfo}>
+                  <Text style={styles.headerName}>{chatPartner?.name}</Text>
+                  <Text style={styles.headerStatus}>Offline</Text>
+                </View>
               </View>
+
+              <TouchableOpacity style={styles.moreButton} onPress={() => setMenuVisible(true)}>
+                <Ionicons name="ellipsis-vertical" size={24} color="white" />
+              </TouchableOpacity>
             </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </View>
 
-            <TouchableOpacity style={styles.moreButton} onPress={() => setMenuVisible(true)}>
-              <Ionicons name="ellipsis-vertical" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-
-      {/* Messages Container */}
-      <View style={styles.messagesContainer}>
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.messagesList}
-          contentContainerStyle={[
-            messages.length === 0 && !loading
-              ? styles.messagesContentEmpty
-              : styles.messagesContent,
-            { paddingBottom: keyboardHeight > 0 ? 20 : 40 },
-          ]}
+      {/* Messages Container with KeyboardAvoidingView */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={keyboardBehavior}
+        keyboardVerticalOffset={headerHeight || getKeyboardVerticalOffset()}
+      >
+        {/* Inverted FlatList for messages */}
+        <FlatList
+          ref={flatListRef}
+          inverted
+          data={loading ? [] : [...messages].reverse()}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.messagesContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-        >
-          {loading ? (
-            // Skeleton loader for messages
-            <>
-              {[1, 2, 3, 4, 5].map((index) => (
-                <View
-                  key={`skeleton-${index}`}
-                  style={[styles.messageRow, index % 2 === 0 && styles.messageRowRight]}
-                >
-                  {index % 2 !== 0 && (
-                    <View style={[styles.messageAvatar, styles.skeletonAvatar]} />
-                  )}
-                  <View
-                    style={[
-                      index % 2 === 0 ? styles.currentUserMessage : styles.otherUserMessage,
-                      styles.skeletonMessage,
-                      styles.skeletonMessageRandom,
-                      { width: `${60 + Math.random() * 20}%` },
-                    ]}
-                  >
-                    <View style={styles.skeletonText} />
-                    <View style={styles.skeletonMessageSecondLine} />
-                  </View>
-                </View>
-              ))}
-            </>
-          ) : messages.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyStateText}>Start the conversation!</Text>
-              <Text style={styles.emptyStateSubtext}>Say hello and break the ice 👋</Text>
-            </View>
-          ) : (
-            messages.map((message) => {
-              const isCurrentUser = message.sender_id === currentUser?.id;
-              return (
-                <View
-                  key={message.id}
-                  style={[styles.messageRow, isCurrentUser && styles.messageRowRight]}
-                >
-                  {!isCurrentUser && (
-                    <Image
-                      source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
-                      style={styles.messageAvatar}
-                    />
-                  )}
-
-                  {isCurrentUser ? (
-                    <View style={styles.currentUserMessage}>
-                      <Text style={styles.currentUserMessageText}>
-                        {message.content ?? message.text ?? ''}
-                      </Text>
-                      <Text style={styles.messageTime}>
-                        {formatMessageTime(message.created_at || message.createdAt || '')}
-                      </Text>
-                    </View>
-                  ) : (
-                    <View style={styles.otherUserMessage}>
-                      <Text style={styles.otherUserMessageText}>
-                        {message.content ?? message.text ?? ''}
-                      </Text>
-                      <Text style={styles.messageTime}>
-                        {formatMessageTime(message.created_at || message.createdAt || '')}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              );
-            })
-          )}
-
-          {/* Typing Indicator */}
-          {otherUserTyping && (
-            <View style={styles.typingIndicatorRow}>
-              <Image
-                source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
-                style={styles.messageAvatar}
-              />
-              <View style={styles.typingIndicator}>
-                <View style={styles.typingDots}>
-                  <Animated.View style={[styles.typingDot, styles.typingDotFirst]} />
-                  <Animated.View style={[styles.typingDot, styles.typingDotSecond]} />
-                  <Animated.View style={[styles.typingDot, styles.typingDotThird]} />
-                </View>
-              </View>
-            </View>
-          )}
-        </ScrollView>
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+            autoscrollToTopThreshold: 10,
+          }}
+          ListHeaderComponent={renderTypingIndicator()}
+          ListEmptyComponent={loading ? renderSkeletonLoader() : renderEmptyState()}
+        />
 
         {/* Input Bar */}
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={0}
-        >
-          <View style={[styles.inputBar, { paddingBottom: inputBottomPadding }]}>
-            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
-            <View style={styles.inputContainer}>
-              <TouchableOpacity style={styles.attachButton} onPress={handleAttachPress}>
-                <Ionicons name="add-circle" size={28} color={theme.colors.primary} />
-              </TouchableOpacity>
+        <View style={[styles.inputBar, { paddingBottom: bottomPadding }]}>
+          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
+          <View style={styles.inputContainer}>
+            <TouchableOpacity style={styles.attachButton} onPress={handleAttachPress}>
+              <Ionicons name="add-circle" size={28} color={theme.colors.primary} />
+            </TouchableOpacity>
 
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={styles.input}
-                  value={newMessage}
-                  onChangeText={(text) => {
-                    setNewMessage(text);
-                    handleTyping();
-                  }}
-                  placeholder="Type a message..."
-                  placeholderTextColor="#999"
-                  multiline
-                  maxLength={1000}
-                  contextMenuHidden={true}
-                />
-              </View>
-
-              <TouchableOpacity
-                style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
-                onPress={analyzeThenSend}
-                disabled={!newMessage.trim()}
-              >
-                <Ionicons
-                  name="send"
-                  size={24}
-                  color={newMessage.trim() ? theme.colors.primary : '#ccc'}
-                />
-              </TouchableOpacity>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                value={newMessage}
+                onChangeText={(text) => {
+                  setNewMessage(text);
+                  handleTyping();
+                }}
+                placeholder="Type a message..."
+                placeholderTextColor="#999"
+                multiline
+                maxLength={1000}
+                contextMenuHidden={true}
+              />
             </View>
+
+            <TouchableOpacity
+              style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
+              onPress={analyzeThenSend}
+              disabled={!newMessage.trim()}
+            >
+              <Ionicons
+                name="send"
+                size={24}
+                color={newMessage.trim() ? theme.colors.primary : '#ccc'}
+              />
+            </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
 
       {/* Chat menu */}
       <ChatMenuPopup
@@ -907,22 +888,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     minWidth: 60,
   },
-  messagesContainer: {
-    flex: 1,
-  },
   messagesContent: {
     flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 20,
-  },
-  messagesContentEmpty: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-  },
-  messagesList: {
-    flex: 1,
   },
   moreButton: {
     marginLeft: 12,

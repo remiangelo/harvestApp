@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
@@ -25,6 +25,7 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import useSubscriptionStore from '../../stores/useSubscriptionStore';
 import { UpgradeModal } from '../UpgradeModal';
 import { formatLimitMessage } from '../../lib/subscription';
+import { useKeyboardSafeArea } from '../../hooks/useKeyboardSafeArea';
 
 import GARDENER_AVATAR from '../../assets/images/unnamed.png';
 
@@ -44,6 +45,11 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const { user } = useAuthStore();
   const { tier, canUseGardener, incrementGardenerUsage, fetchSubscription, fetchUsage } =
     useSubscriptionStore();
+  const insets = useSafeAreaInsets();
+  const { bottomPadding, keyboardBehavior, getKeyboardVerticalOffset } = useKeyboardSafeArea({
+    hasTabBar: !onBack, // Tab bar present when used as tab screen (not modal)
+  });
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -55,11 +61,11 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
-  const scrollViewRef = useRef<ScrollView>(null);
-  const insets = useSafeAreaInsets();
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  const flatListRef = useRef<FlatList>(null);
 
   // Load subscription and usage data
   useEffect(() => {
@@ -68,25 +74,6 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
       fetchUsage(user.id);
     }
   }, [user?.id]);
-
-  // Track keyboard height
-  useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-
-    const showSubscription = Keyboard.addListener(showEvent, (e) => {
-      setKeyboardHeight(e.endCoordinates.height);
-    });
-
-    const hideSubscription = Keyboard.addListener(hideEvent, () => {
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
 
   // Load chat history from database
   useEffect(() => {
@@ -128,10 +115,6 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     loadChatHistory();
   }, [user?.id, chatHistory]);
 
-  useEffect(() => {
-    scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [messages]);
-
   const sendMessage = async () => {
     if (!inputText.trim()) return;
 
@@ -162,6 +145,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     addChatMessage({ text: userMessage.text, sender: 'user' });
     setInputText('');
     setIsTyping(true);
+    Keyboard.dismiss(); // Dismiss keyboard after sending
 
     // Save to database if user is authenticated
     if (user?.id) {
@@ -224,15 +208,61 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     }
   };
 
-  // Calculate bottom padding based on keyboard state and whether there's a tab bar
-  const inputBottomPadding =
-    Platform.OS === 'ios'
-      ? keyboardHeight > 0
-        ? 8
-        : Math.max(insets.bottom, 8) + (onBack ? 0 : 70)
-      : onBack
-        ? 8
-        : 78;
+  // Render individual message
+  const renderMessage = ({ item: message }: { item: Message }) => {
+    return (
+      <View
+        style={[
+          styles.messageWrapper,
+          message.sender === 'user' ? styles.userMessageWrapper : styles.gardenerMessageWrapper,
+        ]}
+      >
+        {message.sender === 'gardener' && (
+          <View style={styles.avatarContainer}>
+            <Image source={GARDENER_AVATAR} style={styles.messageAvatar} />
+          </View>
+        )}
+        <View
+          style={[
+            styles.messageBubble,
+            message.sender === 'user' ? styles.userMessage : styles.gardenerMessage,
+          ]}
+        >
+          <Text
+            style={[
+              styles.messageText,
+              message.sender === 'user' ? styles.userMessageText : styles.gardenerMessageText,
+            ]}
+          >
+            {message.text}
+          </Text>
+          <Text
+            style={[
+              styles.timestamp,
+              message.sender === 'user' ? styles.userTimestamp : styles.gardenerTimestamp,
+            ]}
+          >
+            {formatTime(message.timestamp)}
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
+  // Render typing indicator as list header (appears at top when inverted)
+  const renderTypingIndicator = () => {
+    if (!isTyping) return null;
+    return (
+      <View style={[styles.messageWrapper, styles.gardenerMessageWrapper]}>
+        <View style={styles.avatarContainer}>
+          <Image source={GARDENER_AVATAR} style={styles.messageAvatar} />
+        </View>
+        <View style={[styles.messageBubble, styles.gardenerMessage, styles.typingBubble]}>
+          <ActivityIndicator size="small" color="#666" />
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -247,140 +277,96 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
 
       {/* Header - Only show if onBack is provided */}
       {onBack && (
-        <LinearGradient
-          colors={[theme.colors.primary, theme.colors.primaryDark, theme.colors.primaryDark]}
-          style={styles.header}
-        >
-          <SafeAreaView style={styles.headerSafe}>
-            <View style={styles.headerContent}>
-              <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                <Ionicons name="arrow-back" size={24} color="white" />
-              </TouchableOpacity>
-              <View style={styles.headerInfo}>
-                <Text style={styles.headerTitle}>The Gardener</Text>
-                <Text style={styles.headerSubtitle}>AI Dating Coach</Text>
+        <View onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}>
+          <LinearGradient
+            colors={[theme.colors.primary, theme.colors.primaryDark, theme.colors.primaryDark]}
+            style={styles.header}
+          >
+            <SafeAreaView style={styles.headerSafe}>
+              <View style={styles.headerContent}>
+                <TouchableOpacity onPress={onBack} style={styles.backButton}>
+                  <Ionicons name="arrow-back" size={24} color="white" />
+                </TouchableOpacity>
+                <View style={styles.headerInfo}>
+                  <Text style={styles.headerTitle}>The Gardener</Text>
+                  <Text style={styles.headerSubtitle}>AI Dating Coach</Text>
+                </View>
+                <View style={styles.headerAvatar}>
+                  <Image source={GARDENER_AVATAR} style={styles.avatar} />
+                </View>
               </View>
-              <View style={styles.headerAvatar}>
-                <Image source={GARDENER_AVATAR} style={styles.avatar} />
-              </View>
-            </View>
-          </SafeAreaView>
-        </LinearGradient>
+            </SafeAreaView>
+          </LinearGradient>
+        </View>
       )}
 
-      {/* Chat Container */}
-      <View style={styles.chatContainer}>
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.messagesContainer}
-          contentContainerStyle={[
-            styles.messagesContent,
-            { paddingBottom: keyboardHeight > 0 ? 20 : 40 },
-          ]}
+      {/* Chat Container with KeyboardAvoidingView */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={keyboardBehavior}
+        keyboardVerticalOffset={headerHeight || getKeyboardVerticalOffset()}
+      >
+        {/* Inverted FlatList for messages */}
+        <FlatList
+          ref={flatListRef}
+          inverted
+          data={[...messages].reverse()}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.messagesContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-        >
-          {messages.map((message) => (
-            <View
-              key={message.id}
-              style={[
-                styles.messageWrapper,
-                message.sender === 'user'
-                  ? styles.userMessageWrapper
-                  : styles.gardenerMessageWrapper,
-              ]}
-            >
-              {message.sender === 'gardener' && (
-                <View style={styles.avatarContainer}>
-                  <Image source={GARDENER_AVATAR} style={styles.messageAvatar} />
-                </View>
-              )}
-              <View
-                style={[
-                  styles.messageBubble,
-                  message.sender === 'user' ? styles.userMessage : styles.gardenerMessage,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.messageText,
-                    message.sender === 'user' ? styles.userMessageText : styles.gardenerMessageText,
-                  ]}
-                >
-                  {message.text}
-                </Text>
-                <Text
-                  style={[
-                    styles.timestamp,
-                    message.sender === 'user' ? styles.userTimestamp : styles.gardenerTimestamp,
-                  ]}
-                >
-                  {formatTime(message.timestamp)}
-                </Text>
-              </View>
-            </View>
-          ))}
-          {isTyping && (
-            <View style={[styles.messageWrapper, styles.gardenerMessageWrapper]}>
-              <View style={styles.avatarContainer}>
-                <Image source={GARDENER_AVATAR} style={styles.messageAvatar} />
-              </View>
-              <View style={[styles.messageBubble, styles.gardenerMessage, styles.typingBubble]}>
-                <ActivityIndicator size="small" color="#666" />
-              </View>
-            </View>
-          )}
-        </ScrollView>
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+            autoscrollToTopThreshold: 10,
+          }}
+          ListHeaderComponent={renderTypingIndicator()}
+        />
 
         {/* Input Bar */}
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={0}
-        >
-          <View style={[styles.inputBar, { paddingBottom: inputBottomPadding }]}>
-            <BlurView intensity={70} tint="light" style={StyleSheet.absoluteFillObject} />
-            <View style={styles.inputWrapper}>
-              {limitReached ? (
+        <View style={[styles.inputBar, { paddingBottom: bottomPadding }]}>
+          <BlurView intensity={70} tint="light" style={StyleSheet.absoluteFillObject} />
+          <View style={styles.inputWrapper}>
+            {limitReached ? (
+              <TouchableOpacity
+                style={styles.upgradeInputButton}
+                onPress={() => setShowUpgradeModal(true)}
+              >
+                <Ionicons name="sparkles" size={18} color="#fff" />
+                <Text style={styles.upgradeInputButtonText}>Upgrade to continue chatting</Text>
+              </TouchableOpacity>
+            ) : (
+              <>
+                <View style={styles.textInputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    value={inputText}
+                    onChangeText={setInputText}
+                    placeholder="Ask for dating advice..."
+                    placeholderTextColor="#999"
+                    multiline
+                    maxLength={500}
+                  />
+                </View>
                 <TouchableOpacity
-                  style={styles.upgradeInputButton}
-                  onPress={() => setShowUpgradeModal(true)}
+                  onPress={sendMessage}
+                  disabled={!inputText.trim() || isTyping}
+                  style={[
+                    styles.sendButton,
+                    (!inputText.trim() || isTyping) && styles.sendButtonDisabled,
+                  ]}
                 >
-                  <Ionicons name="sparkles" size={18} color="#fff" />
-                  <Text style={styles.upgradeInputButtonText}>Upgrade to continue chatting</Text>
+                  <Ionicons
+                    name="send"
+                    size={20}
+                    color={!inputText.trim() || isTyping ? '#ccc' : theme.colors.primary}
+                  />
                 </TouchableOpacity>
-              ) : (
-                <>
-                  <View style={styles.textInputContainer}>
-                    <TextInput
-                      style={styles.input}
-                      value={inputText}
-                      onChangeText={setInputText}
-                      placeholder="Ask for dating advice..."
-                      placeholderTextColor="#999"
-                      multiline
-                      maxLength={500}
-                    />
-                  </View>
-                  <TouchableOpacity
-                    onPress={sendMessage}
-                    disabled={!inputText.trim() || isTyping}
-                    style={[
-                      styles.sendButton,
-                      (!inputText.trim() || isTyping) && styles.sendButtonDisabled,
-                    ]}
-                  >
-                    <Ionicons
-                      name="send"
-                      size={20}
-                      color={!inputText.trim() || isTyping ? '#ccc' : theme.colors.primary}
-                    />
-                  </TouchableOpacity>
-                </>
-              )}
-            </View>
+              </>
+            )}
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -397,9 +383,6 @@ const styles = StyleSheet.create({
   backButton: {
     marginRight: 8,
     padding: 8,
-  },
-  chatContainer: {
-    flex: 1,
   },
   container: {
     backgroundColor: '#f5f5f5',
@@ -484,10 +467,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 12,
   },
-  messagesContainer: {
-    flex: 1,
-  },
   messagesContent: {
+    flexGrow: 1,
     padding: 16,
   },
   sendButton: {

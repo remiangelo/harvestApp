@@ -2,7 +2,7 @@ export default {
   expo: {
     name: 'Harvest',
     slug: 'harvest',
-    version: '1.4.18',
+    version: '1.4.19',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'harvestapp',
@@ -16,7 +16,7 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'com.harvest.harvestdating',
-      buildNumber: '52',
+      buildNumber: '53',
       appleTeamId: 'L3P46Q9398',
       config: {
         usesNonExemptEncryption: false,

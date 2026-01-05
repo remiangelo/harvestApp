@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Keyboard,
   Image,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -39,11 +40,33 @@ interface GardenerChatProps {
 export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const { chatHistory, addChatMessage, openAiApiKey } = useGardenerStore();
   const { user } = useAuthStore();
-  const { tier, canUseGardener, incrementGardenerUsage, fetchSubscription, fetchUsage } =
-    useSubscriptionStore();
+  const {
+    tier,
+    canUseGardener,
+    incrementGardenerUsage,
+    fetchSubscription,
+    fetchUsage,
+    canUseGardenerCharacters,
+    addGardenerCharacters,
+    getGardenerCharactersRemaining,
+  } = useSubscriptionStore();
   const hasTabBar = !onBack; // Tab bar present when used as tab screen (not modal)
-  const { bottomOffsetWhenHidden } = useKeyboard({ hasTabBar });
+  const { bottomOffsetWhenHidden, keyboardAnimatedHeight } = useKeyboard({ hasTabBar });
   const [inputBarHeight, setInputBarHeight] = useState(CHAT_INPUT_BAR_BASE_HEIGHT);
+
+  // Animated padding for FlatList that syncs with keyboard
+  const BASE_CONTENT_PADDING = 16;
+  const animatedInputHeight = useRef(
+    new Animated.Value(inputBarHeight + BASE_CONTENT_PADDING)
+  ).current;
+
+  // Update animated value when input bar height changes (multiline text growth)
+  useEffect(() => {
+    animatedInputHeight.setValue(inputBarHeight + BASE_CONTENT_PADDING);
+  }, [inputBarHeight, animatedInputHeight]);
+
+  // Combine keyboard height with input bar height for total bottom padding
+  const animatedBottomPadding = Animated.add(keyboardAnimatedHeight, animatedInputHeight);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -59,7 +82,7 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
 
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<Animated.FlatList<Message>>(null);
 
   // Load subscription and usage data
   useEffect(() => {
@@ -112,7 +135,10 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const sendMessage = async () => {
     if (!inputText.trim()) return;
 
-    // Check if user can use gardener based on their tier
+    const userMessageText = inputText.trim();
+    const userMessageLength = userMessageText.length;
+
+    // Check if user can use gardener based on their tier (conversation limit)
     if (!canUseGardener()) {
       setLimitReached(true);
       // Show limit reached message
@@ -128,9 +154,33 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
       return;
     }
 
+    // Check character limit (estimate ~2x for user message + AI response)
+    const estimatedTotalChars = userMessageLength * 2.5; // Conservative estimate
+    if (!canUseGardenerCharacters(estimatedTotalChars)) {
+      const remaining = getGardenerCharactersRemaining();
+      const limitMessage =
+        tier === 'gold'
+          ? `You've reached your daily character limit (30,000 chars). Your limit will reset tomorrow!`
+          : `You've used your character limit for this conversation (${remaining} chars remaining). ${
+              tier === 'seed'
+                ? 'Upgrade to Green for longer conversations!'
+                : 'Upgrade to Gold for unlimited conversations!'
+            }`;
+
+      const gardenerLimitMessage: Message = {
+        id: Date.now().toString(),
+        text: limitMessage,
+        sender: 'gardener',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, gardenerLimitMessage]);
+      setShowUpgradeModal(true);
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputText.trim(),
+      text: userMessageText,
       sender: 'user',
       timestamp: new Date(),
     };
@@ -147,9 +197,14 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     }
 
     try {
-      // Increment gardener usage
+      // Increment gardener usage (conversation count)
       if (user?.id) {
         await incrementGardenerUsage(user.id);
+      }
+
+      // Track user message characters
+      if (user?.id) {
+        await addGardenerCharacters(user.id, userMessageLength);
       }
 
       // Get AI response
@@ -175,8 +230,35 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
         await gardenerChatService.saveMessage(user.id, response, 'gardener');
       }
 
-      // Check if user has hit their limit after this conversation
+      // Track AI response characters
+      if (user?.id) {
+        await addGardenerCharacters(user.id, response.length);
+      }
+
+      // Check if user has hit their conversation limit after this exchange
       if (!canUseGardener()) {
+        setLimitReached(true);
+      }
+
+      // Check if user has hit their character limit
+      if (!canUseGardenerCharacters(100)) {
+        // Small buffer for next message
+        const limitMessage =
+          tier === 'gold'
+            ? "You've reached your daily character limit. Your limit will reset tomorrow!"
+            : `You've reached your character limit for this conversation. ${
+                tier === 'seed'
+                  ? 'Upgrade to Green for longer conversations!'
+                  : 'Upgrade to Gold for unlimited conversations!'
+              }`;
+
+        const gardenerLimitMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          text: limitMessage,
+          sender: 'gardener',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, gardenerLimitMessage]);
         setLimitReached(true);
       }
     } catch (error) {
@@ -294,17 +376,14 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
 
       {/* Chat Container */}
       <View style={styles.messagesContainer}>
-        {/* Inverted FlatList for messages */}
-        <FlatList
+        {/* Inverted Animated FlatList for messages with keyboard-aware padding */}
+        <Animated.FlatList
           ref={flatListRef}
           inverted
           data={[...messages].reverse()}
           renderItem={renderMessage}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={[
-            styles.messagesContent,
-            { paddingBottom: inputBarHeight + bottomOffsetWhenHidden },
-          ]}
+          contentContainerStyle={[styles.messagesContent, { paddingBottom: animatedBottomPadding }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           maintainVisibleContentPosition={{

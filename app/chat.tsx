@@ -67,8 +67,22 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const { currentUser } = useUser();
   const insets = useSafeAreaInsets();
-  const { bottomOffsetWhenHidden } = useKeyboard({ hasTabBar: false });
+  const { bottomOffsetWhenHidden, keyboardAnimatedHeight } = useKeyboard({ hasTabBar: false });
   const [inputBarHeight, setInputBarHeight] = useState(CHAT_INPUT_BAR_BASE_HEIGHT);
+
+  // Animated padding for FlatList that syncs with keyboard
+  const BASE_CONTENT_PADDING = 16;
+  const animatedInputHeight = useRef(
+    new Animated.Value(inputBarHeight + BASE_CONTENT_PADDING)
+  ).current;
+
+  // Update animated value when input bar height changes (multiline text growth)
+  useEffect(() => {
+    animatedInputHeight.setValue(inputBarHeight + BASE_CONTENT_PADDING);
+  }, [inputBarHeight, animatedInputHeight]);
+
+  // Combine keyboard height with input bar height for total bottom padding
+  const animatedBottomPadding = Animated.add(keyboardAnimatedHeight, animatedInputHeight);
 
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -84,7 +98,7 @@ export default function ChatScreen() {
   const [harmfulMessageContent, setHarmfulMessageContent] = useState('');
   const [chatPartner, setChatPartner] = useState<ChatPartner | null>(null);
 
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<Animated.FlatList<Message>>(null);
   const subscriptionRef = useRef<Subscription | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -630,17 +644,14 @@ export default function ChatScreen() {
 
       {/* Messages Container */}
       <View style={styles.messagesContainer}>
-        {/* Inverted FlatList for messages */}
-        <FlatList
+        {/* Inverted Animated FlatList for messages with keyboard-aware padding */}
+        <Animated.FlatList
           ref={flatListRef}
           inverted
           data={loading ? [] : [...messages].reverse()}
           renderItem={renderMessage}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={[
-            styles.messagesContent,
-            { paddingBottom: inputBarHeight + bottomOffsetWhenHidden },
-          ]}
+          contentContainerStyle={[styles.messagesContent, { paddingBottom: animatedBottomPadding }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           maintainVisibleContentPosition={{

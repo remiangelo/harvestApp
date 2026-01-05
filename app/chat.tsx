@@ -3,33 +3,30 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   FlatList,
   Image,
   SafeAreaView,
   Alert,
   Keyboard,
+  Animated,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useUser } from '../context/UserContext';
 import { isUuid } from '../lib/chat';
-import { Animated } from 'react-native';
 import { ChatMenuPopup } from '../components/ChatMenuPopup';
 import * as ImagePicker from 'expo-image-picker';
 import { MindfulMessageModal } from '../components/MindfulMessageModal';
 import { HarmfulMessageModal } from '../components/HarmfulMessageModal';
 import { theme } from '../constants/theme';
 import { analyzeMessage, isMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
-import { useKeyboardSafeArea } from '../hooks/useKeyboardSafeArea';
+import { ChatInputBar, CHAT_INPUT_BAR_BASE_HEIGHT } from '../components/chat';
+import { useKeyboard } from '../hooks/useKeyboard';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/EB1E66/FFFFFF?text=No+Image';
 
@@ -70,9 +67,8 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const { currentUser } = useUser();
   const insets = useSafeAreaInsets();
-  const { bottomPadding, keyboardBehavior, getKeyboardVerticalOffset } = useKeyboardSafeArea({
-    hasTabBar: false,
-  });
+  const { bottomOffsetWhenHidden } = useKeyboard({ hasTabBar: false });
+  const [inputBarHeight, setInputBarHeight] = useState(CHAT_INPUT_BAR_BASE_HEIGHT);
 
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -87,7 +83,6 @@ export default function ChatScreen() {
   const [harmfulMessageAnalysis, setHarmfulMessageAnalysis] = useState<AnalysisResult | null>(null);
   const [harmfulMessageContent, setHarmfulMessageContent] = useState('');
   const [chatPartner, setChatPartner] = useState<ChatPartner | null>(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
 
   const flatListRef = useRef<FlatList>(null);
   const subscriptionRef = useRef<Subscription | null>(null);
@@ -605,42 +600,36 @@ export default function ChatScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}>
-        <LinearGradient
-          colors={[theme.colors.primary, theme.colors.primaryDark]}
-          style={styles.headerGradient}
-        >
-          <SafeAreaView>
-            <View style={styles.header}>
-              <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                <Ionicons name="chevron-back" size={28} color="white" />
-              </TouchableOpacity>
-
-              <View style={styles.headerCenter}>
-                <Image
-                  source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
-                  style={styles.headerAvatar}
-                />
-                <View style={styles.headerInfo}>
-                  <Text style={styles.headerName}>{chatPartner?.name}</Text>
-                  <Text style={styles.headerStatus}>Offline</Text>
-                </View>
-              </View>
-
-              <TouchableOpacity style={styles.moreButton} onPress={() => setMenuVisible(true)}>
-                <Ionicons name="ellipsis-vertical" size={24} color="white" />
-              </TouchableOpacity>
-            </View>
-          </SafeAreaView>
-        </LinearGradient>
-      </View>
-
-      {/* Messages Container with KeyboardAvoidingView */}
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={keyboardBehavior}
-        keyboardVerticalOffset={headerHeight || getKeyboardVerticalOffset()}
+      <LinearGradient
+        colors={[theme.colors.primary, theme.colors.primaryDark]}
+        style={styles.headerGradient}
       >
+        <SafeAreaView>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="chevron-back" size={28} color="white" />
+            </TouchableOpacity>
+
+            <View style={styles.headerCenter}>
+              <Image
+                source={{ uri: chatPartner?.profileImage || FALLBACK_IMAGE }}
+                style={styles.headerAvatar}
+              />
+              <View style={styles.headerInfo}>
+                <Text style={styles.headerName}>{chatPartner?.name}</Text>
+                <Text style={styles.headerStatus}>Offline</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.moreButton} onPress={() => setMenuVisible(true)}>
+              <Ionicons name="ellipsis-vertical" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+
+      {/* Messages Container */}
+      <View style={styles.messagesContainer}>
         {/* Inverted FlatList for messages */}
         <FlatList
           ref={flatListRef}
@@ -648,7 +637,10 @@ export default function ChatScreen() {
           data={loading ? [] : [...messages].reverse()}
           renderItem={renderMessage}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.messagesContent}
+          contentContainerStyle={[
+            styles.messagesContent,
+            { paddingBottom: inputBarHeight + bottomOffsetWhenHidden },
+          ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           maintainVisibleContentPosition={{
@@ -659,44 +651,22 @@ export default function ChatScreen() {
           ListEmptyComponent={loading ? renderSkeletonLoader() : renderEmptyState()}
         />
 
-        {/* Input Bar */}
-        <View style={[styles.inputBar, { paddingBottom: bottomPadding }]}>
-          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
-          <View style={styles.inputContainer}>
-            <TouchableOpacity style={styles.attachButton} onPress={handleAttachPress}>
-              <Ionicons name="add-circle" size={28} color={theme.colors.primary} />
-            </TouchableOpacity>
-
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                value={newMessage}
-                onChangeText={(text) => {
-                  setNewMessage(text);
-                  handleTyping();
-                }}
-                placeholder="Type a message..."
-                placeholderTextColor="#999"
-                multiline
-                maxLength={1000}
-                contextMenuHidden={true}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
-              onPress={analyzeThenSend}
-              disabled={!newMessage.trim()}
-            >
-              <Ionicons
-                name="send"
-                size={24}
-                color={newMessage.trim() ? theme.colors.primary : '#ccc'}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
+        {/* Input Bar - Absolute positioned, animates with keyboard */}
+        <ChatInputBar
+          value={newMessage}
+          onChangeText={(text) => {
+            setNewMessage(text);
+            handleTyping();
+          }}
+          onSend={analyzeThenSend}
+          onAttach={handleAttachPress}
+          placeholder="Type a message..."
+          hasTabBar={false}
+          showAttachButton={true}
+          maxLength={1000}
+          onHeightChange={setInputBarHeight}
+        />
+      </View>
 
       {/* Chat menu */}
       <ChatMenuPopup
@@ -756,10 +726,6 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  attachButton: {
-    marginBottom: 2,
-    marginRight: 12,
-  },
   backButton: {
     marginRight: 12,
   },
@@ -838,35 +804,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 14,
   },
-  input: {
-    color: '#333',
-    fontSize: 16,
-    maxHeight: 100,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  inputBar: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderTopWidth: 0,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    position: 'relative',
-  },
-  inputContainer: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-  },
-  inputWrapper: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 20,
-    elevation: 2,
-    flex: 1,
-    marginHorizontal: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
   messageAvatar: {
     borderRadius: 16,
     height: 32,
@@ -888,6 +825,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     minWidth: 60,
   },
+  messagesContainer: {
+    flex: 1,
+    position: 'relative',
+  },
   messagesContent: {
     flexGrow: 1,
     paddingHorizontal: 16,
@@ -907,12 +848,6 @@ const styles = StyleSheet.create({
     color: '#333',
     fontSize: 16,
     lineHeight: 20,
-  },
-  sendButton: {
-    marginLeft: 12,
-  },
-  sendButtonDisabled: {
-    opacity: 0.5,
   },
   skeletonAvatar: {
     backgroundColor: '#e0e0e0',

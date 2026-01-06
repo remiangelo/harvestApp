@@ -73,9 +73,11 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
   const canSend = value.trim().length > 0 && !disabled;
 
-  // Calculate safe area padding - only apply when keyboard is hidden
-  // When keyboard is visible, keyboard height already accounts for positioning
-  const safeAreaPadding = isKeyboardVisible ? 0 : insets.bottom;
+  // Calculate safe area padding:
+  // - When keyboard is visible: no padding needed (keyboard provides safe area)
+  // - When keyboard is hidden AND no tab bar: need padding for home indicator
+  // - When keyboard is hidden AND has tab bar: no padding (tab bar provides safe area)
+  const safeAreaPadding = isKeyboardVisible || hasTabBar ? 0 : insets.bottom;
 
   return (
     <Animated.View

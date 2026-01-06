@@ -62,8 +62,13 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   onHeightChange,
 }) => {
   const insets = useSafeAreaInsets();
-  const { keyboardAnimatedHeight, isKeyboardVisible } = useKeyboard({ hasTabBar });
+  const { keyboardAnimatedHeight, isKeyboardVisible, bottomOffsetWhenHidden } = useKeyboard({
+    hasTabBar,
+  });
   const [inputHeight, setInputHeight] = useState(0);
+
+  // Extend background to screen bottom when keyboard is hidden
+  const containerPaddingBottom = isKeyboardVisible ? 0 : bottomOffsetWhenHidden;
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
@@ -81,7 +86,10 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
   return (
     <Animated.View
-      style={[styles.container, { bottom: keyboardAnimatedHeight }]}
+      style={[
+        styles.container,
+        { bottom: keyboardAnimatedHeight, paddingBottom: containerPaddingBottom },
+      ]}
       onLayout={handleLayout}
     >
       <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />

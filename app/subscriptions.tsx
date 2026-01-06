@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../constants/theme';
 
-type PlanType = 'free' | 'premium' | 'gold';
+type PlanType = 'seed' | 'green' | 'gold';
 
 interface Feature {
   text: string;
@@ -36,50 +36,55 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const plans: Plan[] = [
   {
-    id: 'free',
-    name: 'Free',
+    id: 'seed',
+    name: '🌱 Seed',
     price: '$0',
     period: 'Forever',
     icon: 'leaf-outline',
     features: [
-      { text: 'Unlimited swipes', included: true },
-      { text: 'Basic filters (age, distance, gender)', included: true },
-      { text: 'Real-time messaging', included: true },
-      { text: '5 Gardener AI chats/month', included: true },
-      { text: 'Mindful Messaging feature', included: true },
+      { text: '5 matches per week', included: true },
+      { text: 'See users up to 100 miles away', included: true },
+      { text: 'Unlimited messaging', included: true },
+      { text: '1 free Gardener conversation (3,000 chars)', included: true },
+      { text: 'Mindful messaging', included: true },
+      { text: 'Basic filters (location, distance)', included: true },
+      { text: 'Values-based matching', included: false },
+      { text: 'Advanced filters (age, height)', included: false },
     ],
     gradient: ['#6B7280', '#4B5563'],
   },
   {
-    id: 'premium',
-    name: 'Premium',
+    id: 'green',
+    name: '🟢 Green',
     price: '$9.99',
     period: '/month',
     popular: true,
     icon: 'heart',
     features: [
-      { text: 'Everything in Free', included: true },
-      { text: '20 Gardener AI chats/month', included: true },
-      { text: 'Advanced filters', included: true },
-      { text: 'See who liked you', included: true },
-      { text: 'Rewind last swipe', included: true },
-      { text: 'No ads', included: true },
+      { text: 'Everything in Seed, plus:', included: true },
+      { text: 'Unlimited matches per week', included: true },
+      { text: 'See users up to 250 miles away', included: true },
+      { text: '1 Gardener conversation daily (10,000 chars)', included: true },
+      { text: 'Values-based matching', included: true },
+      { text: 'Advanced filters (age, height)', included: true },
+      { text: 'Option to disable mindful messaging', included: true },
+      { text: 'See who liked you', included: false },
     ],
     gradient: [theme.colors.primary, theme.colors.primaryDark],
   },
   {
     id: 'gold',
-    name: 'Gold',
+    name: '✨ Gold',
     price: '$19.99',
     period: '/month',
     icon: 'diamond',
     features: [
-      { text: 'Everything in Premium', included: true },
-      { text: 'Unlimited Gardener AI chats', included: true },
-      { text: 'Priority profile visibility', included: true },
-      { text: 'Advanced AI safety features', included: true },
-      { text: 'Exclusive Gold badge', included: true },
-      { text: 'Early access to new features', included: true },
+      { text: 'Everything in Green, plus:', included: true },
+      { text: 'Unlimited Gardener conversations (30k chars/day)', included: true },
+      { text: 'See users unlimited distance (within US)', included: true },
+      { text: 'See who liked you before matching', included: true },
+      { text: 'Full suite of filters (kids, religion, pets)', included: true },
+      { text: 'Priority support', included: true },
     ],
     gradient: ['#F59E0B', '#D97706'],
   },
@@ -88,12 +93,12 @@ const plans: Plan[] = [
 export default function SubscriptionsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [,] = useState<PlanType>('free'); // Currently unused but kept for future functionality
-  const [currentPlan] = useState<PlanType>('free'); // User's current plan
+  const [,] = useState<PlanType>('seed'); // Currently unused but kept for future functionality
+  const [currentPlan] = useState<PlanType>('seed'); // User's current plan - TODO: Get from useSubscriptionStore
 
   const handleSubscribe = (planId: PlanType) => {
-    if (planId === 'free') {
-      Alert.alert('Free Plan', 'You are already on the free plan!');
+    if (planId === 'seed') {
+      Alert.alert('Seed Plan', 'You are already on the free Seed plan!');
       return;
     }
 
@@ -128,7 +133,7 @@ export default function SubscriptionsScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Current Plan Badge */}
-        {currentPlan !== 'free' && (
+        {currentPlan !== 'seed' && (
           <View style={styles.currentPlanBadge}>
             <Ionicons name="checkmark-circle" size={20} color={theme.colors.primary} />
             <Text style={styles.currentPlanText}>
@@ -209,7 +214,7 @@ export default function SubscriptionsScreen() {
                   style={styles.subscribeButton}
                 >
                   <Text style={styles.subscribeText}>
-                    {plan.id === 'free' ? 'Select Free' : `Get ${plan.name}`}
+                    {plan.id === 'seed' ? 'Current Plan' : `Get ${plan.name}`}
                   </Text>
                 </LinearGradient>
               )}

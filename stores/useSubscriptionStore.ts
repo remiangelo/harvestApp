@@ -11,6 +11,7 @@ export interface TierDetails {
   matches_per_week: number | null;
   max_distance_miles: number | null;
   gardener_conversations_per_day: number | null;
+  gardener_character_limit: number;
   has_values_matching: boolean;
   has_advanced_filters: boolean;
   has_full_filters: boolean;
@@ -21,6 +22,7 @@ export interface TierDetails {
 export interface UsageStats {
   matches_count: number;
   gardener_conversations_today: number;
+  gardener_characters_used_today: number;
   week_start_date: string;
 }
 
@@ -38,10 +40,14 @@ interface SubscriptionState {
   // Usage tracking
   incrementMatchCount: (userId: string) => Promise<boolean>;
   incrementGardenerUsage: (userId: string) => Promise<boolean>;
+  addGardenerCharacters: (userId: string, characterCount: number) => Promise<boolean>;
 
   // Feature checks
   canMatch: () => boolean;
   canUseGardener: () => boolean;
+  canUseGardenerCharacters: (additionalChars: number) => boolean;
+  getGardenerCharacterLimit: () => number;
+  getGardenerCharactersRemaining: () => number;
   hasValuesMatching: () => boolean;
   hasAdvancedFilters: () => boolean;
   hasFullFilters: () => boolean;
@@ -64,6 +70,7 @@ const DEFAULT_TIER_DETAILS: TierDetails = {
   matches_per_week: 5,
   max_distance_miles: 100,
   gardener_conversations_per_day: 1,
+  gardener_character_limit: 3000,
   has_values_matching: false,
   has_advanced_filters: false,
   has_full_filters: false,
@@ -155,6 +162,7 @@ const useSubscriptionStore = create<SubscriptionState>()(
                 usage: {
                   matches_count: data.matches_count,
                   gardener_conversations_today: 0,
+                  gardener_characters_used_today: 0,
                   week_start_date: weekStart,
                 },
               });
@@ -163,6 +171,7 @@ const useSubscriptionStore = create<SubscriptionState>()(
                 usage: {
                   matches_count: data.matches_count,
                   gardener_conversations_today: data.gardener_conversations_today,
+                  gardener_characters_used_today: data.gardener_characters_used_today || 0,
                   week_start_date: weekStart,
                 },
               });
@@ -187,6 +196,7 @@ const useSubscriptionStore = create<SubscriptionState>()(
               usage: {
                 matches_count: 0,
                 gardener_conversations_today: 0,
+                gardener_characters_used_today: 0,
                 week_start_date: weekStart,
               },
             });
@@ -228,6 +238,7 @@ const useSubscriptionStore = create<SubscriptionState>()(
               ...usage,
               matches_count: newCount,
               gardener_conversations_today: usage?.gardener_conversations_today || 0,
+              gardener_characters_used_today: usage?.gardener_characters_used_today || 0,
               week_start_date: weekStart,
             },
           });
@@ -272,6 +283,7 @@ const useSubscriptionStore = create<SubscriptionState>()(
               ...usage,
               matches_count: usage?.matches_count || 0,
               gardener_conversations_today: newCount,
+              gardener_characters_used_today: 0, // Reset characters when starting new conversation
               week_start_date: weekStart,
             },
           });
@@ -295,6 +307,70 @@ const useSubscriptionStore = create<SubscriptionState>()(
         if (tierDetails?.gardener_conversations_per_day === null) return true; // Unlimited
         const currentCount = usage?.gardener_conversations_today || 0;
         return currentCount < (tierDetails?.gardener_conversations_per_day || 1);
+      },
+
+      addGardenerCharacters: async (userId: string, characterCount: number) => {
+        const { usage } = get();
+
+        try {
+          const weekStart = getWeekStartDate();
+          const newCount = (usage?.gardener_characters_used_today || 0) + characterCount;
+
+          await supabase.from('user_usage').upsert(
+            {
+              user_id: userId,
+              week_start_date: weekStart,
+              gardener_characters_used_today: newCount,
+              updated_at: new Date().toISOString(),
+            },
+            {
+              onConflict: 'user_id,week_start_date',
+            }
+          );
+
+          set({
+            usage: {
+              ...usage,
+              matches_count: usage?.matches_count || 0,
+              gardener_conversations_today: usage?.gardener_conversations_today || 0,
+              gardener_characters_used_today: newCount,
+              week_start_date: weekStart,
+            },
+          });
+
+          return true;
+        } catch (error) {
+          console.error('[SubscriptionStore] Error adding gardener characters:', error);
+          return false;
+        }
+      },
+
+      canUseGardenerCharacters: (additionalChars: number) => {
+        const { tierDetails, usage, tier } = get();
+
+        // Gold tier has daily limit, not per-conversation
+        if (tier === 'gold') {
+          const currentUsed = usage?.gardener_characters_used_today || 0;
+          const limit = tierDetails?.gardener_character_limit || 30000;
+          return currentUsed + additionalChars <= limit;
+        }
+
+        // Seed and Green have per-conversation limits
+        const currentUsed = usage?.gardener_characters_used_today || 0;
+        const limit = tierDetails?.gardener_character_limit || 3000;
+        return currentUsed + additionalChars <= limit;
+      },
+
+      getGardenerCharacterLimit: () => {
+        const { tierDetails } = get();
+        return tierDetails?.gardener_character_limit || 3000;
+      },
+
+      getGardenerCharactersRemaining: () => {
+        const { tierDetails, usage } = get();
+        const limit = tierDetails?.gardener_character_limit || 3000;
+        const used = usage?.gardener_characters_used_today || 0;
+        return Math.max(0, limit - used);
       },
 
       hasValuesMatching: () => {

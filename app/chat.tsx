@@ -67,19 +67,25 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const { currentUser } = useUser();
   const insets = useSafeAreaInsets();
-  const { bottomOffsetWhenHidden, keyboardAnimatedHeight } = useKeyboard({ hasTabBar: false });
+  const { keyboardAnimatedHeight, isKeyboardVisible } = useKeyboard({ hasTabBar: false });
   const [inputBarHeight, setInputBarHeight] = useState(CHAT_INPUT_BAR_BASE_HEIGHT);
 
   // Animated padding for FlatList that syncs with keyboard
   const BASE_CONTENT_PADDING = 16;
+
+  // Calculate safe area offset for FlatList padding
+  // When keyboard is hidden (no tab bar), input bar has internal safe area padding
+  // that we need to account for in FlatList padding
+  const safeAreaOffset = isKeyboardVisible ? 0 : insets.bottom;
+
   const animatedInputHeight = useRef(
-    new Animated.Value(inputBarHeight + BASE_CONTENT_PADDING)
+    new Animated.Value(inputBarHeight + BASE_CONTENT_PADDING + safeAreaOffset)
   ).current;
 
-  // Update animated value when input bar height changes (multiline text growth)
+  // Update animated value when input bar height changes or safe area changes
   useEffect(() => {
-    animatedInputHeight.setValue(inputBarHeight + BASE_CONTENT_PADDING);
-  }, [inputBarHeight, animatedInputHeight]);
+    animatedInputHeight.setValue(inputBarHeight + BASE_CONTENT_PADDING + safeAreaOffset);
+  }, [inputBarHeight, animatedInputHeight, safeAreaOffset]);
 
   // Combine keyboard height with input bar height for total bottom padding
   const animatedBottomPadding = Animated.add(keyboardAnimatedHeight, animatedInputHeight);

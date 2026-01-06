@@ -21,6 +21,7 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import useSubscriptionStore from '../../stores/useSubscriptionStore';
 import { UpgradeModal } from '../UpgradeModal';
 import { formatLimitMessage } from '../../lib/subscription';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatInputBar, CHAT_INPUT_BAR_BASE_HEIGHT } from '../chat';
 import { useKeyboard } from '../../hooks/useKeyboard';
 
@@ -51,19 +52,26 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     getGardenerCharactersRemaining,
   } = useSubscriptionStore();
   const hasTabBar = !onBack; // Tab bar present when used as tab screen (not modal)
-  const { bottomOffsetWhenHidden, keyboardAnimatedHeight } = useKeyboard({ hasTabBar });
+  const insets = useSafeAreaInsets();
+  const { keyboardAnimatedHeight, isKeyboardVisible } = useKeyboard({ hasTabBar });
   const [inputBarHeight, setInputBarHeight] = useState(CHAT_INPUT_BAR_BASE_HEIGHT);
 
   // Animated padding for FlatList that syncs with keyboard
   const BASE_CONTENT_PADDING = 16;
+
+  // Calculate safe area offset for FlatList padding
+  // When keyboard is hidden AND no tab bar (modal mode), input bar has internal safe area padding
+  // When tab bar is present, no extra offset needed (tab bar handles safe area)
+  const safeAreaOffset = isKeyboardVisible || hasTabBar ? 0 : insets.bottom;
+
   const animatedInputHeight = useRef(
-    new Animated.Value(inputBarHeight + BASE_CONTENT_PADDING)
+    new Animated.Value(inputBarHeight + BASE_CONTENT_PADDING + safeAreaOffset)
   ).current;
 
-  // Update animated value when input bar height changes (multiline text growth)
+  // Update animated value when input bar height changes or safe area changes
   useEffect(() => {
-    animatedInputHeight.setValue(inputBarHeight + BASE_CONTENT_PADDING);
-  }, [inputBarHeight, animatedInputHeight]);
+    animatedInputHeight.setValue(inputBarHeight + BASE_CONTENT_PADDING + safeAreaOffset);
+  }, [inputBarHeight, animatedInputHeight, safeAreaOffset]);
 
   // Combine keyboard height with input bar height for total bottom padding
   const animatedBottomPadding = Animated.add(keyboardAnimatedHeight, animatedInputHeight);

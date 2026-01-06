@@ -23,13 +23,16 @@ interface UseKeyboardReturn {
 }
 
 const TAB_BAR_HEIGHT = 70;
-const MIN_BOTTOM_PADDING = 8;
 
 /**
  * Hook for tracking keyboard height with smooth animations.
  *
  * Provides real-time keyboard height tracking using platform-appropriate
  * events (keyboardWillShow on iOS, keyboardDidShow on Android).
+ *
+ * IMPORTANT: This hook does NOT include safe area insets in bottomOffsetWhenHidden.
+ * Safe area handling is done by the ChatInputBar component internally.
+ * This prevents double safe area padding.
  *
  * @example
  * ```tsx
@@ -51,8 +54,8 @@ export const useKeyboard = (options: UseKeyboardOptions = {}): UseKeyboardReturn
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   // Calculate bottom offset when keyboard is hidden
-  const bottomOffsetWhenHidden =
-    Math.max(insets.bottom, MIN_BOTTOM_PADDING) + (hasTabBar ? TAB_BAR_HEIGHT : 0) + extraPadding;
+  // Only include tab bar height - safe area is handled by ChatInputBar internally
+  const bottomOffsetWhenHidden = (hasTabBar ? TAB_BAR_HEIGHT : 0) + extraPadding;
 
   // Animated value starts at the hidden state offset
   const keyboardAnimatedHeight = useRef(new Animated.Value(bottomOffsetWhenHidden)).current;

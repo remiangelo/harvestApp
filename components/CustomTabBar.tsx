@@ -1,5 +1,13 @@
-import React, { useEffect, useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, Animated, Platform, Image } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  Platform,
+  Image,
+  Keyboard,
+} from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,41 +18,44 @@ import GARDENER_ICON from '../assets/images/unnamed.png';
 
 export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
   const insets = useSafeAreaInsets();
+
   const translateY = useRef(new Animated.Value(0)).current;
+  const [isHidden, setIsHidden] = useState(false);
 
-  // Listen for scroll events from all screens - but keep tab bar always visible for now
+  // 👇 if your tab bar is 56 tall + bottom offset, hiding by ~120 is safe
+  const HIDE_DISTANCE = 140;
+
   useEffect(() => {
-    const handleScroll = (scrollY: number) => {
-      // Keep tab bar always visible - don't hide on scroll
-      // This fixes the issue where the tab bar disappears and doesn't come back
-      return;
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
-      /* Original scroll hiding logic - disabled for now
-      const diff = scrollY - lastScrollY.current;
-
-      if (Math.abs(diff) < 5) return; // Ignore small scroll differences
-
-      if (diff > 0 && !isScrollingDown.current) {
-        // Scrolling down - hide tab bar
-        isScrollingDown.current = true;
-        animateTabBar(false);
-      } else if (diff < 0 && isScrollingDown.current) {
-        // Scrolling up - show tab bar
-        isScrollingDown.current = false;
-        animateTabBar(true);
-      }
-
-      lastScrollY.current = scrollY;
-      */
+    const onShow = () => {
+      setIsHidden(true);
+      Animated.timing(translateY, {
+        toValue: HIDE_DISTANCE,
+        duration: Platform.OS === 'ios' ? 220 : 160,
+        useNativeDriver: true,
+      }).start();
     };
 
-    // Export function for screens to call
-    (global as any).handleTabBarScroll = handleScroll;
+    const onHide = () => {
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: Platform.OS === 'ios' ? 220 : 160,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) setIsHidden(false);
+      });
+    };
+
+    const subShow = Keyboard.addListener(showEvent, onShow);
+    const subHide = Keyboard.addListener(hideEvent, onHide);
 
     return () => {
-      delete (global as any).handleTabBarScroll;
+      subShow.remove();
+      subHide.remove();
     };
-  }, []);
+  }, [translateY]);
 
   const getIconName = (routeName: string): string => {
     switch (routeName) {
@@ -74,24 +85,23 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
     return `${labels[routeName] || routeName}${isFocused ? ', selected' : ''}`;
   };
 
+  const bottomOffset =
+    Platform.OS === 'ios' ? (insets.bottom > 0 ? insets.bottom : 20) : Math.max(insets.bottom, 10);
+
   return (
     <Animated.View
+      pointerEvents={isHidden ? 'none' : 'auto'} // ✅ no ghost taps while hidden
       style={[
         styles.container,
         {
           transform: [{ translateY }],
-          bottom:
-            Platform.OS === 'ios'
-              ? insets.bottom > 0
-                ? insets.bottom
-                : 20
-              : Math.max(insets.bottom, 10),
+          bottom: bottomOffset,
+          opacity: isHidden ? 0 : 1, // ✅ helps on Android (optional but nice)
         },
       ]}
     >
       {/* Ultra Transparent Liquid Glass with Chromatic Aberration */}
       <View style={styles.chromaticContainer}>
-        {/* Red channel offset - very subtle */}
         <View style={[styles.blurContainer, styles.redChannel]}>
           <BlurView intensity={30} tint="light" style={styles.blurView}>
             <View
@@ -100,7 +110,6 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
           </BlurView>
         </View>
 
-        {/* Blue channel offset - very subtle */}
         <View style={[styles.blurContainer, styles.blueChannel]}>
           <BlurView intensity={30} tint="light" style={styles.blurView}>
             <View
@@ -109,10 +118,8 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
           </BlurView>
         </View>
 
-        {/* Main glass layer - ultra transparent */}
         <View style={styles.blurContainer}>
           <BlurView intensity={40} tint="light" style={styles.blurView}>
-            {/* Very subtle glass tint */}
             <LinearGradient
               colors={[
                 'rgba(255,255,255,0.08)',
@@ -123,7 +130,6 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFillObject}
             />
-            {/* Ultra subtle prismatic edge */}
             <LinearGradient
               colors={[
                 'rgba(255,100,150,0.02)',
@@ -135,7 +141,6 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
               locations={[0, 0.5, 1]}
               style={StyleSheet.absoluteFillObject}
             />
-            {/* Very subtle top edge highlight */}
             <View style={styles.edgeHighlight} />
           </BlurView>
         </View>
@@ -223,13 +228,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
-    ...(Platform.OS === 'android' && {
-      elevation: 8,
-    }),
+    ...(Platform.OS === 'android' && { elevation: 8 }),
   },
-  blurView: {
-    flex: 1,
-  },
+  blurView: { flex: 1 },
   chromaticContainer: {
     elevation: 8,
     height: 56,
@@ -247,10 +248,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 100,
   },
-  customIcon: {
-    height: 24,
-    width: 24,
-  },
+  customIcon: { height: 24, width: 24 },
   edgeHighlight: {
     backgroundColor: 'rgba(255, 255, 255, 0.6)',
     height: 1,
@@ -259,25 +257,14 @@ const styles = StyleSheet.create({
     right: 20,
     top: 0,
   },
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  iconFocused: {
-    transform: [{ scale: 1.1 }],
-  },
+  iconContainer: { alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  iconFocused: { transform: [{ scale: 1.1 }] },
   redChannel: {
     opacity: 0.15,
     transform: [{ translateX: -1 }, { translateY: -0.5 }],
     zIndex: 1,
   },
-  tab: {
-    alignItems: 'center',
-    flex: 1,
-    height: '100%',
-    justifyContent: 'center',
-  },
+  tab: { alignItems: 'center', flex: 1, height: '100%', justifyContent: 'center' },
   tabsContainer: {
     alignItems: 'center',
     flexDirection: 'row',

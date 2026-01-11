@@ -14,7 +14,11 @@ interface UseKeyboardReturn {
   keyboardHeight: number;
   /** Whether keyboard is currently visible */
   isKeyboardVisible: boolean;
-  /** Animated value for keyboard height - use for smooth animations */
+  /**
+   * Animated bottom offset to apply to absolute-positioned UI (like your ChatInputBar).
+   * iOS: follows keyboard height.
+   * Android: 0 while keyboard visible (because window already resizes).
+   */
   keyboardAnimatedHeight: Animated.Value;
   /** Safe area insets */
   insets: ReturnType<typeof useSafeAreaInsets>;
@@ -24,28 +28,6 @@ interface UseKeyboardReturn {
 
 const TAB_BAR_HEIGHT = 70;
 
-/**
- * Hook for tracking keyboard height with smooth animations.
- *
- * Provides real-time keyboard height tracking using platform-appropriate
- * events (keyboardWillShow on iOS, keyboardDidShow on Android).
- *
- * IMPORTANT: This hook does NOT include safe area insets in bottomOffsetWhenHidden.
- * Safe area handling is done by the ChatInputBar component internally.
- * This prevents double safe area padding.
- *
- * @example
- * ```tsx
- * const { keyboardAnimatedHeight, isKeyboardVisible, bottomOffsetWhenHidden } = useKeyboard({
- *   hasTabBar: true,
- * });
- *
- * // Use in Animated.View
- * <Animated.View style={{ bottom: keyboardAnimatedHeight }}>
- *   <InputBar />
- * </Animated.View>
- * ```
- */
 export const useKeyboard = (options: UseKeyboardOptions = {}): UseKeyboardReturn => {
   const { hasTabBar = false, extraPadding = 0 } = options;
   const insets = useSafeAreaInsets();
@@ -53,34 +35,23 @@ export const useKeyboard = (options: UseKeyboardOptions = {}): UseKeyboardReturn
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
-  // Calculate bottom offset when keyboard is hidden
-  // Only include tab bar height - safe area is handled by ChatInputBar internally
+  // When keyboard is hidden, you may want to sit above the tab bar.
   const bottomOffsetWhenHidden = (hasTabBar ? TAB_BAR_HEIGHT : 0) + extraPadding;
 
-  // Animated value starts at the hidden state offset
+  // This value is meant to be used for "bottom:" on absolutely positioned elements.
+  // Start at the hidden offset.
   const keyboardAnimatedHeight = useRef(new Animated.Value(bottomOffsetWhenHidden)).current;
 
-  // Track current animation to allow cancellation
   const currentAnimation = useRef<Animated.CompositeAnimation | null>(null);
 
-  const handleKeyboardShow = useCallback(
-    (event: KeyboardEvent) => {
-      // Cancel any ongoing animation
-      if (currentAnimation.current) {
-        currentAnimation.current.stop();
-      }
-
-      const keyboardHeightValue = event.endCoordinates.height;
-      setKeyboardHeight(keyboardHeightValue);
-      setIsKeyboardVisible(true);
-
-      // iOS provides animation duration, Android keyboard is already animated
-      const duration = Platform.OS === 'ios' ? event.duration || 250 : 100;
+  const animateTo = useCallback(
+    (toValue: number, duration: number) => {
+      if (currentAnimation.current) currentAnimation.current.stop();
 
       currentAnimation.current = Animated.timing(keyboardAnimatedHeight, {
-        toValue: keyboardHeightValue,
+        toValue,
         duration,
-        useNativeDriver: false, // Must be false for layout animations
+        useNativeDriver: false,
       });
 
       currentAnimation.current.start(() => {
@@ -90,56 +61,52 @@ export const useKeyboard = (options: UseKeyboardOptions = {}): UseKeyboardReturn
     [keyboardAnimatedHeight]
   );
 
+  const handleKeyboardShow = useCallback(
+    (event: KeyboardEvent) => {
+      const h = event.endCoordinates?.height ?? 0;
+      setKeyboardHeight(h);
+      setIsKeyboardVisible(true);
+
+      // iOS needs to follow the keyboard for perfect attachment.
+      // Android should NOT shift by keyboard height because the window resizes (adjustResize).
+      const targetBottom = Platform.OS === 'ios' ? h : 0;
+
+      const duration = Platform.OS === 'ios' ? event.duration || 250 : 100;
+      animateTo(targetBottom, duration);
+    },
+    [animateTo]
+  );
+
   const handleKeyboardHide = useCallback(
     (event: KeyboardEvent) => {
-      // Cancel any ongoing animation
-      if (currentAnimation.current) {
-        currentAnimation.current.stop();
-      }
-
       setKeyboardHeight(0);
       setIsKeyboardVisible(false);
 
-      // iOS provides animation duration, Android keyboard is already animated
       const duration = Platform.OS === 'ios' ? event.duration || 250 : 100;
-
-      currentAnimation.current = Animated.timing(keyboardAnimatedHeight, {
-        toValue: bottomOffsetWhenHidden,
-        duration,
-        useNativeDriver: false,
-      });
-
-      currentAnimation.current.start(() => {
-        currentAnimation.current = null;
-      });
+      animateTo(bottomOffsetWhenHidden, duration);
     },
-    [keyboardAnimatedHeight, bottomOffsetWhenHidden]
+    [animateTo, bottomOffsetWhenHidden]
   );
 
   useEffect(() => {
-    // Update animated value when bottomOffsetWhenHidden changes (e.g., safe area changes)
+    // If tab bar / padding changes while keyboard is hidden, keep bar in correct place.
     if (!isKeyboardVisible) {
       keyboardAnimatedHeight.setValue(bottomOffsetWhenHidden);
     }
   }, [bottomOffsetWhenHidden, isKeyboardVisible, keyboardAnimatedHeight]);
 
   useEffect(() => {
-    // Use platform-appropriate events
-    // iOS: keyboardWillShow/Hide fires BEFORE animation (smoother)
-    // Android: keyboardDidShow/Hide fires AFTER animation
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
-    const subscriptions: EmitterSubscription[] = [
+    const subs: EmitterSubscription[] = [
       Keyboard.addListener(showEvent, handleKeyboardShow),
       Keyboard.addListener(hideEvent, handleKeyboardHide),
     ];
 
     return () => {
-      subscriptions.forEach((sub) => sub.remove());
-      if (currentAnimation.current) {
-        currentAnimation.current.stop();
-      }
+      subs.forEach((s) => s.remove());
+      if (currentAnimation.current) currentAnimation.current.stop();
     };
   }, [handleKeyboardShow, handleKeyboardHide]);
 

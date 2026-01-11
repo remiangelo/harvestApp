@@ -4,7 +4,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Animated,
   Platform,
   LayoutChangeEvent,
 } from 'react-native';
@@ -27,7 +26,7 @@ interface ChatInputBarProps {
   placeholder?: string;
   /** Whether input is disabled */
   disabled?: boolean;
-  /** Whether screen has bottom tab bar (adds 70px offset) */
+  /** Whether screen has bottom tab bar */
   hasTabBar?: boolean;
   /** Whether to show the attach button */
   showAttachButton?: boolean;
@@ -37,16 +36,26 @@ interface ChatInputBarProps {
   customContent?: React.ReactNode;
   /** Callback when input bar height changes */
   onHeightChange?: (height: number) => void;
+
+  /**
+   * Optional explicit tab bar height if you want it precise.
+   * If not provided and hasTabBar=true, a sensible default is used.
+   */
+  tabBarHeight?: number;
 }
 
 // Estimated base height for layout calculations
 export const CHAT_INPUT_BAR_BASE_HEIGHT = 60;
 
+// Fallback tab bar height (only used if hasTabBar=true and tabBarHeight not provided)
+const DEFAULT_TAB_BAR_HEIGHT = 70;
+
 /**
- * Shared chat input bar component with keyboard-aware positioning.
+ * Chat input bar as a NORMAL footer (no absolute positioning).
  *
- * Uses absolute positioning and animates with keyboard height for
- * zero-gap keyboard attachment on both iOS and Android.
+ * IMPORTANT:
+ * - Place this directly UNDER your FlatList in a column layout.
+ * - Let the parent screen handle the keyboard (KeyboardAvoidingView / adjustResize).
  */
 export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   value,
@@ -60,15 +69,11 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   maxLength = 1000,
   customContent,
   onHeightChange,
+  tabBarHeight,
 }) => {
   const insets = useSafeAreaInsets();
-  const { keyboardAnimatedHeight, isKeyboardVisible, bottomOffsetWhenHidden } = useKeyboard({
-    hasTabBar,
-  });
-  const [inputHeight, setInputHeight] = useState(0);
-
-  // Extend background to screen bottom when keyboard is hidden
-  const containerPaddingBottom = isKeyboardVisible ? 0 : bottomOffsetWhenHidden;
+  const { isKeyboardVisible } = useKeyboard({ hasTabBar });
+  const [_inputHeight, setInputHeight] = useState(0);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
@@ -78,24 +83,26 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
   const canSend = value.trim().length > 0 && !disabled;
 
-  // Calculate safe area padding:
-  // - When keyboard is visible: no padding needed (keyboard provides safe area)
-  // - When keyboard is hidden AND no tab bar: need padding for home indicator
-  // - When keyboard is hidden AND has tab bar: no padding (tab bar provides safe area)
-  const safeAreaPadding = isKeyboardVisible || hasTabBar ? 0 : insets.bottom;
+  /**
+   * Bottom spacing rules:
+   * - If keyboard is visible: parent layout (KeyboardAvoidingView / adjustResize) handles it.
+   *   So we do NOT add extra bottom padding here.
+   * - If keyboard is hidden:
+   *    - with tab bar: add padding so the input sits above the tab bar overlay.
+   *    - without tab bar: add safe-area inset (home indicator).
+   */
+  const bottomPadWhenHidden = hasTabBar ? (tabBarHeight ?? DEFAULT_TAB_BAR_HEIGHT) : insets.bottom;
+
+  const containerBottomPadding = isKeyboardVisible ? 0 : bottomPadWhenHidden;
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        { bottom: keyboardAnimatedHeight, paddingBottom: containerPaddingBottom },
-      ]}
+    <View
+      style={[styles.outerContainer, { paddingBottom: containerBottomPadding }]}
       onLayout={handleLayout}
     >
       <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFillObject} />
 
-      {/* Safe area spacer - only when keyboard hidden */}
-      <View style={[styles.contentWrapper, { paddingBottom: safeAreaPadding }]}>
+      <View style={styles.contentWrapper}>
         {customContent ? (
           <View style={styles.customContentWrapper}>{customContent}</View>
         ) : (
@@ -134,7 +141,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
           </View>
         )}
       </View>
-    </Animated.View>
+    </View>
   );
 };
 
@@ -143,15 +150,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     marginRight: 8,
   },
-  container: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderTopWidth: 0,
-    left: 0,
-    overflow: 'hidden',
-    position: 'absolute',
-    right: 0,
-  },
   contentWrapper: {
+    paddingBottom: 8,
     paddingHorizontal: 16,
     paddingTop: 8,
   },
@@ -169,7 +169,6 @@ const styles = StyleSheet.create({
   inputRow: {
     alignItems: 'flex-end',
     flexDirection: 'row',
-    paddingBottom: 8,
   },
   inputWrapper: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -180,6 +179,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+  },
+  outerContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderTopWidth: 0,
+    overflow: 'hidden',
   },
   sendButton: {
     marginBottom: 6,

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabase';
@@ -28,9 +27,15 @@ import { HarmfulMessageModal } from '../components/HarmfulMessageModal';
 import { theme } from '../constants/theme';
 import { analyzeMessage, isMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
 import { ChatInputBar, CHAT_INPUT_BAR_BASE_HEIGHT } from '../components/chat';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+
+// ✅ Match GardenerChat behavior
+import { useKeyboard } from '../hooks/useKeyboard';
+import { useKeyboardSafeArea } from '../hooks/useKeyboardSafeArea';
+
+// 🚫 Removed: useBottomTabBarHeight (causes crash when not inside tab navigator)
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/EB1E66/FFFFFF?text=No+Image';
+const TAB_BAR_HEIGHT = 70; // fallback only if you ever decide to treat this screen as tabbed
 
 interface ChatPartner {
   id: string;
@@ -68,8 +73,13 @@ interface Subscription {
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const { currentUser } = useUser();
-  const insets = useSafeAreaInsets();
-  const tabBarHeight = useBottomTabBarHeight();
+
+  // ✅ This screen is a Stack screen in your root layout, so it is NOT in the tab navigator.
+  // This prevents the "Couldn't find the bottom tab bar height" crash.
+  const hasTabBar = false;
+
+  const { isKeyboardVisible } = useKeyboard({ hasTabBar });
+  const { keyboardBehavior, getKeyboardVerticalOffset } = useKeyboardSafeArea({ hasTabBar });
 
   const [inputBarHeight, setInputBarHeight] = useState(CHAT_INPUT_BAR_BASE_HEIGHT);
 
@@ -89,16 +99,20 @@ export default function ChatScreen() {
 
   const flatListRef = useRef<FlatList<Message>>(null);
   const subscriptionRef = useRef<Subscription | null>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const conversationId = String(id);
 
-  // always keep bottom visible when new message arrives (unless user is scrolling up)
-  const scrollToBottom = (animated = true) => {
-    requestAnimationFrame(() => {
-      flatListRef.current?.scrollToEnd({ animated });
-    });
-  };
+  // ✅ reliable bottom scroll (same approach as updated GardenerChat)
+  const scrollToBottom = useCallback((animated = false) => {
+    flatListRef.current?.scrollToEnd({ animated });
+  }, []);
+
+  // ✅ Match GardenerChat padding behavior (messages never sit under input; tab bar only if you ever enable it)
+  const listContentPaddingBottom = useMemo(() => {
+    const tabBarPadding = hasTabBar && !isKeyboardVisible ? TAB_BAR_HEIGHT : 0;
+    return inputBarHeight + tabBarPadding + 16;
+  }, [inputBarHeight, hasTabBar, isKeyboardVisible]);
 
   useEffect(() => {
     const loadConversation = async () => {
@@ -155,7 +169,7 @@ export default function ChatScreen() {
     };
 
     loadConversation();
-  }, [conversationId, currentUser]);
+  }, [conversationId, currentUser, scrollToBottom]);
 
   useEffect(() => {
     if (!chatPartner || !currentUser) return;
@@ -189,7 +203,7 @@ export default function ChatScreen() {
           setMessages((current) => [...current, incoming]);
           setOtherUserTyping(false);
 
-          // keep at bottom for new messages
+          // keep at bottom for new messages (existing behavior)
           scrollToBottom(true);
 
           if (incoming.sender_id !== currentUser.id && chatPartner) {
@@ -224,7 +238,7 @@ export default function ChatScreen() {
         supabase.removeChannel(subscriptionRef.current);
       }
     };
-  }, [chatPartner, currentUser, conversationId]);
+  }, [chatPartner, currentUser, conversationId, scrollToBottom]);
 
   if (!chatPartner && !loading) {
     return (
@@ -396,6 +410,45 @@ export default function ChatScreen() {
     );
   };
 
+  const ScreenBody = (
+    <View style={styles.messagesContainer}>
+      <FlatList
+        ref={flatListRef}
+        style={{ flex: 1 }}
+        data={loading ? [] : messages} // oldest -> newest
+        renderItem={renderMessage}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={[
+          styles.messagesContent,
+          { paddingBottom: listContentPaddingBottom },
+        ]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        // ✅ same as updated GardenerChat: scroll after layout/content settles
+        onContentSizeChange={() => scrollToBottom(false)}
+        ListFooterComponent={renderTypingIndicator()}
+      />
+
+      <ChatInputBar
+        value={newMessage}
+        onChangeText={(text) => {
+          setNewMessage(text);
+          handleTyping();
+        }}
+        onSend={analyzeThenSend}
+        onAttach={handleAttachPress}
+        placeholder="Type a message..."
+        hasTabBar={hasTabBar}
+        tabBarHeight={TAB_BAR_HEIGHT}
+        showAttachButton={true}
+        maxLength={1000}
+        onHeightChange={setInputBarHeight}
+        //absolute={false}
+      />
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -426,44 +479,17 @@ export default function ChatScreen() {
         </SafeAreaView>
       </LinearGradient>
 
-      {/* list + input in a column */}
-      <KeyboardAvoidingView
-        style={styles.messagesContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
-      >
-        <FlatList
-          ref={flatListRef}
+      {Platform.OS === 'ios' ? (
+        <KeyboardAvoidingView
           style={{ flex: 1 }}
-          data={loading ? [] : messages} // oldest -> newest
-          renderItem={renderMessage}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.messagesContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-          onContentSizeChange={() => scrollToBottom(false)}
-          onLayout={() => scrollToBottom(false)}
-          ListFooterComponent={renderTypingIndicator()}
-        />
-
-        <ChatInputBar
-          value={newMessage}
-          onChangeText={(text) => {
-            setNewMessage(text);
-            handleTyping();
-          }}
-          onSend={analyzeThenSend}
-          onAttach={handleAttachPress}
-          placeholder="Type a message..."
-          hasTabBar={true}
-          tabBarHeight={tabBarHeight}
-          showAttachButton={true}
-          maxLength={1000}
-          onHeightChange={setInputBarHeight}
-          absolute={false}
-        />
-      </KeyboardAvoidingView>
+          behavior={keyboardBehavior}
+          keyboardVerticalOffset={getKeyboardVerticalOffset(0)}
+        >
+          {ScreenBody}
+        </KeyboardAvoidingView>
+      ) : (
+        ScreenBody
+      )}
     </View>
   );
 }
@@ -508,8 +534,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
     minWidth: 60,
   },
-  messagesContainer: { flex: 1 }, // ✅ no position: relative needed
-  messagesContent: { flexGrow: 1, paddingBottom: 12, paddingHorizontal: 16, paddingTop: 20 },
+  messagesContainer: { flex: 1 },
+  messagesContent: { flexGrow: 1, paddingHorizontal: 16, paddingTop: 20 },
   moreButton: { marginLeft: 12 },
   otherUserMessage: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',

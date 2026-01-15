@@ -9,8 +9,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { theme } from '../../constants/theme';
 import { useAuthStore } from '../../stores/useAuthStore';
+import useSubscriptionStore from '../../stores/useSubscriptionStore';
 import {
   Value,
   getAllValues,
@@ -20,17 +22,20 @@ import {
   saveUserValuesSought,
 } from '../../lib/values';
 import { LiquidGlassView } from '../liquid/LiquidGlassView';
+import { UpgradeModal } from '../UpgradeModal';
 
 type ValueType = 'brought' | 'sought';
 
 export const ValuesQuestionnaire: React.FC = () => {
   const { user } = useAuthStore();
+  const hasValuesMatching = useSubscriptionStore((state) => state.hasValuesMatching);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<ValueType>('brought');
   const [allValues, setAllValues] = useState<Value[]>([]);
   const [selectedBrought, setSelectedBrought] = useState<string[]>([]);
   const [selectedSought, setSelectedSought] = useState<string[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -145,6 +150,57 @@ export const ValuesQuestionnaire: React.FC = () => {
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Loading values...</Text>
+      </View>
+    );
+  }
+
+  // Show locked screen for free tier users
+  if (!hasValuesMatching()) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.lockedContainer}>
+          <BlurView intensity={60} tint="light" style={styles.lockedBlur}>
+            <View style={styles.lockedContent}>
+              <View style={styles.lockIconLarge}>
+                <Ionicons name="lock-closed" size={48} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.lockedTitle}>Values-Based Matching</Text>
+              <Text style={styles.lockedSubtitle}>Premium Feature</Text>
+              <Text style={styles.lockedDescription}>
+                Unlock the power of values-based matching to find partners who share what matters
+                most to you. Define the values you bring and the values you seek in a relationship.
+              </Text>
+              <View style={styles.featureList}>
+                <View style={styles.featureItem}>
+                  <Ionicons name="gift" size={20} color={theme.colors.accent} />
+                  <Text style={styles.featureText}>Share 5 values you bring</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="search" size={20} color={theme.colors.accent} />
+                  <Text style={styles.featureText}>Define 5 values you seek</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Ionicons name="heart" size={20} color={theme.colors.accent} />
+                  <Text style={styles.featureText}>Get matched on shared values</Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={styles.upgradeButton}
+                onPress={() => setShowUpgradeModal(true)}
+              >
+                <Ionicons name="leaf" size={22} color="#000" />
+                <Text style={styles.upgradeButtonText}>Upgrade to Green</Text>
+              </TouchableOpacity>
+            </View>
+          </BlurView>
+        </View>
+        <UpgradeModal
+          visible={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          highlightFeature="values"
+          title="Unlock Values Matching"
+          subtitle="Find partners who share what matters most to you"
+        />
       </View>
     );
   }
@@ -312,6 +368,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
+  featureItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    paddingVertical: 8,
+  },
+  featureList: {
+    marginBottom: 24,
+    marginTop: 20,
+    width: '100%',
+  },
+  featureText: {
+    color: theme.colors.text.primary,
+    fontFamily: theme.typography.fontFamily.medium,
+    fontSize: 15,
+  },
   header: {
     marginBottom: 20,
     padding: 20,
@@ -325,6 +397,55 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     fontSize: 16,
     marginTop: 12,
+  },
+  lockIconLarge: {
+    alignItems: 'center',
+    backgroundColor: `${theme.colors.primary}15`,
+    borderRadius: 48,
+    height: 96,
+    justifyContent: 'center',
+    marginBottom: 20,
+    width: 96,
+  },
+  lockedBlur: {
+    alignItems: 'center',
+    borderRadius: 24,
+    flex: 1,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    width: '100%',
+  },
+  lockedContainer: {
+    borderRadius: 24,
+    flex: 1,
+    marginTop: 20,
+    overflow: 'hidden',
+  },
+  lockedContent: {
+    alignItems: 'center',
+    padding: 32,
+  },
+  lockedDescription: {
+    color: theme.colors.text.secondary,
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: 15,
+    lineHeight: 22,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  lockedSubtitle: {
+    color: theme.colors.accent,
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: 14,
+    letterSpacing: 1,
+    marginTop: 4,
+    textTransform: 'uppercase',
+  },
+  lockedTitle: {
+    color: theme.colors.text.primary,
+    fontFamily: theme.typography.fontFamily.display,
+    fontSize: 28,
+    textAlign: 'center',
   },
   rankBadge: {
     alignItems: 'center',
@@ -408,6 +529,21 @@ const styles = StyleSheet.create({
     color: theme.colors.text.primary,
     fontSize: 22,
     fontWeight: 'bold',
+  },
+  upgradeButton: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.accent,
+    borderRadius: 28,
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: 28,
+    paddingVertical: 16,
+    ...theme.shadows.md,
+  },
+  upgradeButtonText: {
+    color: '#000',
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: 17,
   },
   valueCard: {
     backgroundColor: 'white',

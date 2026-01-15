@@ -17,6 +17,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from './liquid/LiquidGlassView';
 import { theme } from '../constants/theme';
 import { getUserValuesBrought, getUserValuesSought, UserValue } from '../lib/values';
+import useSubscriptionStore from '../stores/useSubscriptionStore';
+import { PremiumLockedOverlay } from './PremiumLockedOverlay';
+import { UpgradeModal } from './UpgradeModal';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/A0354E/FFFFFF?text=No+Image';
 
@@ -50,6 +53,9 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [valuesBrought, setValuesBrought] = useState<UserValue[]>([]);
   const [valuesSought, setValuesSought] = useState<UserValue[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const hasValuesMatching = useSubscriptionStore((state) => state.hasValuesMatching);
 
   useEffect(() => {
     if (visible && profile) {
@@ -215,47 +221,61 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
                 </View>
               )}
 
-              {/* Values - What They Bring */}
-              {valuesBrought.length > 0 && (
-                <View style={styles.valuesSection}>
-                  <View style={styles.valuesTitleRow}>
-                    <Ionicons name="gift" size={20} color={theme.colors.primary} />
-                    <Text style={styles.sectionTitle}>Top Values They Bring</Text>
-                  </View>
-                  <View style={styles.valuesGrid}>
-                    {valuesBrought.slice(0, 3).map((userValue, index) => (
-                      <View key={userValue.id} style={styles.valueChip}>
-                        <View style={styles.valueRank}>
-                          <Text style={styles.valueRankText}>{index + 1}</Text>
-                        </View>
-                        <Text style={styles.valueText}>
-                          {(userValue.value as any)?.name || 'Unknown'}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              )}
+              {/* Values Section - Premium Feature */}
+              {(valuesBrought.length > 0 || valuesSought.length > 0) && (
+                <View style={styles.valuesSectionWrapper}>
+                  {/* Show lock overlay for free tier */}
+                  {!hasValuesMatching() && (
+                    <PremiumLockedOverlay
+                      onUpgrade={() => setShowUpgradeModal(true)}
+                      featureName="Values-Based Matching"
+                      description="See what values potential matches bring and seek. Upgrade to Green tier to unlock."
+                    />
+                  )}
 
-              {/* Values - What They Seek */}
-              {valuesSought.length > 0 && (
-                <View style={styles.valuesSection}>
-                  <View style={styles.valuesTitleRow}>
-                    <Ionicons name="search" size={20} color={theme.colors.primary} />
-                    <Text style={styles.sectionTitle}>Top Values They Seek</Text>
-                  </View>
-                  <View style={styles.valuesGrid}>
-                    {valuesSought.slice(0, 3).map((userValue, index) => (
-                      <View key={userValue.id} style={styles.valueChip}>
-                        <View style={styles.valueRank}>
-                          <Text style={styles.valueRankText}>{index + 1}</Text>
-                        </View>
-                        <Text style={styles.valueText}>
-                          {(userValue.value as any)?.name || 'Unknown'}
-                        </Text>
+                  {/* Values - What They Bring */}
+                  {valuesBrought.length > 0 && (
+                    <View style={styles.valuesSection}>
+                      <View style={styles.valuesTitleRow}>
+                        <Ionicons name="gift" size={20} color={theme.colors.primary} />
+                        <Text style={styles.sectionTitle}>Top Values They Bring</Text>
                       </View>
-                    ))}
-                  </View>
+                      <View style={styles.valuesGrid}>
+                        {valuesBrought.slice(0, 3).map((userValue, index) => (
+                          <View key={userValue.id} style={styles.valueChip}>
+                            <View style={styles.valueRank}>
+                              <Text style={styles.valueRankText}>{index + 1}</Text>
+                            </View>
+                            <Text style={styles.valueText}>
+                              {(userValue.value as any)?.name || 'Unknown'}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Values - What They Seek */}
+                  {valuesSought.length > 0 && (
+                    <View style={styles.valuesSection}>
+                      <View style={styles.valuesTitleRow}>
+                        <Ionicons name="search" size={20} color={theme.colors.primary} />
+                        <Text style={styles.sectionTitle}>Top Values They Seek</Text>
+                      </View>
+                      <View style={styles.valuesGrid}>
+                        {valuesSought.slice(0, 3).map((userValue, index) => (
+                          <View key={userValue.id} style={styles.valueChip}>
+                            <View style={styles.valueRank}>
+                              <Text style={styles.valueRankText}>{index + 1}</Text>
+                            </View>
+                            <Text style={styles.valueText}>
+                              {(userValue.value as any)?.name || 'Unknown'}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
                 </View>
               )}
             </LiquidGlassView>
@@ -272,6 +292,15 @@ export const ProfileViewModal: React.FC<ProfileViewModalProps> = ({
           )}
         </View>
       </BlurView>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        visible={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        highlightFeature="values"
+        title="Unlock Values Matching"
+        subtitle="Discover what truly matters to your potential matches"
+      />
     </Modal>
   );
 };
@@ -485,6 +514,11 @@ const styles = StyleSheet.create({
   },
   valuesSection: {
     marginTop: 16,
+  },
+  valuesSectionWrapper: {
+    marginTop: 16,
+    minHeight: 180,
+    position: 'relative',
   },
   valuesTitleRow: {
     alignItems: 'center',

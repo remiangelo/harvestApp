@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,13 @@ import {
   ActivityIndicator,
   StyleSheet,
   SafeAreaView,
-  Keyboard,
   Image,
-  Animated,
+  Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+
 import { useGardenerStore } from '../../stores/useGardenerStore';
 import { theme } from '../../constants/theme';
 import { gardenerService } from '../../lib/ai/gardenerService';
@@ -21,11 +22,16 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import useSubscriptionStore from '../../stores/useSubscriptionStore';
 import { UpgradeModal } from '../UpgradeModal';
 import { formatLimitMessage } from '../../lib/subscription';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatInputBar, CHAT_INPUT_BAR_BASE_HEIGHT } from '../chat';
+
+// Keep this: used for padding logic (tab bar slides away when keyboard is up)
 import { useKeyboard } from '../../hooks/useKeyboard';
+import { useKeyboardSafeArea } from '../../hooks/useKeyboardSafeArea';
 
 import GARDENER_AVATAR from '../../assets/images/unnamed.png';
+
+// Must match your tab bar height (only used when keyboard hidden)
+const TAB_BAR_HEIGHT = 70;
 
 interface Message {
   id: string;
@@ -39,8 +45,9 @@ interface GardenerChatProps {
 }
 
 export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
-  const { chatHistory, addChatMessage, openAiApiKey } = useGardenerStore();
+  const { chatHistory, addChatMessage } = useGardenerStore();
   const { user } = useAuthStore();
+
   const {
     tier,
     canUseGardener,
@@ -51,31 +58,10 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     addGardenerCharacters,
     getGardenerCharactersRemaining,
   } = useSubscriptionStore();
-  const hasTabBar = !onBack; // Tab bar present when used as tab screen (not modal)
-  const insets = useSafeAreaInsets();
-  const { keyboardAnimatedHeight, isKeyboardVisible } = useKeyboard({ hasTabBar });
+
+  const hasTabBar = !onBack;
+
   const [inputBarHeight, setInputBarHeight] = useState(CHAT_INPUT_BAR_BASE_HEIGHT);
-
-  // Animated padding for FlatList that syncs with keyboard
-  const BASE_CONTENT_PADDING = 16;
-
-  // Calculate safe area offset for FlatList padding
-  // When keyboard is hidden AND no tab bar (modal mode), input bar has internal safe area padding
-  // When tab bar is present, no extra offset needed (tab bar handles safe area)
-  const safeAreaOffset = isKeyboardVisible || hasTabBar ? 0 : insets.bottom;
-
-  const animatedInputHeight = useRef(
-    new Animated.Value(inputBarHeight + BASE_CONTENT_PADDING + safeAreaOffset)
-  ).current;
-
-  // Update animated value when input bar height changes or safe area changes
-  useEffect(() => {
-    animatedInputHeight.setValue(inputBarHeight + BASE_CONTENT_PADDING + safeAreaOffset);
-  }, [inputBarHeight, animatedInputHeight, safeAreaOffset]);
-
-  // Combine keyboard height with input bar height for total bottom padding
-  const animatedBottomPadding = Animated.add(keyboardAnimatedHeight, animatedInputHeight);
-
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -90,49 +76,66 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
 
-  const flatListRef = useRef<Animated.FlatList<Message>>(null);
+  const flatListRef = useRef<FlatList<Message>>(null);
 
-  // Load subscription and usage data
+  const { isKeyboardVisible } = useKeyboard({ hasTabBar });
+  const { keyboardBehavior, getKeyboardVerticalOffset } = useKeyboardSafeArea({ hasTabBar });
+
+  // FlatList padding so messages never sit under input (or tab bar when visible)
+  const listContentPaddingBottom = useMemo(() => {
+    const tabBarPadding = hasTabBar && !isKeyboardVisible ? TAB_BAR_HEIGHT : 0;
+    return inputBarHeight + tabBarPadding + 16; // breathing room
+  }, [inputBarHeight, hasTabBar, isKeyboardVisible]);
+
+  // Only scroll when needed:
+  // - first load / history load (content size changes)
+  // - keyboard opens / layout shrinks (content size changes)
+  // - input grows (content size changes)
+  const scrollToBottom = useCallback((animated = false) => {
+    flatListRef.current?.scrollToEnd({ animated });
+  }, []);
+
   useEffect(() => {
     if (user?.id) {
       fetchSubscription(user.id);
       fetchUsage(user.id);
     }
-  }, [user?.id]);
+  }, [user?.id, fetchSubscription, fetchUsage]);
 
-  // Load chat history from database
   useEffect(() => {
     const loadChatHistory = async () => {
-      if (user?.id) {
+      try {
         setIsLoadingHistory(true);
-        const dbHistory = await gardenerChatService.getChatHistory(user.id);
 
-        if (dbHistory.length > 0) {
-          const formattedHistory = dbHistory.map((msg) => ({
-            id: msg.id || Date.now().toString(),
-            text: msg.message,
-            sender: msg.sender,
-            timestamp: new Date(msg.created_at || Date.now()),
-          }));
-          setMessages(formattedHistory);
-        } else if (chatHistory.length > 0) {
-          // Fallback to local store if no DB history
-          const formattedHistory = chatHistory.map((msg: any) => ({
-            ...msg,
-            timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
-          }));
-          setMessages(formattedHistory);
+        if (user?.id) {
+          const dbHistory = await gardenerChatService.getChatHistory(user.id);
+
+          if (dbHistory.length > 0) {
+            const formattedHistory: Message[] = dbHistory.map((msg) => ({
+              id: msg.id || `${Date.now()}-${Math.random()}`,
+              text: msg.message,
+              sender: msg.sender,
+              timestamp: new Date(msg.created_at || Date.now()),
+            }));
+            setMessages(formattedHistory);
+          } else if (chatHistory.length > 0) {
+            const formattedHistory: Message[] = chatHistory.map((msg: any) => ({
+              ...msg,
+              timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+            }));
+            setMessages(formattedHistory);
+          }
+        } else {
+          // test mode
+          if (chatHistory.length > 0) {
+            const formattedHistory: Message[] = chatHistory.map((msg: any) => ({
+              ...msg,
+              timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+            }));
+            setMessages(formattedHistory);
+          }
         }
-        setIsLoadingHistory(false);
-      } else {
-        // Use local store for test mode
-        if (chatHistory.length > 0) {
-          const formattedHistory = chatHistory.map((msg: any) => ({
-            ...msg,
-            timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
-          }));
-          setMessages(formattedHistory);
-        }
+      } finally {
         setIsLoadingHistory(false);
       }
     };
@@ -140,30 +143,26 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     loadChatHistory();
   }, [user?.id, chatHistory]);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (!inputText.trim()) return;
 
     const userMessageText = inputText.trim();
     const userMessageLength = userMessageText.length;
 
-    // Check if user can use gardener based on their tier (conversation limit)
     if (!canUseGardener()) {
       setLimitReached(true);
-      // Show limit reached message
       const limitMessage = formatLimitMessage('gardener', tier, 0);
-      const gardenerLimitMessage: Message = {
-        id: Date.now().toString(),
-        text: limitMessage,
-        sender: 'gardener',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, gardenerLimitMessage]);
+
+      setMessages((prev) => [
+        ...prev,
+        { id: `${Date.now()}`, text: limitMessage, sender: 'gardener', timestamp: new Date() },
+      ]);
+
       setShowUpgradeModal(true);
       return;
     }
 
-    // Check character limit (estimate ~2x for user message + AI response)
-    const estimatedTotalChars = userMessageLength * 2.5; // Conservative estimate
+    const estimatedTotalChars = userMessageLength * 2.5;
     if (!canUseGardenerCharacters(estimatedTotalChars)) {
       const remaining = getGardenerCharactersRemaining();
       const limitMessage =
@@ -175,19 +174,17 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
                 : 'Upgrade to Gold for unlimited conversations!'
             }`;
 
-      const gardenerLimitMessage: Message = {
-        id: Date.now().toString(),
-        text: limitMessage,
-        sender: 'gardener',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, gardenerLimitMessage]);
+      setMessages((prev) => [
+        ...prev,
+        { id: `${Date.now()}`, text: limitMessage, sender: 'gardener', timestamp: new Date() },
+      ]);
+
       setShowUpgradeModal(true);
       return;
     }
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: `${Date.now()}`,
       text: userMessageText,
       sender: 'user',
       timestamp: new Date(),
@@ -197,34 +194,24 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     addChatMessage({ text: userMessage.text, sender: 'user' });
     setInputText('');
     setIsTyping(true);
-    Keyboard.dismiss(); // Dismiss keyboard after sending
 
-    // Save to database if user is authenticated
     if (user?.id) {
       await gardenerChatService.saveMessage(user.id, userMessage.text, 'user');
     }
 
     try {
-      // Increment gardener usage (conversation count)
-      if (user?.id) {
-        await incrementGardenerUsage(user.id);
-      }
+      if (user?.id) await incrementGardenerUsage(user.id);
+      if (user?.id) await addGardenerCharacters(user.id, userMessageLength);
 
-      // Track user message characters
-      if (user?.id) {
-        await addGardenerCharacters(user.id, userMessageLength);
-      }
-
-      // Get AI response
-      const conversationHistory = messages.slice(-10).map((msg) => ({
+      const historyForAI = [...messages, userMessage].slice(-10).map((msg) => ({
         role: msg.sender === 'user' ? ('user' as const) : ('assistant' as const),
         content: msg.text,
       }));
 
-      const response = await gardenerService.getChatResponse(userMessage.text, conversationHistory);
+      const response = await gardenerService.getChatResponse(userMessage.text, historyForAI);
 
       const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: `${Date.now() + 1}`,
         text: response,
         sender: 'gardener',
         timestamp: new Date(),
@@ -233,24 +220,12 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
       setMessages((prev) => [...prev, aiMessage]);
       addChatMessage({ text: aiMessage.text, sender: 'gardener' });
 
-      // Save AI response to database
-      if (user?.id) {
-        await gardenerChatService.saveMessage(user.id, response, 'gardener');
-      }
+      if (user?.id) await gardenerChatService.saveMessage(user.id, response, 'gardener');
+      if (user?.id) await addGardenerCharacters(user.id, response.length);
 
-      // Track AI response characters
-      if (user?.id) {
-        await addGardenerCharacters(user.id, response.length);
-      }
+      if (!canUseGardener()) setLimitReached(true);
 
-      // Check if user has hit their conversation limit after this exchange
-      if (!canUseGardener()) {
-        setLimitReached(true);
-      }
-
-      // Check if user has hit their character limit
       if (!canUseGardenerCharacters(100)) {
-        // Small buffer for next message
         const limitMessage =
           tier === 'gold'
             ? "You've reached your daily character limit. Your limit will reset tomorrow!"
@@ -260,80 +235,90 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
                   : 'Upgrade to Gold for unlimited conversations!'
               }`;
 
-        const gardenerLimitMessage: Message = {
-          id: (Date.now() + 2).toString(),
-          text: limitMessage,
-          sender: 'gardener',
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, gardenerLimitMessage]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `${Date.now() + 2}`,
+            text: limitMessage,
+            sender: 'gardener',
+            timestamp: new Date(),
+          },
+        ]);
         setLimitReached(true);
       }
     } catch (error) {
       console.error('Error getting AI response:', error);
     } finally {
       setIsTyping(false);
+      // ✅ Removed: scrollToOffset({ offset: 0 }) (that scrolls to TOP and breaks everything)
+      // Scrolling is handled by FlatList onContentSizeChange below, only when needed.
     }
-  };
+  }, [
+    inputText,
+    canUseGardener,
+    canUseGardenerCharacters,
+    getGardenerCharactersRemaining,
+    tier,
+    messages,
+    addChatMessage,
+    user?.id,
+    incrementGardenerUsage,
+    addGardenerCharacters,
+  ]);
 
   const formatTime = (date: Date | string) => {
     try {
       const dateObj = typeof date === 'string' ? new Date(date) : date;
-      if (!dateObj || isNaN(dateObj.getTime())) {
-        return '';
-      }
+      if (!dateObj || isNaN(dateObj.getTime())) return '';
       return dateObj.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         hour12: true,
       });
-    } catch (error) {
+    } catch {
       return '';
     }
   };
 
-  // Render individual message
-  const renderMessage = ({ item: message }: { item: Message }) => {
-    return (
+  const renderMessage = ({ item: message }: { item: Message }) => (
+    <View
+      style={[
+        styles.messageWrapper,
+        message.sender === 'user' ? styles.userMessageWrapper : styles.gardenerMessageWrapper,
+      ]}
+    >
+      {message.sender === 'gardener' && (
+        <View style={styles.avatarContainer}>
+          <Image source={GARDENER_AVATAR} style={styles.messageAvatar} />
+        </View>
+      )}
+
       <View
         style={[
-          styles.messageWrapper,
-          message.sender === 'user' ? styles.userMessageWrapper : styles.gardenerMessageWrapper,
+          styles.messageBubble,
+          message.sender === 'user' ? styles.userMessage : styles.gardenerMessage,
         ]}
       >
-        {message.sender === 'gardener' && (
-          <View style={styles.avatarContainer}>
-            <Image source={GARDENER_AVATAR} style={styles.messageAvatar} />
-          </View>
-        )}
-        <View
+        <Text
           style={[
-            styles.messageBubble,
-            message.sender === 'user' ? styles.userMessage : styles.gardenerMessage,
+            styles.messageText,
+            message.sender === 'user' ? styles.userMessageText : styles.gardenerMessageText,
           ]}
         >
-          <Text
-            style={[
-              styles.messageText,
-              message.sender === 'user' ? styles.userMessageText : styles.gardenerMessageText,
-            ]}
-          >
-            {message.text}
-          </Text>
-          <Text
-            style={[
-              styles.timestamp,
-              message.sender === 'user' ? styles.userTimestamp : styles.gardenerTimestamp,
-            ]}
-          >
-            {formatTime(message.timestamp)}
-          </Text>
-        </View>
+          {message.text}
+        </Text>
+        <Text
+          style={[
+            styles.timestamp,
+            message.sender === 'user' ? styles.userTimestamp : styles.gardenerTimestamp,
+          ]}
+        >
+          {formatTime(message.timestamp)}
+        </Text>
       </View>
-    );
-  };
+    </View>
+  );
 
-  // Render typing indicator as list header (appears at top when inverted)
   const renderTypingIndicator = () => {
     if (!isTyping) return null;
     return (
@@ -348,9 +333,58 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     );
   };
 
+  const ScreenBody = (
+    <View style={styles.body}>
+      <FlatList
+        ref={flatListRef}
+        style={styles.list}
+        data={messages}
+        renderItem={renderMessage}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[
+          styles.messagesContent,
+          { paddingBottom: listContentPaddingBottom },
+        ]}
+        ListHeaderComponent={renderTypingIndicator()}
+        // ✅ The single reliable moment: after layout/content settles.
+        // This covers:
+        // - first load
+        // - history load
+        // - keyboard open (layout shrinks)
+        // - input bar height changes
+        onContentSizeChange={() => scrollToBottom(false)}
+      />
+
+      <ChatInputBar
+        value={inputText}
+        onChangeText={setInputText}
+        onSend={sendMessage}
+        placeholder="Ask for dating advice..."
+        hasTabBar={hasTabBar}
+        tabBarHeight={TAB_BAR_HEIGHT}
+        showAttachButton={false}
+        maxLength={500}
+        disabled={isTyping}
+        onHeightChange={setInputBarHeight}
+        customContent={
+          limitReached ? (
+            <TouchableOpacity
+              style={styles.upgradeInputButton}
+              onPress={() => setShowUpgradeModal(true)}
+            >
+              <Ionicons name="sparkles" size={18} color="#fff" />
+              <Text style={styles.upgradeInputButtonText}>Upgrade to continue chatting</Text>
+            </TouchableOpacity>
+          ) : undefined
+        }
+      />
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      {/* Upgrade Modal */}
       <UpgradeModal
         visible={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
@@ -359,7 +393,6 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
         subtitle="Get unlimited AI dating advice with Gold"
       />
 
-      {/* Header - Only show if onBack is provided */}
       {onBack && (
         <LinearGradient
           colors={[theme.colors.primary, theme.colors.primaryDark, theme.colors.primaryDark]}
@@ -382,89 +415,35 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
         </LinearGradient>
       )}
 
-      {/* Chat Container */}
-      <View style={styles.messagesContainer}>
-        {/* Inverted Animated FlatList for messages with keyboard-aware padding */}
-        <Animated.FlatList
-          ref={flatListRef}
-          inverted
-          data={[...messages].reverse()}
-          renderItem={renderMessage}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={[styles.messagesContent, { paddingBottom: animatedBottomPadding }]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          maintainVisibleContentPosition={{
-            minIndexForVisible: 0,
-            autoscrollToTopThreshold: 10,
-          }}
-          ListHeaderComponent={renderTypingIndicator()}
-        />
-
-        {/* Input Bar - Absolute positioned, animates with keyboard */}
-        <ChatInputBar
-          value={inputText}
-          onChangeText={setInputText}
-          onSend={sendMessage}
-          placeholder="Ask for dating advice..."
-          hasTabBar={hasTabBar}
-          showAttachButton={false}
-          maxLength={500}
-          disabled={isTyping}
-          onHeightChange={setInputBarHeight}
-          customContent={
-            limitReached ? (
-              <TouchableOpacity
-                style={styles.upgradeInputButton}
-                onPress={() => setShowUpgradeModal(true)}
-              >
-                <Ionicons name="sparkles" size={18} color="#fff" />
-                <Text style={styles.upgradeInputButtonText}>Upgrade to continue chatting</Text>
-              </TouchableOpacity>
-            ) : undefined
-          }
-        />
-      </View>
+      {Platform.OS === 'ios' ? (
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={keyboardBehavior}
+          keyboardVerticalOffset={getKeyboardVerticalOffset(onBack ? 0 : 0)}
+        >
+          {ScreenBody}
+        </KeyboardAvoidingView>
+      ) : (
+        ScreenBody
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  avatar: {
-    borderRadius: 18,
-    height: 36,
-    width: 36,
-  },
-  avatarContainer: {
-    marginRight: 8,
-  },
-  backButton: {
-    marginRight: 8,
-    padding: 8,
-  },
-  container: {
-    backgroundColor: '#f5f5f5',
-    flex: 1,
-  },
-  gardenerMessage: {
-    backgroundColor: '#f0f0f0',
-    borderBottomLeftRadius: 4,
-  },
-  gardenerMessageText: {
-    color: '#333',
-  },
-  gardenerMessageWrapper: {
-    justifyContent: 'flex-start',
-  },
-  gardenerTimestamp: {
-    color: '#999',
-  },
-  header: {
-    paddingBottom: 10,
-  },
-  headerAvatar: {
-    marginLeft: 12,
-  },
+  avatar: { borderRadius: 18, height: 36, width: 36 },
+  avatarContainer: { marginRight: 8 },
+  backButton: { marginRight: 8, padding: 8 },
+  body: { flex: 1 },
+  container: { backgroundColor: '#f5f5f5', flex: 1 },
+
+  gardenerMessage: { backgroundColor: '#f0f0f0', borderBottomLeftRadius: 4 },
+  gardenerMessageText: { color: '#333' },
+  gardenerMessageWrapper: { justifyContent: 'flex-start' },
+  gardenerTimestamp: { color: '#999' },
+
+  header: { paddingBottom: 10 },
+  headerAvatar: { marginLeft: 12 },
   headerContent: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -472,56 +451,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
   },
-  headerInfo: {
-    flex: 1,
-  },
-  headerSafe: {
-    marginTop: 0,
-  },
-  headerSubtitle: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 14,
-    marginTop: 2,
-  },
-  headerTitle: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  messageAvatar: {
-    borderRadius: 16,
-    height: 32,
-    width: 32,
-  },
-  messageBubble: {
-    borderRadius: 16,
-    maxWidth: '75%',
-    padding: 12,
-  },
-  messageText: {
-    fontSize: 15,
-    lineHeight: 20,
-  },
-  messageWrapper: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  messagesContainer: {
-    flex: 1,
-    position: 'relative',
-  },
+  headerInfo: { flex: 1 },
+  headerSafe: { marginTop: 0 },
+  headerSubtitle: { color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginTop: 2 },
+  headerTitle: { color: 'white', fontSize: 20, fontWeight: '600' },
+
+  list: { flex: 1 },
+
+  messageAvatar: { borderRadius: 16, height: 32, width: 32 },
+  messageBubble: { borderRadius: 16, maxWidth: '75%', padding: 12 },
+  messageText: { fontSize: 15, lineHeight: 20 },
+  messageWrapper: { flexDirection: 'row', marginBottom: 12 },
+
   messagesContent: {
     flexGrow: 1,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
-  timestamp: {
-    fontSize: 11,
-    marginTop: 4,
-  },
-  typingBubble: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
+
+  timestamp: { fontSize: 11, marginTop: 4 },
+  typingBubble: { paddingHorizontal: 24, paddingVertical: 16 },
+
   upgradeInputButton: {
     alignItems: 'center',
     backgroundColor: theme.colors.accent,
@@ -538,17 +488,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginLeft: 8,
   },
-  userMessage: {
-    backgroundColor: theme.colors.primary,
-    borderBottomRightRadius: 4,
-  },
-  userMessageText: {
-    color: 'white',
-  },
-  userMessageWrapper: {
-    justifyContent: 'flex-end',
-  },
-  userTimestamp: {
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
+
+  userMessage: { backgroundColor: theme.colors.primary, borderBottomRightRadius: 4 },
+  userMessageText: { color: 'white' },
+  userMessageWrapper: { justifyContent: 'flex-end' },
+  userTimestamp: { color: 'rgba(255, 255, 255, 0.7)' },
 });

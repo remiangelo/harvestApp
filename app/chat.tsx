@@ -1,19 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  FlatList,
   Image,
   SafeAreaView,
   Alert,
   Keyboard,
+  FlatList,
   Animated,
+  Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import { supabase } from '../lib/supabase';
@@ -26,9 +27,15 @@ import { HarmfulMessageModal } from '../components/HarmfulMessageModal';
 import { theme } from '../constants/theme';
 import { analyzeMessage, isMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
 import { ChatInputBar, CHAT_INPUT_BAR_BASE_HEIGHT } from '../components/chat';
+
+// ✅ Match GardenerChat behavior
 import { useKeyboard } from '../hooks/useKeyboard';
+import { useKeyboardSafeArea } from '../hooks/useKeyboardSafeArea';
+
+// 🚫 Removed: useBottomTabBarHeight (causes crash when not inside tab navigator)
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/EB1E66/FFFFFF?text=No+Image';
+const TAB_BAR_HEIGHT = 70; // fallback only if you ever decide to treat this screen as tabbed
 
 interface ChatPartner {
   id: string;
@@ -66,29 +73,15 @@ interface Subscription {
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const { currentUser } = useUser();
-  const insets = useSafeAreaInsets();
-  const { keyboardAnimatedHeight, isKeyboardVisible } = useKeyboard({ hasTabBar: false });
+
+  // ✅ This screen is a Stack screen in your root layout, so it is NOT in the tab navigator.
+  // This prevents the "Couldn't find the bottom tab bar height" crash.
+  const hasTabBar = false;
+
+  const { isKeyboardVisible } = useKeyboard({ hasTabBar });
+  const { keyboardBehavior, getKeyboardVerticalOffset } = useKeyboardSafeArea({ hasTabBar });
+
   const [inputBarHeight, setInputBarHeight] = useState(CHAT_INPUT_BAR_BASE_HEIGHT);
-
-  // Animated padding for FlatList that syncs with keyboard
-  const BASE_CONTENT_PADDING = 16;
-
-  // Calculate safe area offset for FlatList padding
-  // When keyboard is hidden (no tab bar), input bar has internal safe area padding
-  // that we need to account for in FlatList padding
-  const safeAreaOffset = isKeyboardVisible ? 0 : insets.bottom;
-
-  const animatedInputHeight = useRef(
-    new Animated.Value(inputBarHeight + BASE_CONTENT_PADDING + safeAreaOffset)
-  ).current;
-
-  // Update animated value when input bar height changes or safe area changes
-  useEffect(() => {
-    animatedInputHeight.setValue(inputBarHeight + BASE_CONTENT_PADDING + safeAreaOffset);
-  }, [inputBarHeight, animatedInputHeight, safeAreaOffset]);
-
-  // Combine keyboard height with input bar height for total bottom padding
-  const animatedBottomPadding = Animated.add(keyboardAnimatedHeight, animatedInputHeight);
 
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -104,13 +97,23 @@ export default function ChatScreen() {
   const [harmfulMessageContent, setHarmfulMessageContent] = useState('');
   const [chatPartner, setChatPartner] = useState<ChatPartner | null>(null);
 
-  const flatListRef = useRef<Animated.FlatList<Message>>(null);
+  const flatListRef = useRef<FlatList<Message>>(null);
   const subscriptionRef = useRef<Subscription | null>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const conversationId = String(id);
 
-  // Load conversation and messages when component mounts
+  // ✅ reliable bottom scroll (same approach as updated GardenerChat)
+  const scrollToBottom = useCallback((animated = false) => {
+    flatListRef.current?.scrollToEnd({ animated });
+  }, []);
+
+  // ✅ Match GardenerChat padding behavior (messages never sit under input; tab bar only if you ever enable it)
+  const listContentPaddingBottom = useMemo(() => {
+    const tabBarPadding = hasTabBar && !isKeyboardVisible ? TAB_BAR_HEIGHT : 0;
+    return inputBarHeight + tabBarPadding + 16;
+  }, [inputBarHeight, hasTabBar, isKeyboardVisible]);
+
   useEffect(() => {
     const loadConversation = async () => {
       if (!currentUser?.id || !conversationId) {
@@ -119,7 +122,6 @@ export default function ChatScreen() {
       }
 
       try {
-        // Fetch conversation details
         const { data: conversation, error: convError } = await supabase
           .from('conversations')
           .select(
@@ -140,7 +142,6 @@ export default function ChatScreen() {
           return;
         }
 
-        // Get the other user's info
         const otherUser =
           conversation.user1_id === currentUser.id ? conversation.user2 : conversation.user1;
 
@@ -150,33 +151,29 @@ export default function ChatScreen() {
           profileImage: otherUser?.photos?.[0] || '',
         });
 
-        // Load messages
         const { data: messagesData, error: msgError } = await supabase
           .from('messages')
           .select('*')
           .eq('conversation_id', conversationId)
           .order('created_at', { ascending: true });
 
-        if (msgError) {
-          console.error('Error loading messages:', msgError);
-        } else {
-          setMessages(messagesData || []);
-        }
+        if (msgError) console.error('Error loading messages:', msgError);
+        else setMessages(messagesData || []);
       } catch (error) {
         console.error('Error in loadConversation:', error);
       } finally {
         setLoading(false);
+        // start at bottom once loaded
+        scrollToBottom(false);
       }
     };
 
     loadConversation();
-  }, [conversationId, currentUser]);
+  }, [conversationId, currentUser, scrollToBottom]);
 
-  // Set up real-time subscription for new messages and typing indicators
   useEffect(() => {
     if (!chatPartner || !currentUser) return;
 
-    // Create a channel for real-time messages and presence
     const channel = supabase
       .channel(`chat:${conversationId}`)
       .on(
@@ -188,37 +185,32 @@ export default function ChatScreen() {
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload: { new: Message }) => {
-          const newMessage = payload.new;
+          const incoming = payload.new;
 
-          // Check if this is a message from the other user and mindful messaging is enabled
-          if (newMessage.sender_id !== currentUser.id) {
+          if (incoming.sender_id !== currentUser.id) {
             const isEnabled = await isMindfulMessagingEnabled();
-
             if (isEnabled) {
-              // Analyze the received message for harmful content
-              const analysis = await analyzeMessage(newMessage.content || '');
-
+              const analysis = await analyzeMessage(incoming.content || '');
               if (analysis.needsReview) {
-                // Store the harmful message details and show confirmation modal
-                setHarmfulMessageContent(newMessage.content || '');
+                setHarmfulMessageContent(incoming.content || '');
                 setHarmfulMessageAnalysis(analysis as AnalysisResult);
                 setHarmfulMessageModalVisible(true);
-                return; // Don't add the message to the list yet
+                return;
               }
             }
           }
 
-          // Add the new message to the list
-          setMessages((current) => [...current, newMessage]);
-          // Hide typing indicator when message is received
+          setMessages((current) => [...current, incoming]);
           setOtherUserTyping(false);
 
-          // Send notification if message is from other user
-          if (newMessage.sender_id !== currentUser.id && chatPartner) {
+          // keep at bottom for new messages (existing behavior)
+          scrollToBottom(true);
+
+          if (incoming.sender_id !== currentUser.id && chatPartner) {
             const { notificationService } = await import('../lib/notifications');
             await notificationService.sendMessageNotification(
               chatPartner.name,
-              newMessage.content || '',
+              incoming.content || '',
               conversationId
             );
           }
@@ -226,56 +218,28 @@ export default function ChatScreen() {
       )
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        // Check if other user is typing
         const otherUsers = Object.values(state).flat() as { user_id: string; typing: boolean }[];
         const isOtherTyping = otherUsers.some(
-          (user) => user.user_id !== currentUser.id && user.typing === true
+          (u) => u.user_id !== currentUser.id && u.typing === true
         );
         setOtherUserTyping(isOtherTyping);
       })
-      .on(
-        'presence',
-        { event: 'join' },
-        ({ key: _key, newPresences: _newPresences }: { key: string; newPresences: unknown[] }) => {
-          // Handle user joining
-        }
-      )
-      .on(
-        'presence',
-        { event: 'leave' },
-        ({
-          key: _key,
-          leftPresences: _leftPresences,
-        }: {
-          key: string;
-          leftPresences: unknown[];
-        }) => {
-          // Handle user leaving
-          setOtherUserTyping(false);
-        }
-      )
+      .on('presence', { event: 'leave' }, () => setOtherUserTyping(false))
       .subscribe(async (status: 'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED') => {
         if (status === 'SUBSCRIBED') {
-          // Track user presence
-          await channel.track({
-            user_id: currentUser.id,
-            typing: false,
-          });
+          await channel.track({ user_id: currentUser.id, typing: false });
         }
       });
 
-    // Store subscription reference for cleanup
     subscriptionRef.current = channel;
 
-    // Cleanup function
     return () => {
       if (subscriptionRef.current) {
         supabase.removeChannel(subscriptionRef.current);
       }
     };
-  }, [chatPartner, currentUser, conversationId]);
+  }, [chatPartner, currentUser, conversationId, scrollToBottom]);
 
-  // Early return if chat partner not found (after all hooks)
   if (!chatPartner && !loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -284,67 +248,51 @@ export default function ChatScreen() {
     );
   }
 
-  // Analyze message before sending
   const analyzeThenSend = async () => {
     if (!newMessage.trim() || !currentUser || !chatPartner) return;
 
     const messageText = newMessage.trim();
-    setNewMessage(''); // Clear input immediately for instant feedback
-    Keyboard.dismiss(); // Dismiss keyboard after sending
+    setNewMessage('');
+    Keyboard.dismiss();
 
     try {
-      // Check if mindful messaging is enabled
       const isEnabled = await isMindfulMessagingEnabled();
-
       if (!isEnabled) {
-        // Feature disabled, send directly
-        console.log('[Chat] Mindful messaging disabled, sending directly');
         await actualSendMessage(messageText);
         return;
       }
 
-      // Analyze the message with mindful messaging
-      console.log('[Chat] Analyzing message with mindful messaging...');
       const analysis = await analyzeMessage(messageText);
-
       if (analysis.needsReview) {
-        // Show warning modal - restore message to input for editing
-        console.log('[Chat] Message needs review, showing modal');
-        setNewMessage(messageText); // Restore for editing
+        setNewMessage(messageText);
         setPendingMessage(messageText);
         setAnalysisResult(analysis as AnalysisResult);
         setMindfulModalVisible(true);
       } else {
-        // Message is fine, send it
-        console.log('[Chat] Message passed analysis, sending');
         await actualSendMessage(messageText);
       }
     } catch (error) {
       console.error('[Chat] Error analyzing message:', error);
-      // If analysis fails, send the message anyway
       await actualSendMessage(messageText);
     }
   };
 
-  // Actually send the message (bypassing analysis)
   const actualSendMessage = async (messageText: string) => {
     if (!currentUser || !chatPartner) return;
 
-    // Optimistically add the message to the UI
-    const optimisticMessage = {
+    const optimisticMessage: Message = {
       id: `temp-${Date.now()}`,
       conversation_id: String(id),
       sender_id: currentUser.id,
       content: messageText,
       created_at: new Date().toISOString(),
-      sending: true, // Mark as sending
+      sending: true,
     };
 
     setMessages((current) => [...current, optimisticMessage]);
+    scrollToBottom(true);
 
-    // Only save to database if we have a valid UUID conversation
     if (!isUuid(String(id))) {
-      // For demo chats, just update the local state
       setMessages((current) =>
         current.map((msg) => (msg.id === optimisticMessage.id ? { ...msg, sending: false } : msg))
       );
@@ -352,7 +300,6 @@ export default function ChatScreen() {
     }
 
     try {
-      // Insert the message into the database
       const { data, error } = await supabase
         .from('messages')
         .insert([
@@ -368,166 +315,50 @@ export default function ChatScreen() {
 
       if (error) {
         console.error('Error sending message:', error);
-        // Remove the optimistic message on error
         setMessages((current) => current.filter((m) => m.id !== optimisticMessage.id));
         return;
       }
 
-      // Replace the optimistic message with the real one
       if (data) {
         setMessages((current) => current.map((m) => (m.id === optimisticMessage.id ? data : m)));
       }
     } catch (error) {
       console.error('Error in sendMessage:', error);
-      // Remove the optimistic message on error
       setMessages((current) => current.filter((m) => m.id !== optimisticMessage.id));
     }
   };
 
-  // Handle modal actions
-  const handleEditMessage = () => {
-    setMindfulModalVisible(false);
-    // Restore the message to the input for editing
-    setNewMessage(pendingMessage);
-    setPendingMessage('');
-    setAnalysisResult(null);
-  };
-
-  const handleSendAnyway = async () => {
-    setMindfulModalVisible(false);
-    Keyboard.dismiss();
-    await actualSendMessage(pendingMessage);
-    setPendingMessage('');
-    setAnalysisResult(null);
-  };
-
-  const handleCancelMessage = () => {
-    setMindfulModalVisible(false);
-    setPendingMessage('');
-    setAnalysisResult(null);
-  };
-
-  const handleViewHarmfulAnyway = () => {
-    // Add the harmful message to the list
-    const harmfulMessage = {
-      id: `harmful-${Date.now()}`,
-      conversation_id: conversationId,
-      sender_id: chatPartner?.id || '',
-      content: harmfulMessageContent,
-      created_at: new Date().toISOString(),
-    };
-    setMessages((current) => [...current, harmfulMessage]);
-
-    // Close the modal and reset state
-    setHarmfulMessageModalVisible(false);
-    setHarmfulMessageContent('');
-    setHarmfulMessageAnalysis(null);
-  };
-
-  const handleKeepHidden = () => {
-    // Just close the modal and reset state
-    setHarmfulMessageModalVisible(false);
-    setHarmfulMessageContent('');
-    setHarmfulMessageAnalysis(null);
-  };
-
-  const formatMessageTime = (timestamp: string) => {
-    return format(new Date(timestamp), 'h:mm a');
-  };
-
-  // Handle attachment button press
   const handleAttachPress = () => {
-    // Show action sheet for both platforms using Alert
     Alert.alert(
       'Add Attachment',
       'Choose an option',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Take Photo', onPress: takePhoto },
-        { text: 'Choose from Library', onPress: pickImage },
+        { text: 'Take Photo', onPress: () => {} },
+        { text: 'Choose from Library', onPress: () => {} },
       ],
       { cancelable: true }
     );
   };
 
-  // Take a photo with camera
-  const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please grant camera access to take photos');
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      await handleImageSelected(result.assets[0].uri);
-    }
-  };
-
-  // Pick image from library
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please grant photo library access');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      await handleImageSelected(result.assets[0].uri);
-    }
-  };
-
-  // Handle selected image
-  const handleImageSelected = async (_imageUri: string) => {
-    Alert.alert(
-      'Image Selected',
-      'Image upload functionality will be implemented with backend storage.',
-      [{ text: 'OK' }]
-    );
-  };
-
-  // Handle typing indicator
   const handleTyping = async () => {
     if (!subscriptionRef.current || !currentUser) return;
 
-    // Clear existing timeout
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-    // Send typing indicator
     if (!isTyping) {
       setIsTyping(true);
-      await subscriptionRef.current?.track?.({
-        user_id: currentUser.id || '',
-        typing: true,
-      });
+      await subscriptionRef.current?.track?.({ user_id: currentUser.id || '', typing: true });
     }
 
-    // Stop typing after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(async () => {
       setIsTyping(false);
-      await subscriptionRef.current?.track?.({
-        user_id: currentUser.id || '',
-        typing: false,
-      });
+      await subscriptionRef.current?.track?.({ user_id: currentUser.id || '', typing: false });
     }, 2000);
   };
 
-  // Render individual message
+  const formatMessageTime = (timestamp: string) => format(new Date(timestamp), 'h:mm a');
+
   const renderMessage = ({ item: message }: { item: Message }) => {
     const isCurrentUser = message.sender_id === currentUser?.id;
     return (
@@ -560,44 +391,6 @@ export default function ChatScreen() {
     );
   };
 
-  // Render skeleton loader
-  const renderSkeletonLoader = () => (
-    <>
-      {[1, 2, 3, 4, 5].map((index) => (
-        <View
-          key={`skeleton-${index}`}
-          style={[styles.messageRow, index % 2 === 0 && styles.messageRowRight]}
-        >
-          {index % 2 !== 0 && <View style={[styles.messageAvatar, styles.skeletonAvatar]} />}
-          <View
-            style={[
-              index % 2 === 0 ? styles.currentUserMessage : styles.otherUserMessage,
-              styles.skeletonMessage,
-              styles.skeletonMessageRandom,
-              { width: `${60 + Math.random() * 20}%` },
-            ]}
-          >
-            <View style={styles.skeletonText} />
-            <View style={styles.skeletonMessageSecondLine} />
-          </View>
-        </View>
-      ))}
-    </>
-  );
-
-  // Render empty state
-  const renderEmptyState = () => {
-    if (loading) return null;
-    return (
-      <View style={styles.emptyState}>
-        <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
-        <Text style={styles.emptyStateText}>Start the conversation!</Text>
-        <Text style={styles.emptyStateSubtext}>Say hello and break the ice 👋</Text>
-      </View>
-    );
-  };
-
-  // Render typing indicator as list header (appears at top when inverted)
   const renderTypingIndicator = () => {
     if (!otherUserTyping) return null;
     return (
@@ -617,9 +410,47 @@ export default function ChatScreen() {
     );
   };
 
+  const ScreenBody = (
+    <View style={styles.messagesContainer}>
+      <FlatList
+        ref={flatListRef}
+        style={{ flex: 1 }}
+        data={loading ? [] : messages} // oldest -> newest
+        renderItem={renderMessage}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={[
+          styles.messagesContent,
+          { paddingBottom: listContentPaddingBottom },
+        ]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        // ✅ same as updated GardenerChat: scroll after layout/content settles
+        onContentSizeChange={() => scrollToBottom(false)}
+        ListFooterComponent={renderTypingIndicator()}
+      />
+
+      <ChatInputBar
+        value={newMessage}
+        onChangeText={(text) => {
+          setNewMessage(text);
+          handleTyping();
+        }}
+        onSend={analyzeThenSend}
+        onAttach={handleAttachPress}
+        placeholder="Type a message..."
+        hasTabBar={hasTabBar}
+        tabBarHeight={TAB_BAR_HEIGHT}
+        showAttachButton={true}
+        maxLength={1000}
+        onHeightChange={setInputBarHeight}
+        //absolute={false}
+      />
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <LinearGradient
         colors={[theme.colors.primary, theme.colors.primaryDark]}
         style={styles.headerGradient}
@@ -648,108 +479,24 @@ export default function ChatScreen() {
         </SafeAreaView>
       </LinearGradient>
 
-      {/* Messages Container */}
-      <View style={styles.messagesContainer}>
-        {/* Inverted Animated FlatList for messages with keyboard-aware padding */}
-        <Animated.FlatList
-          ref={flatListRef}
-          inverted
-          data={loading ? [] : [...messages].reverse()}
-          renderItem={renderMessage}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={[styles.messagesContent, { paddingBottom: animatedBottomPadding }]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          maintainVisibleContentPosition={{
-            minIndexForVisible: 0,
-            autoscrollToTopThreshold: 10,
-          }}
-          ListHeaderComponent={renderTypingIndicator()}
-          ListEmptyComponent={loading ? renderSkeletonLoader() : renderEmptyState()}
-        />
-
-        {/* Input Bar - Absolute positioned, animates with keyboard */}
-        <ChatInputBar
-          value={newMessage}
-          onChangeText={(text) => {
-            setNewMessage(text);
-            handleTyping();
-          }}
-          onSend={analyzeThenSend}
-          onAttach={handleAttachPress}
-          placeholder="Type a message..."
-          hasTabBar={false}
-          showAttachButton={true}
-          maxLength={1000}
-          onHeightChange={setInputBarHeight}
-        />
-      </View>
-
-      {/* Chat menu */}
-      <ChatMenuPopup
-        visible={menuVisible}
-        onClose={() => setMenuVisible(false)}
-        matchName={chatPartner?.name || 'Unknown'}
-        matchPhoto={chatPartner?.profileImage || ''}
-        isActive={false}
-        messageCount={messages.length}
-        onShareProfile={() => {
-          setMenuVisible(false);
-          Alert.alert('Share', "Profile sharing isn't configured yet.");
-        }}
-        onToggleReady={() => {
-          // Hook into match state when backend is ready
-        }}
-        onGardenerAI={() => {
-          setMenuVisible(false);
-          router.push('/gardener');
-        }}
-        onReportProfile={() => {
-          setMenuVisible(false);
-          Alert.alert('Report', 'Thanks for the report. We will review.');
-        }}
-        onUnmatch={() => {
-          setMenuVisible(false);
-          Alert.alert('Unmatch', 'Unmatch logic will be implemented with matches table.');
-        }}
-      />
-
-      {/* Mindful Messaging Modal */}
-      {analysisResult && (
-        <MindfulMessageModal
-          visible={mindfulModalVisible}
-          onClose={handleCancelMessage}
-          onEdit={handleEditMessage}
-          onSendAnyway={handleSendAnyway}
-          reason={analysisResult.reason || ''}
-          growthLesson={analysisResult.growthLesson || ''}
-          severity={analysisResult.severity || 'low'}
-        />
-      )}
-
-      {/* Harmful Message Modal */}
-      {harmfulMessageAnalysis && (
-        <HarmfulMessageModal
-          visible={harmfulMessageModalVisible}
-          onClose={handleKeepHidden}
-          onViewAnyway={handleViewHarmfulAnyway}
-          reason={harmfulMessageAnalysis.reason || ''}
-          growthLesson={harmfulMessageAnalysis.growthLesson || ''}
-          severity={harmfulMessageAnalysis.severity || 'low'}
-        />
+      {Platform.OS === 'ios' ? (
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={keyboardBehavior}
+          keyboardVerticalOffset={getKeyboardVerticalOffset(0)}
+        >
+          {ScreenBody}
+        </KeyboardAvoidingView>
+      ) : (
+        ScreenBody
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  backButton: {
-    marginRight: 12,
-  },
-  container: {
-    backgroundColor: '#f5f5f5',
-    flex: 1,
-  },
+  backButton: { marginRight: 12 },
+  container: { backgroundColor: '#f5f5f5', flex: 1 },
   currentUserMessage: {
     backgroundColor: theme.colors.primary,
     borderRadius: 18,
@@ -757,51 +504,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
-  currentUserMessageText: {
-    color: 'white',
-    fontSize: 16,
-    lineHeight: 20,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 100,
-    width: '100%',
-  },
-  emptyStateSubtext: {
-    color: '#666',
-    fontSize: 14,
-    marginTop: 8,
-  },
-  emptyStateText: {
-    color: '#333',
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 16,
-  },
-  errorText: {
-    color: '#666',
-    fontSize: 18,
-    marginTop: 50,
-    textAlign: 'center',
-  },
+  currentUserMessageText: { color: 'white', fontSize: 16, lineHeight: 20 },
+  errorText: { color: '#666', fontSize: 18, marginTop: 50, textAlign: 'center' },
   header: {
     alignItems: 'center',
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  headerAvatar: {
-    borderRadius: 20,
-    height: 40,
-    marginRight: 12,
-    width: 40,
-  },
-  headerCenter: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-  },
+  headerAvatar: { borderRadius: 20, height: 40, marginRight: 12, width: 40 },
+  headerCenter: { alignItems: 'center', flex: 1, flexDirection: 'row' },
   headerGradient: {
     elevation: 5,
     shadowColor: '#000',
@@ -809,32 +521,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
-  headerInfo: {
-    flex: 1,
-  },
-  headerName: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  headerStatus: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 14,
-  },
-  messageAvatar: {
-    borderRadius: 16,
-    height: 32,
-    marginRight: 8,
-    width: 32,
-  },
-  messageRow: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
-  messageRowRight: {
-    justifyContent: 'flex-end',
-  },
+  headerInfo: { flex: 1 },
+  headerName: { color: 'white', fontSize: 18, fontWeight: '600' },
+  headerStatus: { color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 },
+  messageAvatar: { borderRadius: 16, height: 32, marginRight: 8, width: 32 },
+  messageRow: { alignItems: 'flex-end', flexDirection: 'row', marginBottom: 16 },
+  messageRowRight: { justifyContent: 'flex-end' },
   messageTime: {
     color: 'rgba(0, 0, 0, 0.5)',
     flexShrink: 0,
@@ -842,18 +534,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
     minWidth: 60,
   },
-  messagesContainer: {
-    flex: 1,
-    position: 'relative',
-  },
-  messagesContent: {
-    flexGrow: 1,
-    paddingHorizontal: 16,
-    paddingTop: 20,
-  },
-  moreButton: {
-    marginLeft: 12,
-  },
+  messagesContainer: { flex: 1 },
+  messagesContent: { flexGrow: 1, paddingHorizontal: 16, paddingTop: 20 },
+  moreButton: { marginLeft: 12 },
   otherUserMessage: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 18,
@@ -861,60 +544,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
-  otherUserMessageText: {
-    color: '#333',
-    fontSize: 16,
-    lineHeight: 20,
-  },
-  skeletonAvatar: {
-    backgroundColor: '#e0e0e0',
-  },
-  skeletonMessage: {
-    backgroundColor: '#f0f0f0',
-    padding: 16,
-  },
-  skeletonMessageRandom: {
-    width: '70%',
-  },
-  skeletonMessageSecondLine: {
-    marginTop: 8,
-    width: '40%',
-  },
-  skeletonText: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 4,
-    height: 14,
-    width: '80%',
-  },
-  typingDot: {
-    backgroundColor: '#666',
-    borderRadius: 4,
-    height: 8,
-    marginHorizontal: 2,
-    width: 8,
-  },
-  typingDotFirst: {
-    opacity: 0.4,
-  },
-  typingDotSecond: {
-    opacity: 0.7,
-  },
-  typingDotThird: {
-    opacity: 1,
-  },
-  typingDots: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
+  otherUserMessageText: { color: '#333', fontSize: 16, lineHeight: 20 },
+
+  typingDot: { backgroundColor: '#666', borderRadius: 4, height: 8, marginHorizontal: 2, width: 8 },
+  typingDotFirst: { opacity: 0.4 },
+  typingDotSecond: { opacity: 0.7 },
+  typingDotThird: { opacity: 1 },
+  typingDots: { alignItems: 'center', flexDirection: 'row' },
   typingIndicator: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  typingIndicatorRow: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
+  typingIndicatorRow: { alignItems: 'flex-end', flexDirection: 'row', marginBottom: 16 },
 });

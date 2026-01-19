@@ -462,7 +462,6 @@ const styles = StyleSheet.create({
   messageWrapper: { flexDirection: 'row', marginBottom: 12 },
 
   messagesContent: {
-    flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
   },

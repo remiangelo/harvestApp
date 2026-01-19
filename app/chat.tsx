@@ -28,11 +28,11 @@ import { theme } from '../constants/theme';
 import { analyzeMessage, isMindfulMessagingEnabled } from '../lib/ai/mindfulMessaging';
 import { ChatInputBar, CHAT_INPUT_BAR_BASE_HEIGHT } from '../components/chat';
 
-// ✅ Match GardenerChat behavior
+// Match GardenerChat behavior
 import { useKeyboard } from '../hooks/useKeyboard';
 import { useKeyboardSafeArea } from '../hooks/useKeyboardSafeArea';
 
-// 🚫 Removed: useBottomTabBarHeight (causes crash when not inside tab navigator)
+// Removed: useBottomTabBarHeight (causes crash when not inside tab navigator)
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/EB1E66/FFFFFF?text=No+Image';
 const TAB_BAR_HEIGHT = 70; // fallback only if you ever decide to treat this screen as tabbed
@@ -74,7 +74,7 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const { currentUser } = useUser();
 
-  // ✅ This screen is a Stack screen in your root layout, so it is NOT in the tab navigator.
+  // This screen is a Stack screen in your root layout, so it is NOT in the tab navigator.
   // This prevents the "Couldn't find the bottom tab bar height" crash.
   const hasTabBar = false;
 
@@ -103,12 +103,12 @@ export default function ChatScreen() {
 
   const conversationId = String(id);
 
-  // ✅ reliable bottom scroll (same approach as updated GardenerChat)
+  // reliable bottom scroll (same approach as updated GardenerChat)
   const scrollToBottom = useCallback((animated = false) => {
     flatListRef.current?.scrollToEnd({ animated });
   }, []);
 
-  // ✅ Match GardenerChat padding behavior (messages never sit under input; tab bar only if you ever enable it)
+  // Match GardenerChat padding behavior (messages never sit under input; tab bar only if you ever enable it)
   const listContentPaddingBottom = useMemo(() => {
     const tabBarPadding = hasTabBar && !isKeyboardVisible ? TAB_BAR_HEIGHT : 0;
     return inputBarHeight + tabBarPadding + 16;
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
     minWidth: 60,
   },
   messagesContainer: { flex: 1 },
-  messagesContent: { flexGrow: 1, paddingHorizontal: 16, paddingTop: 20 },
+  messagesContent: { paddingHorizontal: 16, paddingTop: 20 },
   moreButton: { marginLeft: 12 },
   otherUserMessage: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',

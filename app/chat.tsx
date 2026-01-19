@@ -483,7 +483,7 @@ export default function ChatScreen() {
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={keyboardBehavior}
-          keyboardVerticalOffset={getKeyboardVerticalOffset(0)}
+          keyboardVerticalOffset={0}
         >
           {ScreenBody}
         </KeyboardAvoidingView>

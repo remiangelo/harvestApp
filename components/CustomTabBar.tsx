@@ -90,13 +90,13 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
 
   return (
     <Animated.View
-      pointerEvents={isHidden ? 'none' : 'auto'} // ✅ no ghost taps while hidden
+      pointerEvents={isHidden ? 'none' : 'auto'} // no ghost taps while hidden
       style={[
         styles.container,
         {
           transform: [{ translateY }],
           bottom: bottomOffset,
-          opacity: isHidden ? 0 : 1, // ✅ helps on Android (optional but nice)
+          opacity: isHidden ? 0 : 1, // elps on Android (optional but nice)
         },
       ]}
     >

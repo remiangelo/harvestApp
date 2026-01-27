@@ -85,15 +85,23 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
   /**
    * Bottom spacing rules:
-   * - If keyboard is visible: parent layout (KeyboardAvoidingView / adjustResize) handles it.
-   *   So we do NOT add extra bottom padding here.
+   * - If keyboard is visible:
+   *    - iOS still needs bottom safe-area padding (home indicator) to avoid slight overlap.
+   *    - Android: parent adjustResize handles it; no extra padding needed.
    * - If keyboard is hidden:
    *    - with tab bar: add padding so the input sits above the tab bar overlay.
    *    - without tab bar: add safe-area inset (home indicator).
    */
   const bottomPadWhenHidden = hasTabBar ? (tabBarHeight ?? DEFAULT_TAB_BAR_HEIGHT) : insets.bottom;
 
-  const containerBottomPadding = isKeyboardVisible ? 0 : bottomPadWhenHidden;
+  const containerBottomPadding =
+    Platform.OS === 'ios'
+      ? isKeyboardVisible
+        ? insets.bottom
+        : bottomPadWhenHidden
+      : isKeyboardVisible
+        ? 0
+        : bottomPadWhenHidden;
 
   return (
     <View

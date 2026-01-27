@@ -250,7 +250,6 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
       console.error('Error getting AI response:', error);
     } finally {
       setIsTyping(false);
-      // ✅ Removed: scrollToOffset({ offset: 0 }) (that scrolls to TOP and breaks everything)
       // Scrolling is handled by FlatList onContentSizeChange below, only when needed.
     }
   }, [
@@ -348,7 +347,6 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
           { paddingBottom: listContentPaddingBottom },
         ]}
         ListHeaderComponent={renderTypingIndicator()}
-        // ✅ The single reliable moment: after layout/content settles.
         // This covers:
         // - first load
         // - history load
@@ -464,7 +462,6 @@ const styles = StyleSheet.create({
   messageWrapper: { flexDirection: 'row', marginBottom: 12 },
 
   messagesContent: {
-    flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
   },

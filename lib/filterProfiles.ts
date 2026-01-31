@@ -63,8 +63,9 @@ function calculateDistance(location1: string, location2: string): number {
     return distances[idx1][idx2];
   }
 
-  // Random distance for unknown cities
-  return Math.floor(Math.random() * 100) + 1;
+  // Unknown cities - return 0 so they aren't filtered out by distance
+  // Real distance filtering requires GPS coordinates (not yet implemented)
+  return 0;
 }
 
 /**

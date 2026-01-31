@@ -451,6 +451,61 @@ export default function ChatScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Mindful Messaging Modal - shown when user tries to send a flagged message */}
+      <MindfulMessageModal
+        visible={mindfulModalVisible}
+        onClose={() => {
+          setMindfulModalVisible(false);
+          setPendingMessage('');
+          setAnalysisResult(null);
+        }}
+        onEdit={() => {
+          setMindfulModalVisible(false);
+          // Message text is already restored in newMessage by analyzeThenSend
+        }}
+        onSendAnyway={async () => {
+          setMindfulModalVisible(false);
+          if (pendingMessage) {
+            await actualSendMessage(pendingMessage);
+            setNewMessage('');
+          }
+          setPendingMessage('');
+          setAnalysisResult(null);
+        }}
+        reason={analysisResult?.reason || ''}
+        growthLesson={analysisResult?.growthLesson || ''}
+        severity={analysisResult?.severity || 'low'}
+      />
+
+      {/* Harmful Message Modal - shown when receiving a flagged message */}
+      <HarmfulMessageModal
+        visible={harmfulMessageModalVisible}
+        onClose={() => {
+          setHarmfulMessageModalVisible(false);
+          setHarmfulMessageAnalysis(null);
+          setHarmfulMessageContent('');
+        }}
+        onViewAnyway={() => {
+          setHarmfulMessageModalVisible(false);
+          if (harmfulMessageContent) {
+            setMessages((current) => [
+              ...current,
+              {
+                id: `harmful-${Date.now()}`,
+                content: harmfulMessageContent,
+                sender_id: chatPartner?.id || '',
+                created_at: new Date().toISOString(),
+              },
+            ]);
+          }
+          setHarmfulMessageAnalysis(null);
+          setHarmfulMessageContent('');
+        }}
+        reason={harmfulMessageAnalysis?.reason || ''}
+        growthLesson={harmfulMessageAnalysis?.growthLesson || ''}
+        severity={harmfulMessageAnalysis?.severity || 'low'}
+      />
+
       <LinearGradient
         colors={[theme.colors.primary, theme.colors.primaryDark]}
         style={styles.headerGradient}

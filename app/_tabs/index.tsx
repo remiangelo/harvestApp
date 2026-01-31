@@ -273,7 +273,7 @@ export default function SwipingScreen() {
 
       if (user && !isTestMode) {
         // Save swipe to database
-        const result = await saveSwipe(user.id, currentProfile.id, 'top_pick');
+        const result = await saveSwipe(user.id, currentProfile.id, 'super_like');
 
         if (result.success && result.isMatch) {
           setMatchedProfile(currentProfile);

@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export type SwipeAction = 'like' | 'nope' | 'top_pick';
+export type SwipeAction = 'like' | 'nope' | 'super_like';
 
 interface SwipeResult {
   success: boolean;
@@ -42,7 +42,7 @@ export const saveSwipe = async (
     }
 
     // If it's a like or top_pick, check if a match was created
-    if (action === 'like' || action === 'top_pick') {
+    if (action === 'like' || action === 'super_like') {
       const { data: matchData } = await supabase
         .rpc('get_match_status', {
           user_a: swiperId,
@@ -135,7 +135,7 @@ export const getSwipeStats = async (userId: string) => {
       total: data.length,
       likes: data.filter((s: any) => s.action === 'like').length,
       nopes: data.filter((s: any) => s.action === 'nope').length,
-      topPicks: data.filter((s: any) => s.action === 'top_pick').length,
+      topPicks: data.filter((s: any) => s.action === 'super_like').length,
     };
 
     return { stats, error: null };

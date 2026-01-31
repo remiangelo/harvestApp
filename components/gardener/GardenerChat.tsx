@@ -200,7 +200,13 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
     }
 
     try {
-      if (user?.id) await incrementGardenerUsage(user.id);
+      // Only increment conversation count on first message of the day (not per message)
+      if (
+        user?.id &&
+        (useSubscriptionStore.getState().usage?.gardener_conversations_today || 0) === 0
+      ) {
+        await incrementGardenerUsage(user.id);
+      }
       if (user?.id) await addGardenerCharacters(user.id, userMessageLength);
 
       const historyForAI = [...messages, userMessage].slice(-10).map((msg) => ({

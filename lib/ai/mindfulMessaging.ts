@@ -131,35 +131,35 @@ const PHONE_PATTERNS = [
 const GROWTH_LESSONS = {
   aggressive: {
     title: 'Mindful Communication',
-    message: `Words have power. When we express frustration or anger, it's important to focus on our feelings rather than attacking the other person. Try: "I feel hurt when..." instead of name-calling.`,
+    message: `Quick check — how do you think this might land on the other side?`,
   },
   possessive: {
     title: 'Respecting Autonomy',
-    message: `Healthy relationships are built on mutual respect and freedom. Everyone deserves independence and personal boundaries. Try expressing your feelings without controlling language.`,
+    message: `Quick check — how might this come across from their point of view?`,
   },
   pressuring: {
     title: 'Consent & Choice',
-    message: `Pressure removes choice. In healthy connections, both people feel free to make their own decisions. Try: "I'd love if you could..." instead of "You have to..."`,
+    message: `Quick check — what options does this leave on their end?`,
   },
   manipulative: {
     title: 'Authentic Expression',
-    message: `Manipulation creates distance. Share your genuine feelings without guilt-tripping. Try: "I feel..." statements instead of "If you really..." comparisons.`,
+    message: `Quick check — what do you think this communicates beneath the words?`,
   },
   sexual_pressure: {
     title: 'Respecting Boundaries',
-    message: `Intimacy should never feel pressured. Moving at a pace that feels comfortable for both people builds trust and connection. Express interest without pressure.`,
+    message: `Quick check — how might this be received at this point in the conversation?`,
   },
   excessive_intensity: {
     title: 'Balanced Connection',
-    message: `While strong feelings are natural, placing someone as "your everything" can be overwhelming. Healthy relationships include individual identity alongside connection.`,
+    message: `Quick check — how does this fit the stage you're in right now?`,
   },
   general: {
     title: 'Pause & Reflect',
-    message: `Taking a moment to consider how our words might land can deepen understanding. How might the other person receive this message?`,
+    message: `Quick check — how do you imagine this being received?`,
   },
   personal_info: {
     title: 'Stay Safe',
-    message: `Sharing personal contact info early can put your safety at risk. Take time to build trust within the app first. When you're ready to connect outside, consider video chatting first.`,
+    message: `Quick check — is this the level of sharing you want at this moment?`,
   },
 };
 

@@ -70,7 +70,7 @@ describe('HarvestSwipeCard persistence callbacks', () => {
   });
 
   it('calls saveSwipe once on super like', async () => {
-    const onSuperLike = () => saveSwipe('user', profile.id, 'top_pick');
+    const onSuperLike = () => saveSwipe('user', profile.id, 'super_like');
     let card: renderer.ReactTestRenderer;
     await act(async () => {
       card = renderer.create(

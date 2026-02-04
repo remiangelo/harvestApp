@@ -418,39 +418,6 @@ export default function HarvestSwipeCard({
                 </View>
               </View>
 
-              {/* Compatibility badges - maroon theme variants */}
-              <View style={styles.compatibilityRow}>
-                <View style={styles.compatibilityBadge}>
-                  <LinearGradient
-                    colors={['rgba(160, 53, 78, 0.9)', 'rgba(139, 46, 67, 0.85)']}
-                    style={styles.badgeGradient}
-                  >
-                    <Text style={styles.badgeLabel}>Interests</Text>
-                    <Text style={styles.badgeValue}>95%</Text>
-                  </LinearGradient>
-                </View>
-
-                <View style={styles.compatibilityBadge}>
-                  <LinearGradient
-                    colors={['rgba(196, 86, 107, 0.9)', 'rgba(184, 149, 106, 0.85)']}
-                    style={styles.badgeGradient}
-                  >
-                    <Text style={styles.badgeLabel}>Personality</Text>
-                    <Text style={styles.badgeValue}>98%</Text>
-                  </LinearGradient>
-                </View>
-
-                <View style={styles.compatibilityBadge}>
-                  <LinearGradient
-                    colors={['rgba(122, 155, 142, 0.9)', 'rgba(212, 115, 138, 0.85)']}
-                    style={styles.badgeGradient}
-                  >
-                    <Text style={styles.badgeLabel}>Overall</Text>
-                    <Text style={styles.badgeValue}>96%</Text>
-                  </LinearGradient>
-                </View>
-              </View>
-
               {/* Hobbies */}
               {profile.hobbies && profile.hobbies.length > 0 && (
                 <View style={styles.hobbiesRow}>
@@ -480,24 +447,6 @@ const styles = StyleSheet.create({
   activeDot: {
     backgroundColor: '#fff',
   },
-  badgeGradient: {
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  badgeLabel: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  badgeValue: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 2,
-  },
   bio: {
     color: 'rgba(255,255,255,0.95)',
     fontSize: 15,
@@ -517,21 +466,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     width: Dimensions.get('window').width,
-  },
-  compatibilityBadge: {
-    borderRadius: 12,
-    elevation: 5,
-    flex: 1,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  compatibilityRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 10,
   },
   container: {
     backgroundColor: '#000',

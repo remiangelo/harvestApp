@@ -92,8 +92,8 @@ android {
         applicationId 'com.harvest.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 58
-        versionName "1.4.20"
+        versionCode 59
+        versionName "1.4.21"
     }
     signingConfigs {
         debug {

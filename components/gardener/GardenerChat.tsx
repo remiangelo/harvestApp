@@ -81,11 +81,11 @@ export const GardenerChat: React.FC<GardenerChatProps> = ({ onBack }) => {
   const { isKeyboardVisible } = useKeyboard({ hasTabBar });
   const { keyboardBehavior, getKeyboardVerticalOffset } = useKeyboardSafeArea({ hasTabBar });
 
-  // FlatList padding so messages never sit under input (or tab bar when visible)
+  // FlatList padding so messages never sit under input
+  // Note: ChatInputBar handles its own tab bar padding, so we only add inputBarHeight
   const listContentPaddingBottom = useMemo(() => {
-    const tabBarPadding = hasTabBar && !isKeyboardVisible ? TAB_BAR_HEIGHT : 0;
-    return inputBarHeight + tabBarPadding + 16; // breathing room
-  }, [inputBarHeight, hasTabBar, isKeyboardVisible]);
+    return inputBarHeight + 16; // breathing room
+  }, [inputBarHeight]);
 
   // Only scroll when needed:
   // - first load / history load (content size changes)

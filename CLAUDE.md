@@ -6,11 +6,11 @@
 
 ## Current Status
 
-**Version**: 1.4.19
-**Build**: 57
+**Version**: 1.4.21
+**Build**: 59
 **iOS Status**: ✅ **READY FOR TESTFLIGHT SUBMISSION**
 **Android Status**: ✅ **BUILD CONFIGURED & WORKING**
-**Last Updated**: January 15, 2026
+**Last Updated**: February 4, 2026
 
 ## CRITICAL Requirements
 
@@ -211,8 +211,9 @@ EXPO_PUBLIC_OPENAI_API_KEY=your_openai_key  # Optional
 
 - Uses `users` table (NOT `profiles`)
 - Messages use `conversation_id` (NOT `match_id`)
-- Swipes use `action` column (NOT `swipe_type`)
+- Swipes use `action` column with enum values: `like`, `nope`, `super_like` (NOT `top_pick`)
 - All critical columns: email (NOT NULL), photo_url (NOT avatar_url)
+- `user_usage` table has `gardener_characters_used_today` column (added in migration)
 
 ### Design System
 
@@ -279,6 +280,13 @@ shadowOpacity: 0.1 (unselected), 0.3 (selected)
 - ✅ Android NDK missing source.properties: Delete and let Gradle reinstall
 - ✅ Android system image incomplete: Reinstall via Android Studio SDK Manager
 - ✅ Android emulator won't start: Reinstall complete system image with all .img files
+- ✅ Mindful messaging modal not showing: Was imported but never rendered in chat.tsx JSX
+- ✅ Matching profiles randomly disappearing: calculateDistance() returned random values for unknown cities
+- ✅ Super-like swipes failing silently: Code sent 'top_pick' but DB enum is 'super_like'
+- ✅ Gardener AI blocked after first message: incrementGardenerUsage called per message instead of per session
+- ✅ Match notification showing "undefined": Code used `currentProfile.name` instead of `currentProfile.nickname`
+- ✅ Black bar at bottom of screens: Discover screen `backgroundColor: '#000'` showing through tab bar
+- ✅ Gardener chat whitespace: Double padding from both FlatList and ChatInputBar
 
 ### Current Workarounds
 
@@ -338,7 +346,7 @@ cd android && ./gradlew clean
 
 ### Pre-Flight Checklist
 
-- [x] Version 1.4.11, Build 42 synchronized
+- [x] Version 1.4.21, Build 59 synchronized
 - [x] Bundle ID: com.harvest.harvestdating
 - [x] Supabase credentials in eas.json
 - [x] All TypeScript errors fixed (0 errors)
@@ -368,6 +376,68 @@ See `TODO.md` for comprehensive upgrade plan.
 **Safe Alternative Now**: `npx expo install --fix` for patch updates
 
 ## Latest Session Summary
+
+### February 4, 2026 - UI Fixes: Percentage Matching, Undefined Name, Layout Issues
+
+**Changes**:
+
+1. ✅ Removed percentage-based matchmaking display
+   - Removed "Interests 95%", "Personality 98%", "Overall 96%" badges from swipe cards (`HarvestSwipeCard.tsx`)
+   - Removed compatibility metrics from match modal (`MatchModal.tsx`)
+   - Updated match modal subtitle to "We think you and {name} would be great together!"
+2. ✅ Fixed "You and undefined liked each other!" notification
+   - Changed `currentProfile.name` → `currentProfile.nickname` in 3 places (`index.tsx`)
+   - Database uses `nickname` column, not `name`
+3. ✅ Fixed black bar at bottom of Gardener/Messages screens
+   - Changed Discover screen background from `#000` → `#F8F8F8` (`index.tsx`)
+   - The black background was showing through the tab bar area
+4. ✅ Fixed whitespace between Gardener chat and input box
+   - Removed double tab bar padding in `GardenerChat.tsx`
+   - `ChatInputBar` handles its own tab bar padding, so FlatList only needs `inputBarHeight + 16`
+
+**Files Changed**: 4 files
+
+- `app/_tabs/index.tsx` - nickname fix, background color, removed compatibility prop
+- `components/HarvestSwipeCard.tsx` - removed compatibility badges + styles
+- `components/MatchModal.tsx` - removed compatibility interface, badges, unused import
+- `components/gardener/GardenerChat.tsx` - fixed double padding
+
+### February 1, 2026 - Mindful Messaging, Matching & Gardener Bug Fixes
+
+**Changes**:
+
+1. ✅ Fixed Mindful Messaging modal not rendering
+   - `MindfulMessageModal` and `HarmfulMessageModal` were imported in `chat.tsx` but never added to JSX
+   - Added both modals with proper handlers (Edit, Send Anyway, Cancel / View Anyway, Keep Hidden)
+   - Updated GROWTH_LESSONS to concise "Quick check" prompts per dev team feedback
+2. ✅ Fixed matching profiles randomly disappearing
+   - `calculateDistance()` in `filterProfiles.ts` returned `Math.random() * 100` for unknown cities
+   - With default `max_distance: 50`, ~50% of profiles were randomly filtered out each load
+   - Fixed to return 0 for unknown cities (distance filtering requires real GPS coordinates)
+3. ✅ Fixed super-like swipes failing silently
+   - DB `swipe_type` enum: `{like, nope, super_like}`
+   - Code was sending `'top_pick'` which doesn't match the enum
+   - Updated all references in `swipes.ts`, `index.tsx`, and test file to use `'super_like'`
+4. ✅ Fixed Gardener AI blocked after first message
+   - `incrementGardenerUsage()` was called per message, but seed tier allows 1 conversation/day
+   - After first message, counter hit 1 and `canUseGardener()` returned false
+   - Fixed to only increment on first message of the day (count === 0), allowing full conversation within character limit
+5. ✅ Added missing `gardener_characters_used_today` column to `user_usage` table via migration
+6. ✅ Updated version 1.4.19 → 1.4.20, Build 57 → 58 (all 5 config files)
+
+**Commit**: 9bb211d - pushed to origin/main
+**Files Changed**: 12 files, 87 insertions(+), 25 deletions(-)
+
+**Database Migration Applied**:
+
+- `add_gardener_characters_used_today`: Added integer column to `user_usage` table
+
+**Key Findings for Future Reference**:
+
+- Distance filtering is mock-only (no real GPS coordinate calculation yet)
+- Seed/Green tiers get 1 conversation per day with character limits (3000/10000 chars)
+- Gold tier gets unlimited conversations with 30000 char daily limit
+- 3 users (André, André, Andrea) have no subscription records (default to seed tier)
 
 ### November 4, 2025 - Android Build Setup & Configuration
 
@@ -504,5 +574,5 @@ See `TODO.md` for comprehensive upgrade plan.
 
 ---
 
-**Last Memory Update**: November 4, 2025 - Android Build Setup
-**Next Review**: After Android testing on emulator (1-2 days)
+**Last Memory Update**: February 4, 2026 - UI Fixes: Percentage Matching, Undefined Name, Layout Issues
+**Next Review**: After TestFlight testing of v1.4.20

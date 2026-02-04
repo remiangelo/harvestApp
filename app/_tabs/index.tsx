@@ -198,7 +198,7 @@ export default function SwipingScreen() {
           setShowMatchModal(true);
           // Send match notification
           await notificationService.sendMatchNotification(
-            currentProfile.name,
+            currentProfile.nickname,
             currentProfile.photos?.[0] || ''
           );
         } else if (!result.success) {
@@ -215,7 +215,7 @@ export default function SwipingScreen() {
           setShowMatchModal(true);
           // Send match notification
           await notificationService.sendMatchNotification(
-            currentProfile.name,
+            currentProfile.nickname,
             currentProfile.photos?.[0] || ''
           );
         }
@@ -280,7 +280,7 @@ export default function SwipingScreen() {
           setShowMatchModal(true);
           // Send match notification
           await notificationService.sendMatchNotification(
-            currentProfile.name,
+            currentProfile.nickname,
             currentProfile.photos?.[0] || ''
           );
         } else if (!result.success) {
@@ -421,13 +421,8 @@ export default function SwipingScreen() {
               photo: currentUser?.photos?.[0] || 'https://i.pravatar.cc/150?img=1',
             }}
             matchProfile={{
-              name: matchedProfile.name,
+              name: matchedProfile.nickname || matchedProfile.name,
               photo: matchedProfile.photos?.[0] || '',
-            }}
-            compatibility={{
-              interests: 95,
-              personality: 98,
-              overall: 96,
             }}
           />
         )}
@@ -438,7 +433,7 @@ export default function SwipingScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#000',
+    backgroundColor: '#F8F8F8',
     flex: 1,
   },
   emptyStateButton: {

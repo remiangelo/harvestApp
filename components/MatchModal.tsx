@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, Dimensions, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LiquidGlassView, LiquidGlassButton, LiquidGlassBadge } from './liquid';
+import { LiquidGlassView, LiquidGlassButton } from './liquid';
 import * as Haptics from 'expo-haptics';
 import { theme } from '../constants/theme';
 import ConfettiCannon from 'react-native-confetti-cannon';
@@ -21,11 +21,6 @@ interface MatchModalProps {
     name: string;
     photo: string;
   };
-  compatibility: {
-    interests: number;
-    personality: number;
-    overall: number;
-  };
 }
 
 export const MatchModal: React.FC<MatchModalProps> = ({
@@ -34,7 +29,6 @@ export const MatchModal: React.FC<MatchModalProps> = ({
   onSendMessage,
   userProfile,
   matchProfile,
-  compatibility,
 }) => {
   const insets = useSafeAreaInsets();
   const confettiRef = useRef<ConfettiCannon>(null);
@@ -102,32 +96,9 @@ export const MatchModal: React.FC<MatchModalProps> = ({
             {/* Match Text */}
             <Text style={styles.matchTitle}>It&apos;s a match, {userProfile.name}!</Text>
             <Text style={styles.matchSubtitle}>
-              We think you&apos;re a great match! Our algorithm{'\n'}
-              has given you {compatibility.overall}% compatibility.
+              We think you and {matchProfile.name} would be great together!
             </Text>
             <Text style={styles.matchHint}>Try asking them about their love for travel</Text>
-
-            {/* Compatibility Metrics with Maroon Theme */}
-            <View style={styles.metricsContainer}>
-              <LiquidGlassBadge
-                label="Interests"
-                value={`${compatibility.interests}%`}
-                color={theme.colors.primary}
-                size="large"
-              />
-              <LiquidGlassBadge
-                label="Personality"
-                value={`${compatibility.personality}%`}
-                color="#C4566B"
-                size="large"
-              />
-              <LiquidGlassBadge
-                label="Match"
-                value={`${compatibility.overall}%`}
-                color="#7A9B8E"
-                size="large"
-              />
-            </View>
 
             {/* Action Buttons */}
             <LiquidGlassButton
@@ -258,12 +229,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(255, 255, 255, 0.8)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-  },
-  metricsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 30,
-    width: '100%',
   },
   photo: {
     height: '100%',

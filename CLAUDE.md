@@ -6,8 +6,8 @@
 
 ## Current Status
 
-**Version**: 1.4.21
-**Build**: 59
+**Version**: 1.4.22
+**Build**: 60
 **iOS Status**: ✅ **READY FOR TESTFLIGHT SUBMISSION**
 **Android Status**: ✅ **BUILD CONFIGURED & WORKING**
 **Last Updated**: February 4, 2026
@@ -20,17 +20,17 @@
 
 ### Core
 
-- **Framework**: Expo SDK 53.0.20, React Native 0.79.5, React 19.0.0
+- **Framework**: Expo SDK 54, React Native 0.81.5, React 19.1.0
 - **Language**: TypeScript
-- **Navigation**: Expo Router ~5.1.4 (file-based routing)
+- **Navigation**: Expo Router ~6.0.23 (file-based routing)
 - **State Management**: Zustand + AsyncStorage
 - **Styling**: StyleSheet with liquid glass design system
 - **Backend**: Supabase (auth, database, storage, real-time)
 
 ### Key Dependencies
 
-- **Animations**: React Native Reanimated ~3.17.4
-- **Gestures**: React Native Gesture Handler v2
+- **Animations**: React Native Reanimated ~4.1.1
+- **Gestures**: React Native Gesture Handler ~2.28.0
 - **UI**: Expo Vector Icons, expo-image, expo-blur, expo-linear-gradient
 - **Auth**: @supabase/supabase-js
 - **AI**: OpenAI GPT-4 (optional, with fallbacks)
@@ -346,7 +346,7 @@ cd android && ./gradlew clean
 
 ### Pre-Flight Checklist
 
-- [x] Version 1.4.21, Build 59 synchronized
+- [x] Version 1.4.22, Build 60 synchronized
 - [x] Bundle ID: com.harvest.harvestdating
 - [x] Supabase credentials in eas.json
 - [x] All TypeScript errors fixed (0 errors)
@@ -356,26 +356,64 @@ cd android && ./gradlew clean
 
 ## Future TODO
 
-### SDK 54 Upgrade (2-3 Months Post-Launch)
+### SDK 54 Upgrade — COMPLETED
 
-See `TODO.md` for comprehensive upgrade plan.
-
-**DO NOT UPGRADE** until:
-
-- App stable in production for 2-3 months
-- Baseline metrics established
-- User feedback collected
-
-**Breaking Changes**:
-
-- React Native Reanimated v4 (requires worklet rewrites)
-- React Native 0.81 (JSC removed)
-- expo-file-system API changes
-- Metro internal import changes
-
-**Safe Alternative Now**: `npx expo install --fix` for patch updates
+SDK 54 upgrade completed February 4, 2026. See session summary below for full details.
+All breaking changes resolved: Reanimated v4 (hook-based API compatible), expo-file-system/legacy, SafeAreaView/StatusBar migrations, babel plugin deduplication.
 
 ## Latest Session Summary
+
+### February 4, 2026 - Expo SDK 53 → 54 Upgrade + Bug Fixes
+
+**Changes**:
+
+1. ✅ Fixed profile picture not showing after onboarding
+   - `lib/onboarding.ts` lines 87, 96: Changed fallback `return photoUri` to `return null`
+   - Local `file://` URIs were saved to DB when uploads failed — break after app restart
+   - Line 102 already filters nulls, so photos that fail to upload are simply excluded
+2. ✅ Fixed black bar behind tab bar (all screens)
+   - Added `sceneStyle: { backgroundColor: '#F8F8F8' }` to Tabs screenOptions (`app/_tabs/_layout.tsx`)
+3. ✅ Fixed matches screen whitespace above tab bar
+   - Moved `paddingBottom` from LiquidGlassView container to ScrollView `contentContainerStyle` (`app/_tabs/matches.tsx`)
+4. ✅ Fixed gardener/chat input bar gap above tab bar
+   - Changed `bottomPadWhenHidden` to use `insets.bottom` instead of full tab bar height (`components/chat/ChatInputBar.tsx`)
+   - CustomTabBar reserves its own layout space, so only home indicator padding is needed
+5. ✅ Upgraded Expo SDK 53 → 54
+   - expo 53 → 54, react-native 0.79.5 → 0.81.5, react 19.0.0 → 19.1.0
+   - expo-router 5.1.4 → 6.0.23, reanimated 3.17.5 → 4.1.1
+   - gesture-handler 2.24.0 → 2.28.0, screens 4.11.1 → 4.16.0
+   - All 36 SDK-compatible packages updated
+6. ✅ Fixed build blockers
+   - Removed duplicate reanimated babel plugin (`babel.config.js`) — SDK 54's babel-preset-expo auto-includes it
+   - Changed `expo-file-system` → `expo-file-system/legacy` in `lib/storage.ts` and `lib/profiles.ts`
+7. ✅ Fixed deprecated SafeAreaView imports (18 files)
+   - Replaced `SafeAreaView` from `react-native` with `react-native-safe-area-context`
+   - Files: complete.tsx, terms-of-service.tsx, privacy-policy.tsx, community-guidelines.tsx, auth/index.tsx, chat.tsx (tab), matches.tsx, gardener.tsx, tips.tsx, two.tsx, help-center.tsx, login.tsx, profile-edit.tsx, filters.tsx, OnboardingScreen.tsx, GardenerChat.tsx, chat.tsx (detail), settings.tsx
+8. ✅ Fixed deprecated StatusBar imports (4 files)
+   - Replaced `StatusBar` from `react-native` with `expo-status-bar`
+   - Changed `barStyle="light-content"` → `style="light"`
+   - Files: chat.tsx, matches.tsx, gardener.tsx, tips.tsx (all in \_tabs/)
+9. ✅ Fixed SDK 54 API changes
+   - `Notifications.removeNotificationSubscription()` → `.remove()` on subscription objects (`_layout.tsx`, `notifications.ts`)
+   - `DailyQuizPopup.tsx`: replaced `useGardenerStore` (no `user` property) with `useUser` context
+   - Tabs `sceneContainerStyle` → `screenOptions.sceneStyle` (expo-router v6 API change)
+10. ✅ Installed missing peer dependency `react-native-worklets` (required by reanimated v4)
+11. ✅ Regenerated native projects (`npx expo prebuild --clean` + `pod install`)
+12. ✅ Version bump 1.4.21 → 1.4.22, Build 59 → 60
+
+**Files Changed**: ~30 files
+
+**Verification**:
+
+- `npx tsc --noEmit` — 0 TypeScript errors
+- `npx expo-doctor` — All critical checks passed (peer deps satisfied)
+- CocoaPods installed 114 pods successfully
+
+**Key Versions After Upgrade**:
+
+- Expo SDK 54.0.33, React Native 0.81.5, React 19.1.0
+- expo-router 6.0.23, reanimated 4.1.1, gesture-handler 2.28.0
+- TypeScript 5.9.2, Hermes engine (default)
 
 ### February 4, 2026 - UI Fixes: Percentage Matching, Undefined Name, Layout Issues
 
@@ -574,5 +612,5 @@ See `TODO.md` for comprehensive upgrade plan.
 
 ---
 
-**Last Memory Update**: February 4, 2026 - UI Fixes: Percentage Matching, Undefined Name, Layout Issues
+**Last Memory Update**: February 4, 2026 - Expo SDK 53 → 54 Upgrade + Bug Fixes (v1.4.22 build 60)
 **Next Review**: After TestFlight testing of v1.4.20

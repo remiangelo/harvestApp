@@ -6,13 +6,12 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  SafeAreaView,
-  StatusBar,
   Animated,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { ProfileViewModal, ProfileData } from '../../components/ProfileViewModal';
 import { router } from 'expo-router';
@@ -196,7 +195,7 @@ export default function MatchesScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar style="light" />
 
       {/* Header with gradient background */}
       <LinearGradient
@@ -275,15 +274,13 @@ export default function MatchesScreen() {
       <LiquidGlassView
         intensity={85}
         tint="light"
-        style={StyleSheet.flatten([
-          styles.conversationsContainer,
-          { paddingBottom: insets.bottom + 56 + 20 },
-        ])}
+        style={styles.conversationsContainer}
         borderRadius={24}
         glassTint="rgba(255, 255, 255, 0.95)"
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
           onScroll={(event) => {
             const y = event.nativeEvent.contentOffset.y;
             // Notify tab bar about scroll

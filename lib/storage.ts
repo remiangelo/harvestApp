@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 export const uploadProfilePhoto = async (userId: string, photoUri: string, photoIndex: number) => {
   try {

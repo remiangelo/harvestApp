@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { gardenerService, QuizQuestion } from '../../lib/ai/gardenerService';
 import { gardenerQuizService, gardenerInsightsService } from '../../lib/gardenerSupabase';
-import { useGardenerStore } from '../../stores/useGardenerStore';
+import { useUser } from '../../context/UserContext';
 import { theme } from '../../constants/theme';
 
 interface DailyQuizPopupProps {
@@ -34,7 +34,7 @@ export const DailyQuizPopup: React.FC<DailyQuizPopupProps> = ({ visible, onClose
   const [hasAnswered, setHasAnswered] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const scaleAnim = useState(new Animated.Value(0.9))[0];
-  const { user } = useGardenerStore();
+  const { currentUser: user } = useUser();
 
   useEffect(() => {
     if (visible) {

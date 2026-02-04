@@ -92,7 +92,9 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
    *    - with tab bar: add padding so the input sits above the tab bar overlay.
    *    - without tab bar: add safe-area inset (home indicator).
    */
-  const bottomPadWhenHidden = hasTabBar ? (tabBarHeight ?? DEFAULT_TAB_BAR_HEIGHT) : insets.bottom;
+  // CustomTabBar reserves its own layout space, so we only need safe-area
+  // padding (home indicator) — not the full tab bar height.
+  const bottomPadWhenHidden = insets.bottom;
 
   const containerBottomPadding =
     Platform.OS === 'ios'

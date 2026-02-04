@@ -2,14 +2,13 @@ import React, { ReactNode } from 'react';
 import {
   View,
   StyleSheet,
-  SafeAreaView,
   ActivityIndicator,
   TouchableOpacity,
   Text,
   ScrollView,
   Platform,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';

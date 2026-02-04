@@ -83,8 +83,8 @@ export const saveOnboardingStep = async (
               return url;
             } else {
               console.error(`Failed to upload photo ${i}:`, error);
-              // Return the local URI as fallback
-              return photoUri;
+              // Return null — local file:// URIs break after restart
+              return null;
             }
           } else if (photoUri) {
             // This is already a URL, keep it
@@ -92,8 +92,8 @@ export const saveOnboardingStep = async (
           }
         } catch (timeoutError) {
           console.error(`Photo ${i} upload timeout after 30s:`, timeoutError);
-          // Return local URI as fallback on timeout
-          return photoUri;
+          // Return null — local file:// URIs break after restart
+          return null;
         }
         return null;
       });

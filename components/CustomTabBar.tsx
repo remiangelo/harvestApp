@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
    * This is what prevents overlap with ChatInputBar and all other screens.
    */
   reservedWrapper: {
-    backgroundColor: '#F8F8F8',
+    backgroundColor: 'transparent',
     width: '100%',
   },
 

@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../../constants/theme';
 import { useKeyboard } from '../../hooks/useKeyboard';
+import { VISUAL_BAR_HEIGHT } from '../CustomTabBar';
 
 interface ChatInputBarProps {
   /** Current input value */
@@ -46,9 +47,6 @@ interface ChatInputBarProps {
 
 // Estimated base height for layout calculations
 export const CHAT_INPUT_BAR_BASE_HEIGHT = 60;
-
-// Fallback tab bar height (only used if hasTabBar=true and tabBarHeight not provided)
-const DEFAULT_TAB_BAR_HEIGHT = 70;
 
 /**
  * Chat input bar as a NORMAL footer (no absolute positioning).
@@ -92,9 +90,9 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
    *    - with tab bar: add padding so the input sits above the tab bar overlay.
    *    - without tab bar: add safe-area inset (home indicator).
    */
-  // CustomTabBar reserves its own layout space, so we only need safe-area
-  // padding (home indicator) — not the full tab bar height.
-  const bottomPadWhenHidden = insets.bottom;
+  // Tab bar is floating (absolute), so when keyboard is hidden we must
+  // clear the pill.  Non-tab screens only need the home-indicator inset.
+  const bottomPadWhenHidden = hasTabBar ? VISUAL_BAR_HEIGHT + insets.bottom : insets.bottom;
 
   const containerBottomPadding =
     Platform.OS === 'ios'

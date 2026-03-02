@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface UseKeyboardSafeAreaOptions {
-  hasTabBar?: boolean; // Whether screen has bottom tab bar (70px)
+  hasTabBar?: boolean; // Whether screen has bottom tab bar (56px)
   extraPadding?: number; // Additional padding if needed
 }
 
@@ -21,7 +21,7 @@ export const useKeyboardSafeArea = (options: UseKeyboardSafeAreaOptions = {}) =>
   const { hasTabBar = false, extraPadding = 0 } = options;
   const insets = useSafeAreaInsets();
 
-  const TAB_BAR_HEIGHT = 70; // From CLAUDE.md - standard tab bar height
+  const TAB_BAR_HEIGHT = 56; // Matches VISUAL_BAR_HEIGHT in CustomTabBar
   const MIN_PADDING = 8;
 
   // Calculate bottom padding for input bar

@@ -18,10 +18,12 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import { OptimizedImage } from '../../components/OptimizedImage';
 import { useRouter } from 'expo-router';
 import { theme } from '../../constants/theme';
+import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { tabBarPadding } = useTabBarPadding();
   const [isEditing, setIsEditing] = useState(false);
   const { currentUser, updateOnboardingData } = useUserStore();
   useAuthStore();
@@ -158,7 +160,7 @@ export default function ProfileScreen() {
 
         <Animated.ScrollView
           style={styles.content}
-          contentContainerStyle={{ paddingBottom: insets.bottom + 56 + 20 }}
+          contentContainerStyle={{ paddingBottom: tabBarPadding }}
           showsVerticalScrollIndicator={false}
           onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
             useNativeDriver: true,

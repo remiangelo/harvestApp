@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { theme } from '../../constants/theme';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 
 interface Conversation {
   id: string;
@@ -35,6 +36,7 @@ export default function ChatTabScreen() {
   const [chatsLoading, setChatsLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const { user } = useAuthStore();
+  const { tabBarPadding } = useTabBarPadding();
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -170,7 +172,7 @@ export default function ChatTabScreen() {
       <ScrollView
         style={styles.conversationsContainer}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarPadding }]}
       >
         {chatsLoading ? (
           // Skeleton loader for chats
@@ -398,7 +400,6 @@ const styles = StyleSheet.create({
     width: 14,
   },
   scrollContent: {
-    paddingBottom: 76, // Tab bar (56px) + padding (20px)
     paddingTop: 20,
   },
   searchBar: {

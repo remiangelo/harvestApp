@@ -3,13 +3,14 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from '
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LiquidGlassView } from '../../components/liquid/LiquidGlassView';
 import { theme } from '../../constants/theme';
 import { DailyQuizPopup } from '../../components/gardener/DailyQuizPopup';
 import { ValuesQuestionnaire } from '../../components/gardener/ValuesQuestionnaire';
 import { useGardenerStore } from '../../stores/useGardenerStore';
 import { useRouter } from 'expo-router';
+import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 
 interface DatingTip {
   id: string;
@@ -107,7 +108,6 @@ const quickAdvice: QuickAdvice[] = [
 import { getDailyReflection, getLastReflection } from '../../lib/gardener';
 
 export default function GardenerScreen() {
-  const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedAdvice, setExpandedAdvice] = useState<string | null>(null);
   const [reflection, setReflection] = useState<string>('');
@@ -117,13 +117,14 @@ export default function GardenerScreen() {
   const _router = useRouter(); // Prefixed with _ to indicate intentionally unused
 
   const { shouldShowDailyQuiz, markQuizShown } = useGardenerStore();
+  const { tabBarPadding } = useTabBarPadding();
 
   const scrollContentStyle = useMemo(
     () => ({
-      paddingBottom: insets.bottom + 56 + 40,
+      paddingBottom: tabBarPadding,
       paddingTop: 20,
     }),
-    [insets.bottom]
+    [tabBarPadding]
   );
 
   React.useEffect(() => {

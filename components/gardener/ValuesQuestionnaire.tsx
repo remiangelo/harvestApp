@@ -23,6 +23,7 @@ import {
 } from '../../lib/values';
 import { LiquidGlassView } from '../liquid/LiquidGlassView';
 import { UpgradeModal } from '../UpgradeModal';
+import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 
 type ValueType = 'brought' | 'sought';
 
@@ -36,6 +37,7 @@ export const ValuesQuestionnaire: React.FC = () => {
   const [selectedBrought, setSelectedBrought] = useState<string[]>([]);
   const [selectedSought, setSelectedSought] = useState<string[]>([]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const { tabBarPadding } = useTabBarPadding();
 
   useEffect(() => {
     loadData();
@@ -268,7 +270,7 @@ export const ValuesQuestionnaire: React.FC = () => {
       {/* Values List */}
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarPadding }]}
         showsVerticalScrollIndicator={false}
       >
         {Object.entries(groupedValues).map(([category, values]) => (
@@ -478,9 +480,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  scrollContent: {
-    paddingBottom: 96, // Tab bar (56px) + extra padding (40px)
-  },
+  scrollContent: {},
   scrollView: {
     flex: 1,
   },

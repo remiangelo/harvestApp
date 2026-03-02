@@ -16,21 +16,16 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { theme } from '../constants/theme';
 import GARDENER_ICON from '../assets/images/unnamed.png';
 
+/** Height of the visible glass pill (exported for padding calculations). */
+export const VISUAL_BAR_HEIGHT = 56;
+
 /**
- * BEST FIX:
- * - Reserve layout space (so screen content never sits behind the tab bar).
- * - Keep the visual "floating" bar as an absolute child inside that reserved area.
- * - Hide/show on keyboard exactly as before (slide down).
- *
- * Key idea:
- *   Outer wrapper = normal flow height (tabBarHeight + safe area).
- *   Inner floating bar = absolute positioned within wrapper for your glass effect.
+ * Floating tab bar overlay.
+ * The wrapper is absolutely positioned at the bottom so content scrolls behind
+ * the glass pill.  Screens must add their own bottom padding via useTabBarPadding.
  */
 export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
   const insets = useSafeAreaInsets();
-
-  // Visual bar height (your glass pill)
-  const VISUAL_BAR_HEIGHT = 56;
 
   // The amount of space we reserve at the bottom so content never overlaps.
   // This MUST include safe-area bottom on iOS.
@@ -112,7 +107,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
 
   return (
     <Animated.View
-      pointerEvents={isHidden ? 'none' : 'auto'}
+      pointerEvents={isHidden ? 'none' : 'box-none'}
       style={[
         styles.reservedWrapper,
         {
@@ -296,13 +291,16 @@ const styles = StyleSheet.create({
   },
 
   /**
-   * Outer wrapper reserves layout space.
-   * IMPORTANT: Do NOT absolute-position this.
-   * This is what prevents overlap with ChatInputBar and all other screens.
+   * Outer wrapper is absolutely positioned at the bottom so content can scroll
+   * behind the floating glass pill.  Screens add their own bottom padding.
    */
   reservedWrapper: {
     backgroundColor: 'transparent',
-    width: '100%',
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    zIndex: 1000,
   },
 
   tab: { alignItems: 'center', flex: 1, height: '100%', justifyContent: 'center' },

@@ -20,6 +20,7 @@ import { supabase } from '../../lib/supabase';
 import { useUser } from '../../context/UserContext';
 import { theme } from '../../constants/theme';
 import { ensureConversation } from '../../lib/chat';
+import { useTabBarPadding } from '../../hooks/useTabBarPadding';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/400x400/EB1E66/FFFFFF?text=No+Image';
 
@@ -34,6 +35,7 @@ export default function MatchesScreen() {
   const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { currentUser } = useUser();
+  const { tabBarPadding } = useTabBarPadding();
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -280,7 +282,7 @@ export default function MatchesScreen() {
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: tabBarPadding }}
           onScroll={(event) => {
             const y = event.nativeEvent.contentOffset.y;
             // Notify tab bar about scroll

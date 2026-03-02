@@ -3,7 +3,7 @@ import { Keyboard, Platform, Animated, KeyboardEvent, EmitterSubscription } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface UseKeyboardOptions {
-  /** Whether the screen has a bottom tab bar (70px) */
+  /** Whether the screen has a bottom tab bar (56px) */
   hasTabBar?: boolean;
   /** Extra padding to add when keyboard is hidden */
   extraPadding?: number;
@@ -26,7 +26,7 @@ interface UseKeyboardReturn {
   bottomOffsetWhenHidden: number;
 }
 
-const TAB_BAR_HEIGHT = 70;
+const TAB_BAR_HEIGHT = 56;
 
 export const useKeyboard = (options: UseKeyboardOptions = {}): UseKeyboardReturn => {
   const { hasTabBar = false, extraPadding = 0 } = options;

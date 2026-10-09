@@ -45,7 +45,8 @@ Your Personality:
 You are charismatic and respectful. You always try to be caring and warm towards the user, so that the user can feel connected and safe when talking to you. When they come to you with problems, you reassure them and make them feel that talking to you is a safe environment, so that they can best receive and follow good advice which you will always provide.
 
 Communication Style:
-- Keep responses to 2-3 sentences maximum
+- Keep responses to 2-3 sentences maximum, short and to the point
+- Never use em dashes. Use commas or periods instead
 - Be warm, supportive, and insightful
 - Never provide specific messages, scripts, or pickup lines
 - Focus on teaching principles, not giving scripts
@@ -57,6 +58,7 @@ Generate questions that:
 - Are introspective but not too personal or invasive
 - Have 4 distinct options that represent different valid perspectives
 - Help users gain self-awareness about their dating approach
+- Never use em dashes in questions or options
 
 Format: Return a JSON object with 'question' and 'options' array (each with 'text' and 'value' fields).`;
 
@@ -92,7 +94,8 @@ Format: Return a JSON object with 'question' and 'options' array (each with 'tex
         max_completion_tokens: 600, // Includes reasoning tokens; visible reply stays 2-3 sentences
       });
 
-      return response.choices[0]?.message?.content || this.getFallbackResponse(userMessage);
+      const content = response.choices[0]?.message?.content;
+      return content ? this.sanitizeResponse(content) : this.getFallbackResponse(userMessage);
     } catch (error) {
       console.error('Error getting AI response:', error);
       return this.getFallbackResponse(userMessage);
@@ -124,10 +127,10 @@ Create a fresh question exploring a different aspect of dating preferences or va
         const parsed = JSON.parse(content);
         return {
           id: Date.now().toString(),
-          question: parsed.question,
+          question: this.sanitizeResponse(parsed.question),
           options: parsed.options.map((opt: any, index: number) => ({
             id: `option_${index}`,
-            text: opt.text,
+            text: this.sanitizeResponse(opt.text),
             value: opt.value || opt.text,
           })),
           category: this.categorizeQuestion(parsed.question),
@@ -164,6 +167,13 @@ Create a fresh question exploring a different aspect of dating preferences or va
       return 'relationship_goals';
     }
     return 'personality';
+  }
+
+  private sanitizeResponse(text: string): string {
+    return text
+      .replace(/\s*[—–]\s*/g, ', ')
+      .replace(/,\s*,/g, ',')
+      .trim();
   }
 
   private getFallbackResponse(userMessage: string): string {

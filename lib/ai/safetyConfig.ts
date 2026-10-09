@@ -6,9 +6,8 @@ export const SAFETY_CONFIG = {
   // OpenAI Configuration
   openai: {
     apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY || '',
-    model: 'gpt-4-turbo-preview',
-    temperature: 0.3, // Lower for consistent safety detection
-    maxTokens: 500,
+    model: 'gpt-5-mini',
+    maxTokens: 1000, // GPT-5 counts reasoning tokens toward this cap
   },
 
   // Safety Score Thresholds

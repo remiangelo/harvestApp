@@ -1,0 +1,75 @@
+# The Tech Behind Harvest
+
+Harvest is a mindful dating app — swipe-based matching, real-time chat, and an AI dating coach called **The Gardener** — built on Expo / React Native (TypeScript) with a Supabase backend and OpenAI for the AI features. This page is a short technical tour for the curious.
+
+## Stack at a glance
+
+- **Client:** Expo SDK 54, React Native 0.81, React 19, TypeScript. File-based routing via Expo Router, state via Zustand persisted to AsyncStorage.
+- **Backend:** Supabase — Postgres for data, Supabase Auth (email + Google OAuth), Realtime channels for chat/typing indicators, Storage for photos, and Row Level Security on every user-facing table.
+- **AI:** OpenAI (GPT-4 family) via the `openai` JS SDK, called directly from the app, plus a deterministic rule engine that works even when no API key is configured.
+
+## How the OpenAI side is wired
+
+Every AI feature runs through a small set of services in `lib/ai/`, each tuned differently:
+
+| Feature               | Model        | Tuning                  | Output                         |
+| --------------------- | ------------ | ----------------------- | ------------------------------ |
+| Gardener chat         | `gpt-5-mini` | `reasoning_effort: low` | short prose (2–3 sentences)    |
+| Safety analysis       | `gpt-5-mini` | `reasoning_effort: low` | `response_format: json_object` |
+| Mindful messaging     | `gpt-5-mini` | `reasoning_effort: low` | JSON classification            |
+| Daily quiz generation | `gpt-5-mini` | `reasoning_effort: low` | `response_format: json_object` |
+
+Two things we did deliberately:
+
+1. **Structured outputs everywhere it matters.** Anything that drives app behavior — safety scores, red flags, quiz questions — is requested as a JSON object and parsed into typed results (`SafetyAnalysisResult`, `QuizQuestion`). The UI never free-parses prose.
+2. **Graceful degradation.** Every AI call site has a non-AI fallback: keyword/regex detection for safety and mindful messaging, curated responses and quizzes for the Gardener. If the API key is absent or the request fails, the feature still works — it just gets less clever.
+
+## The Gardener: an AI coach with a point of view
+
+The Gardener is a tab inside the app (`app/_tabs/gardener.tsx` → `components/gardener/GardenerChat.tsx` → `lib/ai/gardenerService.ts`). The interesting part isn't the plumbing — it's the system prompt, which was written as a product spec before it was code:
+
+- **Therapist, not ghostwriter.** When a user asks "what should I reply?", the Gardener refuses to produce scripts or pickup lines — it advises on _what to talk about_ instead. Teaching principles, not canned lines.
+- **Safety first.** NSFW, dangerous, or emotionally harmful content is off-limits in both directions; red-flag topics get safety resources rather than validation.
+- **Bounded style.** 2–3 sentence responses, warm and charismatic, and it may ask follow-up questions — but never more than three in a row.
+
+Conversation context is a rolling window: the last 10 messages are sent as `user`/`assistant` history alongside the persona system prompt. History is stored in two places — a Zustand store persisted to AsyncStorage for instant resume, and a `gardener_chat_history` table in Postgres (RLS: a user can only ever select their own rows) so conversations survive reinstalls.
+
+## Memory and grounding ("the soil")
+
+The Gardener isn't a stateless chatbot — it sits on top of a slowly growing per-user model:
+
+- **Daily quiz.** Once a day the app asks GPT-4 to generate a fresh question (JSON: `question` + 4 options), seeded with the last 7 questions the user saw so topics don't repeat. Questions are deduplicated globally via a `UNIQUE(question)` constraint.
+- **Insight extraction.** Each answer lands in `gardener_quiz_responses`, and a Postgres trigger (`update_user_insights_from_quiz`) folds it into `gardener_user_insights` — dating style, communication preference, relationship goals, and a `core_values` array. The database, not the app, maintains the user model.
+- **Values matching.** Users separately rank 5 values they _bring_ and 5 they _seek_ (`user_values_brought` / `user_values_sought`, with enforced unique rankings). Compatibility is computed by intersecting one user's sought set with the other's brought set — a transparent, explainable match signal rather than a black-box score.
+
+This accumulated profile — quiz insights, ranked values, and chat history — is the grounding layer the AI features draw on, so advice and matching reflect who the user actually is rather than a generic persona.
+
+## Conversation context & safety analysis
+
+Screenshots aren't sent to any model — everything the AI sees is text, pulled fresh from Postgres at analysis time. The safety pipeline (`lib/ai/safetyAnalysisService.ts`) assembles a `ConversationContext` on demand: both user profiles, the last 50 messages, conversation duration, and message count. The "Ready to move off-app" check then analyzes the most recent 20 messages.
+
+It's also gated by _time_, not just content: contact sharing requires a minimum conversation duration (24h) and message count (20) before the AI is even consulted — the model's verdict is layered on top of deterministic trust-building rules, not instead of them.
+
+## Moderation: two engines, belt and suspenders
+
+**Mindful Messaging** runs on outgoing messages _before they send_ (`analyzeThenSend` in `app/chat.tsx`). A GPT-4 classifier returns `{needsReview, severity, reason, category, growthLesson}` as JSON. Flagged messages trigger a "quick check" modal that shows a growth lesson — e.g. possessive phrasing gets a note about respecting autonomy — and the sender chooses to edit or send anyway. Incoming flagged messages get a protective warning modal instead. There are no silent blocks; the design goal is coaching, not censorship.
+
+**The safety analyzer** runs a hybrid pass: a deterministic engine scans for red-flag keyword classes (financial scams, personal-info harvesting, catfishing tells, urgency/manipulation), phone-number regexes, and even caps-lock ratio — _then_ merges those flags with a GPT-4 structured analysis that returns a `safetyScore` (0–100), typed `redFlags` with severity and evidence, recommendations, and an `allowContactSharing` verdict.
+
+Results persist to `safety_analyses`; anything `critical` or `high` auto-files a row in `red_flag_reports` (`ai_detected: true`) so a human reviews it. Score thresholds drive UX: `safe ≥ 80`, `caution ≥ 70`, `warning ≥ 50`, `immediateBlock < 20` — surfaced on a per-match safety dashboard.
+
+## Backend architecture
+
+Everything lives in Postgres via Supabase migrations (`supabase/migrations/`):
+
+- `users`, `swipes`, `matches`, `messages`, `conversations` — the core graph
+- `gardener_chat_history`, `gardener_quiz_questions`, `gardener_quiz_responses`, `gardener_user_insights`, `gardener_daily_quiz_tracking` — the AI layer, with the insight trigger doing write-time aggregation
+- `safety_analyses`, `red_flag_reports`, `user_safety_settings` — the moderation layer
+- `values`, `user_values_brought`, `user_values_sought` — matching
+- `subscription_tiers`, `user_usage` — metering. Gardener usage is rate-limited per tier (Seed: 1 conversation/day & 3k chars · Green: 10k chars · Gold: unlimited conversations, 30k chars/day), tracked with a daily-reset counter — an app-level token budget.
+
+RLS is enabled on every table: users read/write only their own chat history, insights, and quiz responses, while `values` and quiz questions are world-readable. Realtime chat is a `postgres_changes` channel filtered per-conversation, with typing indicators over Supabase presence.
+
+---
+
+_Built with Expo, Supabase, and OpenAI — plus a rule engine that doesn't trust the model on its own._

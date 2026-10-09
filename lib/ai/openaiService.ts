@@ -99,8 +99,8 @@ export const analyzeMessage = async (
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      temperature: SAFETY_CONFIG.openai.temperature,
-      max_tokens: SAFETY_CONFIG.openai.maxTokens,
+      reasoning_effort: 'low',
+      max_completion_tokens: SAFETY_CONFIG.openai.maxTokens,
       response_format: { type: 'json_object' },
     });
 

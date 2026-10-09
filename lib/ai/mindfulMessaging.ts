@@ -277,7 +277,8 @@ async function analyzeWithOpenAI(message: string): Promise<SentimentAnalysisResu
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-5-mini',
+        reasoning_effort: 'low',
         messages: [
           {
             role: 'system',
@@ -303,8 +304,7 @@ Respond with JSON:
             content: `Analyze this message: "${message}"`,
           },
         ],
-        temperature: 0.3,
-        max_tokens: 300,
+        max_completion_tokens: 500,
       }),
     });
 

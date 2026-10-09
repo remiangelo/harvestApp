@@ -86,10 +86,10 @@ Format: Return a JSON object with 'question' and 'options' array (each with 'tex
       ];
 
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-5-mini',
         messages: messages as any,
-        temperature: 0.7,
-        max_tokens: 200, // Reduced for more concise responses
+        reasoning_effort: 'low',
+        max_completion_tokens: 600, // Includes reasoning tokens; visible reply stays 2-3 sentences
       });
 
       return response.choices[0]?.message?.content || this.getFallbackResponse(userMessage);
@@ -110,12 +110,12 @@ Previous topics covered: ${previousQuizzes.slice(-7).join(', ') || 'None yet'}.
 Create a fresh question exploring a different aspect of dating preferences or values.`;
 
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-5-mini',
         messages: [
           { role: 'system', content: this.quizSystemPrompt },
           { role: 'user', content: prompt },
         ],
-        temperature: 0.8,
+        reasoning_effort: 'low',
         response_format: { type: 'json_object' },
       });
 
